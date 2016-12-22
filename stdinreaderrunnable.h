@@ -52,10 +52,9 @@ public:
     {
         char buffer[256];
 
-        while (1) {
+        while (!feof(stdin)) {
             if (buffer == fgets(buffer, 256, stdin))
                 QCoreApplication::postEvent(m_receiver, new StdinReadEvent(QString::fromLocal8Bit(buffer)), Qt::NormalEventPriority);
-            
         }
     }
 

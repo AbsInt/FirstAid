@@ -225,6 +225,17 @@ void PdfViewer::closeDocument()
     m_fileSaveCopyAct->setEnabled(false);
 }
 
+bool PdfViewer::event(QEvent *e)
+{
+    if (QEvent::User == e->type()) {
+        StdinReadEvent *sre=static_cast<StdinReadEvent *>(e);
+        qDebug("got command: %s", qPrintable(sre->text().trimmed()));
+        return true;
+    }
+    else
+        return QMainWindow::event(e);
+}
+
 void PdfViewer::slotOpenFile()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open PDF Document"), QDir::homePath(), tr("PDF Documents (*.pdf)"));

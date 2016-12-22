@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,10 +40,12 @@ public:
     PdfViewer();
     ~PdfViewer();
 
-    /*virtual*/ QSize sizeHint() const;
+    QSize sizeHint() const override;
 
     void loadDocument(const QString &file);
     void closeDocument();
+
+    bool event(QEvent *e) override;
 
 private Q_SLOTS:
     void slotOpenFile();
