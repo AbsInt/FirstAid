@@ -62,28 +62,6 @@ PdfViewer::PdfViewer()
 
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
-    QMenu *settingsMenu = menuBar()->addMenu(tr("&Settings"));
-    m_settingsTextAAAct = settingsMenu->addAction(tr("Text Antialias"));
-    m_settingsTextAAAct->setCheckable(true);
-    connect(m_settingsTextAAAct, SIGNAL(toggled(bool)), this, SLOT(slotToggleTextAA(bool)));
-    m_settingsGfxAAAct = settingsMenu->addAction(tr("Graphics Antialias"));
-    m_settingsGfxAAAct->setCheckable(true);
-    connect(m_settingsGfxAAAct, SIGNAL(toggled(bool)), this, SLOT(slotToggleGfxAA(bool)));
-    QMenu *settingsRenderMenu = settingsMenu->addMenu(tr("Render Backend"));
-    m_settingsRenderBackendGrp = new QActionGroup(settingsRenderMenu);
-    m_settingsRenderBackendGrp->setExclusive(true);
-    act = settingsRenderMenu->addAction(tr("Splash"));
-    act->setCheckable(true);
-    act->setChecked(true);
-    act->setData(qVariantFromValue(0));
-    m_settingsRenderBackendGrp->addAction(act);
-    act = settingsRenderMenu->addAction(tr("Arthur"));
-    act->setCheckable(true);
-    act->setData(qVariantFromValue(1));
-    m_settingsRenderBackendGrp->addAction(act);
-    connect(m_settingsRenderBackendGrp, SIGNAL(triggered(QAction*)),
-            this, SLOT(slotRenderBackend(QAction*)));
-
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     act = helpMenu->addAction(tr("&About"), this, SLOT(slotAbout()));
     act = helpMenu->addAction(tr("About &Qt"), this, SLOT(slotAboutQt()));
@@ -108,10 +86,6 @@ PdfViewer::PdfViewer()
     connect(navbar, SIGNAL(zoomChanged(qreal)), view, SLOT(slotZoomChanged(qreal)));
     connect(navbar, SIGNAL(rotationChanged(int)), view, SLOT(slotRotationChanged(int)));
     connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGoto(QString)));
-
-    // activate AA by default
-    m_settingsTextAAAct->setChecked(true);
-    m_settingsGfxAAAct->setChecked(true);
 }
 
 PdfViewer::~PdfViewer()
@@ -153,9 +127,9 @@ void PdfViewer::loadDocument(const QString &file)
 
     m_doc = newdoc;
 
-    m_doc->setRenderHint(Poppler::Document::TextAntialiasing, m_settingsTextAAAct->isChecked());
-    m_doc->setRenderHint(Poppler::Document::Antialiasing, m_settingsGfxAAAct->isChecked());
-    m_doc->setRenderBackend((Poppler::Document::RenderBackend)m_settingsRenderBackendGrp->checkedAction()->data().toInt());
+    m_doc->setRenderHint(Poppler::Document::TextAntialiasing, true);
+    m_doc->setRenderHint(Poppler::Document::Antialiasing, true);
+    m_doc->setRenderBackend(Poppler::Document::SplashBackend);
 
     Q_FOREACH(DocumentObserver *obs, m_observers) {
         obs->documentLoaded();
@@ -222,45 +196,6 @@ void PdfViewer::slotAbout()
 void PdfViewer::slotAboutQt()
 {
     QMessageBox::aboutQt(this);
-}
-
-void PdfViewer::slotToggleTextAA(bool value)
-{
-    if (!m_doc) {
-        return;
-    }
-
-    m_doc->setRenderHint(Poppler::Document::TextAntialiasing, value);
-
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
-        obs->pageChanged(m_currentPage);
-    }
-}
-
-void PdfViewer::slotToggleGfxAA(bool value)
-{
-    if (!m_doc) {
-        return;
-    }
-
-    m_doc->setRenderHint(Poppler::Document::Antialiasing, value);
-
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
-        obs->pageChanged(m_currentPage);
-    }
-}
-
-void PdfViewer::slotRenderBackend(QAction *act)
-{
-    if (!m_doc || !act) {
-        return;
-    }
-
-    m_doc->setRenderBackend((Poppler::Document::RenderBackend)act->data().toInt());
-
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
-        obs->pageChanged(m_currentPage);
-    }
 }
 
 void PdfViewer::slotGoto(const QString &dest)

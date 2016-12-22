@@ -52,9 +52,6 @@ private Q_SLOTS:
     void slotOpenFileExternal();
     void slotAbout();
     void slotAboutQt();
-    void slotToggleTextAA(bool value);
-    void slotToggleGfxAA(bool value);
-    void slotRenderBackend(QAction *act);
 
     void slotGoto(const QString &dest);
 
@@ -65,9 +62,6 @@ private:
     int m_currentPage;
 
     QAction *m_fileOpenExternalAct;
-    QAction *m_settingsTextAAAct;
-    QAction *m_settingsGfxAAAct;
-    QActionGroup *m_settingsRenderBackendGrp;
 
     QList<DocumentObserver *> m_observers;
 
