@@ -63,7 +63,7 @@ TocDock::TocDock(QWidget *parent)
 
     setWidget(m_tree);
 
-    connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), SLOT(itemDoubleClicked(QTreeWidgetItem*,int)));
+    connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem*,int)), SLOT(itemClicked(QTreeWidgetItem*,int)));
 }
 
 TocDock::~TocDock()
@@ -89,7 +89,7 @@ void TocDock::documentClosed()
     AbstractInfoDock::documentClosed();
 }
 
-void TocDock::itemDoubleClicked(QTreeWidgetItem *item, int column)
+void TocDock::itemClicked(QTreeWidgetItem *item, int column)
 {
     if (!item)
         return;

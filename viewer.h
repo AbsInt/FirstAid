@@ -67,6 +67,7 @@ private:
 
     Poppler::Document *m_doc;
     QThread *m_thread;
+    QString m_filePath;
 };
 
 #endif

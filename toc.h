@@ -42,7 +42,7 @@ protected:
     /*virtual*/ void fillInfo();
 
 protected slots:
-    void itemDoubleClicked(QTreeWidgetItem *item, int column);
+    void itemClicked(QTreeWidgetItem *item, int column);
 
 private:
     QTreeWidget *m_tree;
