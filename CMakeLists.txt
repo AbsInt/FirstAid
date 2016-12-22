@@ -6,8 +6,18 @@ project(firstaid)
 
 # set compile flags for AbsInt internal compilation, to enforce right compilers/flags
 if(ABSINT)
+    # this sets the right compile flags and exports macros like for code-signing
     find_package (UR REQUIRED)
     include (${UR_USE_FILE})
+
+    # static linking
+    if (WIN32)
+        add_definitions (-DAI_LINK_QT_STATIC_WINDOWS)
+    elseif (APPLE)
+        add_definitions (-DAI_LINK_QT_STATIC_APPLE)
+    else()
+        add_definitions (-DAI_LINK_QT_STATIC_LINUX)
+    endif()
 endif()
 
 # Find includes in corresponding build directories

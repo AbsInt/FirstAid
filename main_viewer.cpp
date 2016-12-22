@@ -18,10 +18,38 @@
 
 #include "viewer.h"
 
-#include <QtWidgets/QApplication>
+#include <QApplication>
+#include <QtPlugin>
 
 int main(int argc, char *argv[])
 {
+    /**
+     * if you want static binaries, init plugins
+     */
+#ifdef AI_LINK_QT_STATIC_WINDOWS
+    Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+    Q_IMPORT_PLUGIN(QSvgIconPlugin)
+    Q_IMPORT_PLUGIN(QICOPlugin)
+    Q_IMPORT_PLUGIN(QSvgPlugin)
+    Q_IMPORT_PLUGIN(QWindowsPrinterSupportPlugin)
+#endif
+
+#ifdef AI_LINK_QT_STATIC_APPLE
+    Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
+    Q_IMPORT_PLUGIN(QSvgIconPlugin)
+    Q_IMPORT_PLUGIN(QICOPlugin)
+    Q_IMPORT_PLUGIN(QSvgPlugin)
+    Q_IMPORT_PLUGIN(QCocoaPrinterSupportPlugin)
+#endif
+
+#ifdef AI_LINK_QT_STATIC_LINUX
+    Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+    Q_IMPORT_PLUGIN(QSvgIconPlugin)
+    Q_IMPORT_PLUGIN(QICOPlugin)
+    Q_IMPORT_PLUGIN(QSvgPlugin)
+    Q_IMPORT_PLUGIN(QCupsPrinterSupportPlugin)
+#endif
+
     QApplication app(argc, argv);
     const QStringList args = QCoreApplication::arguments();
     PdfViewer *viewer = new PdfViewer();
