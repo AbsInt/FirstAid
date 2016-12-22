@@ -63,7 +63,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS} ${Qt
 add_executable(firstaid ${firstaid_SRCS} ${firstaid_UI_SRCS} ${firstaid_QRC_SRCS})
 set_property(TARGET firstaid PROPERTY WIN32_EXECUTABLE true)
 
-target_link_libraries(firstaid -lpoppler-qt5 -lpoppler -lz -ljpeg Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
+target_link_libraries(firstaid -lpoppler-qt5 -lpoppler Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 install(PROGRAMS firstaid DESTINATION bin)
 
 # sign result binary for AbsInt internal compilation
