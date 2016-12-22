@@ -20,11 +20,35 @@
 #ifndef PAGEVIEW_H
 #define PAGEVIEW_H
 
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QScrollArea>
 
 #include "documentobserver.h"
 
-class QLabel;
+namespace Poppler {
+class Annotation;
+}
+
+class ImageLabel: public QLabel
+{
+    Q_OBJECT
+
+public:
+    ImageLabel(QWidget *parent=nullptr);
+    ~ImageLabel();
+
+    void setAnnotations(const QList<Poppler::Annotation *> &annotations);
+
+signals:
+    void gotoRequested(const QString &dest);
+
+protected:
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
+
+private:
+    QList<Poppler::Annotation *> m_annotations;
+};
 
 class PageView : public QScrollArea, public DocumentObserver
 {
@@ -34,16 +58,19 @@ public:
     PageView(QWidget *parent = 0);
     ~PageView();
 
-    /*virtual*/ void documentLoaded();
-    /*virtual*/ void documentClosed();
-    /*virtual*/ void pageChanged(int page);
+    void documentLoaded() override;
+    void documentClosed() override;
+    void pageChanged(int page) override;
+
+signals:
+    void gotoRequested(const QString &dest);
 
 private Q_SLOTS:
     void slotZoomChanged(qreal value);
     void slotRotationChanged(int value);
 
 private:
-    QLabel *m_imageLabel;
+    ImageLabel *m_imageLabel;
     qreal m_zoom;
     int m_rotation;
     int m_dpiX;

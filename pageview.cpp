@@ -22,11 +22,77 @@
 
 #include <poppler-qt5.h>
 
+#include <QtGui/QCursor>
+#include <QtGui/QDesktopServices>
+#include <QtGui/QImage>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QPixmap>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
-#include <QtGui/QImage>
 #include <QtWidgets/QLabel>
-#include <QtGui/QPixmap>
+
+ImageLabel::ImageLabel(QWidget *parent)
+          : QLabel(parent)
+{
+    setMouseTracking(true);
+}
+
+ImageLabel::~ImageLabel()
+{
+    qDeleteAll(m_annotations);
+}
+
+void ImageLabel::setAnnotations(const QList<Poppler::Annotation *> &annotations)
+{
+    qDeleteAll(m_annotations);
+
+    m_annotations=annotations;
+}
+
+void ImageLabel::mouseMoveEvent(QMouseEvent *e)
+{
+    qreal xPos=e->x()/(qreal)width();
+    qreal yPos=e->y()/(qreal)height();
+
+    bool linkFound=false;
+
+    foreach (Poppler::Annotation *a, m_annotations) {
+        if (a->boundary().contains(QPointF(xPos, yPos))) {
+            linkFound=true;
+            break;
+        }
+    }
+    
+    setCursor(linkFound ? Qt::PointingHandCursor : Qt::ArrowCursor);
+}
+
+void ImageLabel::mousePressEvent(QMouseEvent *e)
+{
+    qreal xPos=e->x()/(qreal)width();
+    qreal yPos=e->y()/(qreal)height();
+
+    foreach (Poppler::Annotation *a, m_annotations) {
+        if (a->boundary().contains(QPointF(xPos, yPos))) {
+            Poppler::Link *link=static_cast<Poppler::LinkAnnotation *>(a)->linkDestination();
+            switch (link->linkType()) {
+                case Poppler::Link::Goto:
+                    emit gotoRequested(QString::number(static_cast<Poppler::LinkGoto *>(link)->destination().pageNumber()));
+                    break;
+
+                case Poppler::Link::Browse:
+                    QDesktopServices::openUrl(QUrl(static_cast<Poppler::LinkBrowse *>(link)->url()));
+                    break;
+
+                default:
+                    qDebug("Not yet handled link type %d.", link->linkType());
+            }
+
+            break;
+        }
+    }
+}
+
+
 
 PageView::PageView(QWidget *parent)
     : QScrollArea(parent)
@@ -38,9 +104,11 @@ PageView::PageView(QWidget *parent)
     // test
     m_dpiX=m_dpiY;
 
-    m_imageLabel = new QLabel(this);
+    m_imageLabel = new ImageLabel(this);
     m_imageLabel->resize(0, 0);
     setWidget(m_imageLabel);
+
+    connect(m_imageLabel, SIGNAL(gotoRequested(QString)), SIGNAL(gotoRequested(QString)));
 }
 
 PageView::~PageView()
@@ -81,6 +149,10 @@ void PageView::pageChanged(int page)
         m_imageLabel->resize(0, 0);
         m_imageLabel->setPixmap(QPixmap());
     }
+
+    QList<Poppler::Annotation *> annotations=popplerPage->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
+    m_imageLabel->setAnnotations(annotations);
+
     delete popplerPage;
 }
 
