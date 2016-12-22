@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +26,7 @@
 #include <QtWidgets/QComboBox>
 
 NavigationToolBar::NavigationToolBar(QWidget *parent)
-    : QToolBar(parent)
+    : QToolBar("Navigation", parent)
 {
     m_firstAct = addAction(tr("First"), this, SLOT(slotGoFirst()));
     m_prevAct = addAction(tr("Previous"), this, SLOT(slotGoPrev()));
