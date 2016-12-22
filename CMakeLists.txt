@@ -2,6 +2,7 @@
 cmake_minimum_required (VERSION 2.8.11)
 set (CMAKE_MODULE_PATH "${CMAKE_INSTALL_PREFIX}/share/cmake/modules")
 
+# FirstAid - PDF Help Viewer
 project(firstaid)
 
 # set compile flags for AbsInt internal compilation, to enforce right compilers/flags
@@ -26,6 +27,7 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set (CMAKE_AUTOMOC ON)
 
+# needed Qt parts
 find_package(Qt5Concurrent)
 find_package(Qt5Core)
 find_package(Qt5Widgets)
@@ -54,22 +56,23 @@ set(firstaid_SRCS
 
 qt5_add_resources(firstaid_QRC_SRCS firstaid.qrc)
 
+# embedd icon on Windows
 IF(WIN32)
     SET(firstaid_SRCS ${firstaid_SRCS} firstaid.rc)
 ENDIF(WIN32)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
-
+# build FirstAid binary
 add_executable(firstaid ${firstaid_SRCS} ${firstaid_UI_SRCS} ${firstaid_QRC_SRCS})
-set_property(TARGET firstaid PROPERTY WIN32_EXECUTABLE true)
 
+# link, we assume static libs on Windows ATM
 if (WIN32)
     target_link_libraries(firstaid poppler-qt5.lib poppler.lib freetype.lib Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 else()
     target_link_libraries(firstaid -lpoppler-qt5 -lpoppler Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 endif()
 
-install(PROGRAMS firstaid DESTINATION bin)
+# install viewer to prefix
+install(TARGETS firstaid DESTINATION bin)
 
 # sign result binary for AbsInt internal compilation
 if(ABSINT)
