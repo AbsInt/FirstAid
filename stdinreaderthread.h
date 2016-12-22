@@ -16,12 +16,12 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef STDINREADERRUNNABLE
-#define STDINREADERRUNNABLE
+#ifndef STDINREADERTHREAD
+#define STDINREADERTHREAD
 
 #include <QCoreApplication>
 #include <QEvent>
-#include <QRunnable>
+#include <QThread>
 #include <stdio.h>
 
 class StdinReadEvent: public QEvent
@@ -40,11 +40,10 @@ private:
 
 
 
-class StdinReaderRunnable: public QRunnable
+class StdinReaderThread: public QThread
 {
 public:
-    StdinReaderRunnable(QObject *receiver): QRunnable()
-                                          , m_receiver(receiver)
+    StdinReaderThread(QObject *parent): QThread(parent)
     {
     }
 
@@ -54,14 +53,11 @@ public:
 
         while (!feof(stdin)) {
             if (buffer == fgets(buffer, 256, stdin))
-                QCoreApplication::postEvent(m_receiver, new StdinReadEvent(QString::fromLocal8Bit(buffer)), Qt::NormalEventPriority);
+                QCoreApplication::postEvent(parent(), new StdinReadEvent(QString::fromLocal8Bit(buffer)), Qt::NormalEventPriority);
         }
     }
-
-private:
-    QObject *m_receiver;
 };
 
 
 
-#endif // #ifndef STDINREADERRUNNABLE
+#endif // #ifndef STDINREADERTHREAD

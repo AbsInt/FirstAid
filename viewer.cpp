@@ -22,7 +22,7 @@
 
 #include "viewer.h"
 
-#include "stdinreaderrunnable.h"
+#include "stdinreaderthread.h"
 
 #include "embeddedfiles.h"
 #include "fonts.h"
@@ -51,6 +51,9 @@ PdfViewer::PdfViewer()
 {
     setWindowTitle(tr("Poppler-Qt5 Demo"));
     setWindowIcon(QIcon(":/firstaid.png"));
+
+    m_thread=new StdinReaderThread(this);
+    m_thread->start();
 
     // setup the menus
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
@@ -163,6 +166,9 @@ PdfViewer::PdfViewer()
 PdfViewer::~PdfViewer()
 {
     closeDocument();
+
+    m_thread->terminate();
+    m_thread->wait();
 }
 
 QSize PdfViewer::sizeHint() const

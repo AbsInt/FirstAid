@@ -25,6 +25,7 @@
 class QAction;
 class QActionGroup;
 class QLabel;
+class QThread;
 class DocumentObserver;
 namespace Poppler {
 class Document;
@@ -71,6 +72,7 @@ private:
     QList<DocumentObserver *> m_observers;
 
     Poppler::Document *m_doc;
+    QThread *m_thread;
 };
 
 #endif

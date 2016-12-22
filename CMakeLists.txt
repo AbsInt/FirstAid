@@ -43,7 +43,7 @@ set(firstaid_SRCS
   embeddedfiles.cpp
   fonts.cpp
   info.cpp
-  main_viewer.cpp
+  main.cpp
   metadata.cpp
   navigationtoolbar.cpp
   optcontent.cpp
