@@ -22,6 +22,8 @@
 
 #include "viewer.h"
 
+#include "stdinreaderrunnable.h"
+
 #include "embeddedfiles.h"
 #include "fonts.h"
 #include "info.h"
