@@ -32,14 +32,8 @@ find_package(Qt5Widgets)
 find_package(Qt5PrintSupport)
 find_package(Qt5Xml)
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${Qt5Core_INCLUDE_DIRS}
-  ${Qt5Widgets_INCLUDE_DIRS}
-  ${Qt5Gui_INCLUDE_DIRS}
-  ${Qt5Xml_INCLUDE_DIRS}
-  ../libpoppler/qt5/src
-)
+# prefer local poppler
+include_directories(${CMAKE_INSTALL_PREFIX}/include/poppler/qt5)
 
 set(firstaid_SRCS
   abstractinfodock.cpp
