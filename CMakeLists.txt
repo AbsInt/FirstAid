@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 2.8.11)
+set (CMAKE_MODULE_PATH "${CMAKE_INSTALL_PREFIX}/share/cmake/modules")
 
 project(firstaid)
+
+set (CMAKE_AUTOMOC ON)
+
+find_package(Qt5Concurrent)
+find_package(Qt5Core)
+find_package(Qt5Widgets)
+find_package(Qt5PrintSupport)
 
 add_definitions(${QT5_DEFINITIONS})
 add_definitions(${Qt5Core_DEFINITIONS})
@@ -10,12 +18,11 @@ add_definitions(${Qt5Xml_DEFINITIONS})
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/../src
-  ${CMAKE_CURRENT_BINARY_DIR}
   ${Qt5Core_INCLUDE_DIRS}
   ${Qt5Widgets_INCLUDE_DIRS}
   ${Qt5Gui_INCLUDE_DIRS}
   ${Qt5Xml_INCLUDE_DIRS}
+  ../libpoppler/qt5/src
 )
 
 set(firstaid_SRCS
@@ -44,4 +51,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS} ${Qt
 add_executable(firstaid ${firstaid_SRCS} ${firstaid_UI_SRCS} ${firstaid_QRC_SRCS})
 set_property(TARGET firstaid PROPERTY WIN32_EXECUTABLE true)
 
-target_link_libraries(firstaid ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${Qt5Xml_LIBRARIES})
+target_link_libraries(firstaid -lpoppler-qt5 -lpoppler Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent)
