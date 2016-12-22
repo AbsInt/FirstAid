@@ -58,6 +58,8 @@ set(firstaid_SRCS
   viewer.cpp
 )
 
+qt5_add_resources(firstaid_QRC_SRCS firstaid.qrc)
+
 IF(WIN32)
     SET(firstaid_SRCS ${firstaid_SRCS} firstaid.rc)
 ENDIF(WIN32)
