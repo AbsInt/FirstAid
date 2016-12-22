@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "fonts.h"
+#include "abstractinfodock.h"
 
 AbstractInfoDock::AbstractInfoDock(QWidget *parent)
     : QDockWidget(parent), m_filled(false)
