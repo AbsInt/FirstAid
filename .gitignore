@@ -1,0 +1,14 @@
+*.moc
+moc_*
+*.depends
+qrc_*
+env.sh
+CMakeCache.txt
+CMakeFiles
+CTestCustom.cmake
+Makefile
+cmake_install.cmake
+compile_commands.json
+firstaid
+firstaid_automoc.cpp
+install_manifest.txt
