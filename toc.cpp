@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,28 +26,27 @@
 
 static void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
 {
-    QTreeWidgetItem *newitem = 0;
-    for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
-        QDomElement e = node.toElement();
+    QTreeWidgetItem *newitem=nullptr;
+    for (QDomNode node=parent.firstChild(); !node.isNull(); node=node.nextSibling()) {
+        QDomElement e=node.toElement();
 
-        if (!parentItem) {
-            newitem = new QTreeWidgetItem(tree, newitem);
-        } else {
-            newitem = new QTreeWidgetItem(parentItem, newitem);
-        }
+        if (!parentItem)
+            newitem=new QTreeWidgetItem(tree, newitem);
+        else
+            newitem=new QTreeWidgetItem(parentItem, newitem);
+
         newitem->setText(0, e.tagName());
+        newitem->setData(0, Qt::UserRole, e.attribute("DestinationName"));
 
         bool isOpen = false;
-        if (e.hasAttribute(QString::fromLatin1("Open"))) {
-            isOpen = QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
-        }
-        if (isOpen) {
-            tree->expandItem(newitem);
-        }
+        if (e.hasAttribute(QString::fromLatin1("Open")))
+            isOpen=QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
 
-        if (e.hasChildNodes()) {
+        if (isOpen)
+            tree->expandItem(newitem);
+
+        if (e.hasChildNodes())
             fillToc(node, tree, newitem);
-        }
     }
 }
 
@@ -54,12 +54,16 @@ static void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *
 TocDock::TocDock(QWidget *parent)
     : AbstractInfoDock(parent)
 {
-    m_tree = new QTreeWidget(this);
-    setWidget(m_tree);
+    setWindowTitle(tr("Table of contents"));
+
+    m_tree=new QTreeWidget(this);
     m_tree->setAlternatingRowColors(true);
     m_tree->header()->hide();
-    setWindowTitle(tr("Table of contents"));
     m_tree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+    setWidget(m_tree);
+
+    connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), SLOT(itemDoubleClicked(QTreeWidgetItem*,int)));
 }
 
 TocDock::~TocDock()
@@ -83,6 +87,15 @@ void TocDock::documentClosed()
 {
     m_tree->clear();
     AbstractInfoDock::documentClosed();
+}
+
+void TocDock::itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+    if (!item)
+        return;
+
+    QString dest=item->data(column, Qt::UserRole).toString();
+    emit gotoRequested(dest);
 }
 
 #include "toc.moc"

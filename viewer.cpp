@@ -44,7 +44,7 @@
 PdfViewer::PdfViewer()
     : QMainWindow(), m_currentPage(0), m_doc(0)
 {
-    setWindowTitle(tr("Poppler-Qt5 Demo"));
+    setWindowTitle(tr("FirstAid"));
     setWindowIcon(QIcon(":/firstaid.png"));
 
     m_thread=new StdinReaderThread(this);
@@ -107,6 +107,7 @@ PdfViewer::PdfViewer()
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), view, SLOT(slotZoomChanged(qreal)));
     connect(navbar, SIGNAL(rotationChanged(int)), view, SLOT(slotRotationChanged(int)));
+    connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGoto(QString)));
 
     // activate AA by default
     m_settingsTextAAAct->setChecked(true);
@@ -163,6 +164,8 @@ void PdfViewer::loadDocument(const QString &file)
 
     m_fileOpenExternalAct->setEnabled(true);
     m_filePath=file;
+
+    setWindowTitle(QFileInfo(file).fileName());
 }
 
 void PdfViewer::closeDocument()
@@ -179,6 +182,8 @@ void PdfViewer::closeDocument()
 
     m_fileOpenExternalAct->setEnabled(false);
     m_filePath.clear();
+
+    setWindowTitle(tr("FirstAid"));
 }
 
 bool PdfViewer::event(QEvent *e)
@@ -190,19 +195,8 @@ bool PdfViewer::event(QEvent *e)
         if (command.startsWith("open:"))
             loadDocument(command.mid(5));
 
-        else if (command.startsWith("goto:")) {
-            QString where=command.mid(5);
-
-            bool ok;
-            int pageNumber=where.toInt(&ok);
-            if (ok)
-                setPage(pageNumber-1);
-            else if (Poppler::LinkDestination *dest=m_doc->linkDestination(where)) {
-                setPage(dest->pageNumber()-1);
-                qDebug("anchor=%s", qPrintable(dest->toString()));
-                delete dest;
-            }
-        }
+        else if (command.startsWith("goto:"))
+            slotGoto(command.mid(5));
 
         else if (command.startsWith("close"))
             qApp->quit();
@@ -269,8 +263,23 @@ void PdfViewer::slotRenderBackend(QAction *act)
     }
 }
 
+void PdfViewer::slotGoto(const QString &dest)
+{
+    bool ok;
+    int pageNumber=dest.toInt(&ok);
+    if (ok)
+        setPage(pageNumber-1);
+    else if (Poppler::LinkDestination *link=m_doc->linkDestination(dest)) {
+        setPage(link->pageNumber()-1);
+        delete link;
+    }
+}
+
 void PdfViewer::setPage(int page)
 {
+    if (!m_doc || 0>page || page>=m_doc->numPages())
+        return;
+
     Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->pageChanged(page);
 

@@ -56,6 +56,8 @@ private Q_SLOTS:
     void slotToggleGfxAA(bool value);
     void slotRenderBackend(QAction *act);
 
+    void slotGoto(const QString &dest);
+
 private:
     void setPage(int page);
     int page() const;

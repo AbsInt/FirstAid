@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 #include "abstractinfodock.h"
 
 class QTreeWidget;
+class QTreeWidgetItem;
 
 class TocDock : public AbstractInfoDock
 {
@@ -33,8 +35,14 @@ public:
 
     /*virtual*/ void documentClosed();
 
+signals:
+    void gotoRequested(const QString &dest);
+
 protected:
     /*virtual*/ void fillInfo();
+
+protected slots:
+    void itemDoubleClicked(QTreeWidgetItem *item, int column);
 
 private:
     QTreeWidget *m_tree;
