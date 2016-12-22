@@ -1,8 +1,19 @@
-cmake_minimum_required(VERSION 2.8.11)
+# enforce the right cmake version and module path
+cmake_minimum_required (VERSION 2.8.11)
 set (CMAKE_MODULE_PATH "${CMAKE_INSTALL_PREFIX}/share/cmake/modules")
 
 project(firstaid)
 
+# set compile flags for AbsInt internal compilation, to enforce right compilers/flags
+if(ABSINT)
+    find_package (UR REQUIRED)
+    include (${UR_USE_FILE})
+endif()
+
+# Find includes in corresponding build directories
+set (CMAKE_INCLUDE_CURRENT_DIR ON)
+
+# Instruct CMake to run moc automatically when needed.
 set (CMAKE_AUTOMOC ON)
 
 find_package(Qt5Concurrent)
