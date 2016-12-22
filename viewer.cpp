@@ -3,6 +3,7 @@
  * Copyright (C) 2008, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +48,7 @@ PdfViewer::PdfViewer()
     : QMainWindow(), m_currentPage(0), m_doc(0)
 {
     setWindowTitle(tr("Poppler-Qt5 Demo"));
+    setWindowIcon(QIcon(":/firstaid.png"));
 
     // setup the menus
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
