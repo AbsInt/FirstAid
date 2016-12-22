@@ -166,10 +166,10 @@ bool PdfViewer::event(QEvent *e)
         StdinReadEvent *sre=static_cast<StdinReadEvent *>(e);
         QString command=sre->text().trimmed();
 
-        if (command.startsWith("open:"))
+        if (command.startsWith("open "))
             loadDocument(command.mid(5));
 
-        else if (command.startsWith("goto:"))
+        else if (command.startsWith("goto "))
             slotGoto(command.mid(5));
 
         else if (command.startsWith("close"))
