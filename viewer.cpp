@@ -126,6 +126,7 @@ void PdfViewer::loadDocument(const QString &file)
     closeDocument();
 
     m_doc = newdoc;
+    m_doc->setInfo("filePath", file);
 
     m_doc->setRenderHint(Poppler::Document::TextAntialiasing, true);
     m_doc->setRenderHint(Poppler::Document::Antialiasing, true);
@@ -137,9 +138,8 @@ void PdfViewer::loadDocument(const QString &file)
     }
 
     m_fileOpenExternalAct->setEnabled(true);
-    m_filePath=file;
 
-    setWindowTitle(QFileInfo(file).fileName());
+    setWindowTitle(QFileInfo(m_doc->info("filePath")).fileName());
 }
 
 void PdfViewer::closeDocument()
@@ -155,7 +155,6 @@ void PdfViewer::closeDocument()
     m_doc = 0;
 
     m_fileOpenExternalAct->setEnabled(false);
-    m_filePath.clear();
 
     setWindowTitle(tr("FirstAid"));
 }
@@ -183,7 +182,7 @@ bool PdfViewer::event(QEvent *e)
 
 void PdfViewer::slotOpenFileExternal()
 {
-    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(m_filePath)))
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(m_doc->info("filePath"))))
         QMessageBox::warning(this, "Error", "Failed to open file in external PDF viewer.");
 }
 
