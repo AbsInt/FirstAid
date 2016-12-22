@@ -189,6 +189,21 @@ bool PdfViewer::event(QEvent *e)
 
         if (command.startsWith("open:"))
             loadDocument(command.mid(5));
+
+        else if (command.startsWith("goto:")) {
+            QString where=command.mid(5);
+
+            bool ok;
+            int pageNumber=where.toInt(&ok);
+            if (ok)
+                setPage(pageNumber-1);
+            else if (Poppler::LinkDestination *dest=m_doc->linkDestination(where)) {
+                setPage(dest->pageNumber()-1);
+                qDebug("anchor=%s", qPrintable(dest->toString()));
+                delete dest;
+            }
+        }
+
         else if (command.startsWith("close"))
             qApp->quit();
 
@@ -256,9 +271,8 @@ void PdfViewer::slotRenderBackend(QAction *act)
 
 void PdfViewer::setPage(int page)
 {
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->pageChanged(page);
-    }
 
     m_currentPage = page;
 }
