@@ -58,7 +58,7 @@ TocDock::TocDock(QWidget *parent)
     setWidget(m_tree);
     m_tree->setAlternatingRowColors(true);
     m_tree->header()->hide();
-    setWindowTitle(tr("TOC"));
+    setWindowTitle(tr("Table of contents"));
     m_tree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
@@ -73,7 +73,7 @@ void TocDock::fillInfo()
         fillToc(*toc, m_tree, 0);
     } else {
         QTreeWidgetItem *item = new QTreeWidgetItem();
-        item->setText(0, tr("No TOC"));
+        item->setText(0, tr("No table of contents available."));
         item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
         m_tree->addTopLevelItem(item);
     }

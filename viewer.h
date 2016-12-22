@@ -49,8 +49,7 @@ public:
     bool event(QEvent *e) override;
 
 private Q_SLOTS:
-    void slotOpenFile();
-    void slotSaveCopy();
+    void slotOpenFileExternal();
     void slotAbout();
     void slotAboutQt();
     void slotToggleTextAA(bool value);
@@ -63,8 +62,7 @@ private:
 
     int m_currentPage;
 
-    QAction *m_fileOpenAct;
-    QAction *m_fileSaveCopyAct;
+    QAction *m_fileOpenExternalAct;
     QAction *m_settingsTextAAAct;
     QAction *m_settingsGfxAAAct;
     QActionGroup *m_settingsRenderBackendGrp;
@@ -73,6 +71,7 @@ private:
 
     Poppler::Document *m_doc;
     QThread *m_thread;
+    QString m_filePath;
 };
 
 #endif

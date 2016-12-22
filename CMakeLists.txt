@@ -40,16 +40,9 @@ include_directories(${CMAKE_INSTALL_PREFIX}/include/poppler/qt5)
 set(firstaid_SRCS
   abstractinfodock.cpp
   documentobserver.cpp
-  embeddedfiles.cpp
-  fonts.cpp
-  info.cpp
   main.cpp
-  metadata.cpp
   navigationtoolbar.cpp
-  optcontent.cpp
   pageview.cpp
-  permissions.cpp
-  thumbnails.cpp
   toc.cpp
   viewer.cpp
 )

@@ -24,20 +24,15 @@
 
 #include "stdinreaderthread.h"
 
-#include "embeddedfiles.h"
-#include "fonts.h"
-#include "info.h"
-#include "metadata.h"
 #include "navigationtoolbar.h"
-#include "optcontent.h"
 #include "pageview.h"
-#include "permissions.h"
-#include "thumbnails.h"
 #include "toc.h"
 
 #include <poppler-qt5.h>
 
 #include <QtCore/QDir>
+#include <QtCore/QUrl>
+#include <QtGui/QDesktopServices>
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>
@@ -57,12 +52,10 @@ PdfViewer::PdfViewer()
 
     // setup the menus
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    m_fileOpenAct = fileMenu->addAction(tr("&Open"), this, SLOT(slotOpenFile()));
-    m_fileOpenAct->setShortcut(Qt::CTRL + Qt::Key_O);
+    m_fileOpenExternalAct = fileMenu->addAction(tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
+    m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
+    m_fileOpenExternalAct->setEnabled(false);
     fileMenu->addSeparator();
-    m_fileSaveCopyAct = fileMenu->addAction(tr("&Save a Copy..."), this, SLOT(slotSaveCopy()));
-    m_fileSaveCopyAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
-    m_fileSaveCopyAct->setEnabled(false);
     fileMenu->addSeparator();
     QAction *act = fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()));
     act->setShortcut(Qt::CTRL + Qt::Key_Q);
@@ -103,57 +96,14 @@ PdfViewer::PdfViewer()
     setCentralWidget(view);
     m_observers.append(view);
 
-    InfoDock *infoDock = new InfoDock(this);
-    addDockWidget(Qt::LeftDockWidgetArea, infoDock);
-    infoDock->hide();
-    viewMenu->addAction(infoDock->toggleViewAction());
-    m_observers.append(infoDock);
-
     TocDock *tocDock = new TocDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, tocDock);
     tocDock->hide();
     viewMenu->addAction(tocDock->toggleViewAction());
     m_observers.append(tocDock);
 
-    FontsDock *fontsDock = new FontsDock(this);
-    addDockWidget(Qt::LeftDockWidgetArea, fontsDock);
-    fontsDock->hide();
-    viewMenu->addAction(fontsDock->toggleViewAction());
-    m_observers.append(fontsDock);
-
-    PermissionsDock *permissionsDock = new PermissionsDock(this);
-    addDockWidget(Qt::LeftDockWidgetArea, permissionsDock);
-    permissionsDock->hide();
-    viewMenu->addAction(permissionsDock->toggleViewAction());
-    m_observers.append(permissionsDock);
-
-    ThumbnailsDock *thumbnailsDock = new ThumbnailsDock(this);
-    addDockWidget(Qt::LeftDockWidgetArea, thumbnailsDock);
-    thumbnailsDock->hide();
-    viewMenu->addAction(thumbnailsDock->toggleViewAction());
-    m_observers.append(thumbnailsDock);
-
-    EmbeddedFilesDock *embfilesDock = new EmbeddedFilesDock(this);
-    addDockWidget(Qt::BottomDockWidgetArea, embfilesDock);
-    embfilesDock->hide();
-    viewMenu->addAction(embfilesDock->toggleViewAction());
-    m_observers.append(embfilesDock);
-
-    MetadataDock *metadataDock = new MetadataDock(this);
-    addDockWidget(Qt::BottomDockWidgetArea, metadataDock);
-    metadataDock->hide();
-    viewMenu->addAction(metadataDock->toggleViewAction());
-    m_observers.append(metadataDock);
-
-    OptContentDock *optContentDock = new OptContentDock(this);
-    addDockWidget(Qt::LeftDockWidgetArea, optContentDock);
-    optContentDock->hide();
-    viewMenu->addAction(optContentDock->toggleViewAction());
-    m_observers.append(optContentDock);
-
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->m_viewer = this;
-    }
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), view, SLOT(slotZoomChanged(qreal)));
     connect(navbar, SIGNAL(rotationChanged(int)), view, SLOT(slotRotationChanged(int)));
@@ -211,24 +161,24 @@ void PdfViewer::loadDocument(const QString &file)
         obs->pageChanged(0);
     }
 
-    m_fileSaveCopyAct->setEnabled(true);
+    m_fileOpenExternalAct->setEnabled(true);
+    m_filePath=file;
 }
 
 void PdfViewer::closeDocument()
 {
-    if (!m_doc) {
+    if (!m_doc)
         return;
-    }
 
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->documentClosed();
-    }
 
     m_currentPage = 0;
     delete m_doc;
     m_doc = 0;
 
-    m_fileSaveCopyAct->setEnabled(false);
+    m_fileOpenExternalAct->setEnabled(false);
+    m_filePath.clear();
 }
 
 bool PdfViewer::event(QEvent *e)
@@ -248,41 +198,16 @@ bool PdfViewer::event(QEvent *e)
         return QMainWindow::event(e);
 }
 
-void PdfViewer::slotOpenFile()
+void PdfViewer::slotOpenFileExternal()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open PDF Document"), QDir::homePath(), tr("PDF Documents (*.pdf)"));
-    if (fileName.isEmpty()) {
-        return;
-    }
-
-    loadDocument(fileName);
-}
-
-void PdfViewer::slotSaveCopy()
-{
-    if (!m_doc) {
-        return;
-    }
-
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Copy"), QDir::homePath(), tr("PDF Documents (*.pdf)"));
-    if (fileName.isEmpty()) {
-        return;
-    }
-
-    Poppler::PDFConverter *converter = m_doc->pdfConverter();
-    converter->setOutputFileName(fileName);
-    converter->setPDFOptions(converter->pdfOptions() & ~Poppler::PDFConverter::WithChanges);
-    if (!converter->convert()) {
-        QMessageBox msgbox(QMessageBox::Critical, tr("Save Error"), tr("Cannot export to:\n%1").arg(fileName),
-                           QMessageBox::Ok, this);
-    }
-    delete converter;
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(m_filePath)))
+        QMessageBox::warning(this, "Error", "Failed to open file in external PDF viewer.");
 }
 
 void PdfViewer::slotAbout()
 {
-    const QString text("This is a demo of the Poppler-Qt5 library.");
-    QMessageBox::about(this, QString::fromLatin1("About Poppler-Qt5 Demo"), text);
+    const QString text("FirstAid is a simple PDF viewer based on libpoppler.");
+    QMessageBox::about(this, QString::fromLatin1("About FirstAid"), text);
 }
 
 void PdfViewer::slotAboutQt()
