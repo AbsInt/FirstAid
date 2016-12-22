@@ -235,7 +235,13 @@ bool PdfViewer::event(QEvent *e)
 {
     if (QEvent::User == e->type()) {
         StdinReadEvent *sre=static_cast<StdinReadEvent *>(e);
-        qDebug("got command: %s", qPrintable(sre->text().trimmed()));
+        QString command=sre->text().trimmed();
+
+        if (command.startsWith("open:"))
+            loadDocument(command.mid(5));
+        else if (command.startsWith("close"))
+            qApp->quit();
+
         return true;
     }
     else
