@@ -62,19 +62,21 @@ public:
     void documentClosed() override;
     void pageChanged(int page) override;
 
+public Q_SLOTS:
+    void slotSetMarker(const QRectF &rect);
+
 signals:
     void gotoRequested(const QString &dest);
 
 private Q_SLOTS:
     void slotZoomChanged(qreal value);
-    void slotRotationChanged(int value);
 
 private:
     ImageLabel *m_imageLabel;
     qreal m_zoom;
-    int m_rotation;
     int m_dpiX;
     int m_dpiY;
+    QRectF m_marker;
 };
 
 #endif

@@ -168,6 +168,7 @@ void NavigationToolBar::slotFind()
 
         if (!matches.isEmpty()) {
             setPage(page);
+            emit markerRequested(matches.first());
             return;
         }
 
@@ -183,6 +184,7 @@ void NavigationToolBar::slotFind()
 
         if (!matches.isEmpty()) {
             setPage(page);
+            emit markerRequested(matches.first());
             return;
         }
 

@@ -30,6 +30,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QRubberBand>
 
 ImageLabel::ImageLabel(QWidget *parent)
           : QLabel(parent)
@@ -97,7 +98,6 @@ void ImageLabel::mousePressEvent(QMouseEvent *e)
 PageView::PageView(QWidget *parent)
     : QScrollArea(parent)
     , m_zoom(1.0)
-    , m_rotation(0)
     , m_dpiX(QApplication::desktop()->physicalDpiX())
     , m_dpiY(QApplication::desktop()->physicalDpiY())
 {
@@ -117,12 +117,15 @@ PageView::~PageView()
 
 void PageView::documentLoaded()
 {
+    slotSetMarker(QRectF());
 }
 
 void PageView::documentClosed()
 {
     m_imageLabel->clear();
     m_imageLabel->resize(0, 0);
+
+    slotSetMarker(QRectF());
 }
 
 void PageView::pageChanged(int page)
@@ -131,17 +134,7 @@ void PageView::pageChanged(int page)
     const double resX = m_dpiX * m_zoom;
     const double resY = m_dpiY * m_zoom;
 
-    Poppler::Page::Rotation rot;
-    if (m_rotation == 0)
-        rot = Poppler::Page::Rotate0;
-    else if (m_rotation == 90)
-        rot = Poppler::Page::Rotate90;
-    else if (m_rotation == 180)
-        rot = Poppler::Page::Rotate180;
-    else // m_rotation == 270
-        rot = Poppler::Page::Rotate270;
-
-    QImage image = popplerPage->renderToImage(resX, resY, -1, -1, -1, -1, rot);
+    QImage image = popplerPage->renderToImage(resX, resY, -1, -1, -1, -1, Poppler::Page::Rotate0);
     if (!image.isNull()) {
         m_imageLabel->resize(image.size());
         m_imageLabel->setPixmap(QPixmap::fromImage(image));
@@ -154,6 +147,8 @@ void PageView::pageChanged(int page)
     m_imageLabel->setAnnotations(annotations);
 
     delete popplerPage;
+
+    slotSetMarker(m_marker);
 }
 
 void PageView::slotZoomChanged(qreal value)
@@ -165,13 +160,25 @@ void PageView::slotZoomChanged(qreal value)
     reloadPage();
 }
 
-void PageView::slotRotationChanged(int value)
+void PageView::slotSetMarker(const QRectF &rect)
 {
-    m_rotation = value;
-    if (!document()) {
+    m_marker=rect;
+
+    QList<QRubberBand *> l=viewport()->findChildren<QRubberBand *>();
+    qDeleteAll(l);
+
+    if (rect.isNull())
         return;
-    }
-    reloadPage();
+
+    double sx=m_zoom*m_dpiX/72.0;
+    double sy=m_zoom*m_dpiY/72.0;
+
+    QRectF r=QRectF(rect.left()*sx, rect.top()*sy, rect.width()*sx, rect.height()*sy);
+    r.adjust(-2, -2, 2, 2);
+
+    QRubberBand *rb=new QRubberBand(QRubberBand::Rectangle, viewport());
+    rb->setGeometry(r.toRect());
+    rb->show();
 }
 
 #include "pageview.moc"

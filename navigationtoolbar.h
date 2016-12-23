@@ -44,6 +44,7 @@ public:
 
 Q_SIGNALS:
     void zoomChanged(qreal value);
+    void markerRequested(const QRectF &rect);
 
 private Q_SLOTS:
     void slotGoFirst();
