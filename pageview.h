@@ -72,6 +72,7 @@ private Q_SLOTS:
     void slotZoomChanged(qreal value);
 
 private:
+    int m_currentPage;
     ImageLabel *m_imageLabel;
     qreal m_zoom;
     int m_dpiX;

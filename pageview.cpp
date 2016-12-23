@@ -97,6 +97,7 @@ void ImageLabel::mousePressEvent(QMouseEvent *e)
 
 PageView::PageView(QWidget *parent)
     : QScrollArea(parent)
+    , m_currentPage(-1)
     , m_zoom(1.0)
     , m_dpiX(QApplication::desktop()->physicalDpiX())
     , m_dpiY(QApplication::desktop()->physicalDpiY())
@@ -117,11 +118,14 @@ PageView::~PageView()
 
 void PageView::documentLoaded()
 {
+    m_currentPage=-1;
     slotSetMarker(QRectF());
 }
 
 void PageView::documentClosed()
 {
+    m_currentPage=-1;
+
     m_imageLabel->clear();
     m_imageLabel->resize(0, 0);
 
@@ -147,6 +151,11 @@ void PageView::pageChanged(int page)
     m_imageLabel->setAnnotations(annotations);
 
     delete popplerPage;
+
+    if (m_currentPage != page) {
+        m_currentPage=page;
+        m_marker=QRectF();
+    }
 
     slotSetMarker(m_marker);
 }

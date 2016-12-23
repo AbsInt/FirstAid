@@ -64,6 +64,7 @@ private:
     QAction *m_lastAct;
     QComboBox *m_zoomCombo;
     QLineEdit *m_findEdit;
+    QRectF m_lastSearchPos;
 };
 
 #endif
