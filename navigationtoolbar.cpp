@@ -30,8 +30,8 @@
 NavigationToolBar::NavigationToolBar(QWidget *parent)
     : QToolBar("Navigation", parent)
 {
-    m_firstAct = addAction(tr("First"), this, SLOT(slotGoFirst()));
-    m_prevAct = addAction(tr("Previous"), this, SLOT(slotGoPrev()));
+    m_firstAct = addAction(QIcon(":/icons/go-first-page.png"), tr("First"), this, SLOT(slotGoFirst()));
+    m_prevAct = addAction(QIcon(":/icons/go-previous-page.png"), tr("Previous"), this, SLOT(slotGoPrev()));
 
     m_pageEdit = new QLineEdit(this);
     m_pageEdit->setMaxLength(6);
@@ -42,8 +42,8 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     m_pageLabel = new QLabel(this);
     addWidget(m_pageLabel);
 
-    m_nextAct = addAction(tr("Next"), this, SLOT(slotGoNext()));
-    m_lastAct = addAction(tr("Last"), this, SLOT(slotGoLast()));
+    m_nextAct = addAction(QIcon(":/icons/go-next-page.png"), tr("Next"), this, SLOT(slotGoNext()));
+    m_lastAct = addAction(QIcon(":/icons/go-last-page.png"), tr("Last"), this, SLOT(slotGoLast()));
 
     addSeparator();
 

@@ -1,5 +1,9 @@
 <RCC>
     <qresource>
         <file>firstaid.png</file>
+        <file>icons/go-first-page.png</file>
+        <file>icons/go-last-page.png</file>
+        <file>icons/go-next-page.png</file>
+        <file>icons/go-previous-page.png</file>
     </qresource>
 </RCC>
