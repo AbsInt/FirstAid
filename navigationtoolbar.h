@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +27,8 @@
 
 class QAction;
 class QComboBox;
+class QLabel;
+class QLineEdit;
 
 class NavigationToolBar : public QToolBar, public DocumentObserver
 {
@@ -48,14 +51,15 @@ private Q_SLOTS:
     void slotGoPrev();
     void slotGoNext();
     void slotGoLast();
-    void slotComboActivated(int index);
+    void slotPageSet();
     void slotZoomComboChanged(const QString &text);
     void slotRotationComboChanged(int idx);
 
 private:
     QAction *m_firstAct;
     QAction *m_prevAct;
-    QComboBox *m_pageCombo;
+    QLineEdit *m_pageEdit;
+    QLabel *m_pageLabel;
     QAction *m_nextAct;
     QAction *m_lastAct;
     QComboBox *m_zoomCombo;

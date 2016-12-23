@@ -24,15 +24,24 @@
 
 #include <QtWidgets/QAction>
 #include <QtWidgets/QComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 
 NavigationToolBar::NavigationToolBar(QWidget *parent)
     : QToolBar("Navigation", parent)
 {
     m_firstAct = addAction(tr("First"), this, SLOT(slotGoFirst()));
     m_prevAct = addAction(tr("Previous"), this, SLOT(slotGoPrev()));
-    m_pageCombo = new QComboBox(this);
-    connect(m_pageCombo, SIGNAL(activated(int)), this, SLOT(slotComboActivated(int)));
-    addWidget(m_pageCombo);
+
+    m_pageEdit = new QLineEdit(this);
+    m_pageEdit->setMaxLength(6);
+    m_pageEdit->setFixedWidth(50);
+    connect(m_pageEdit, SIGNAL(returnPressed()), this, SLOT(slotPageSet()));
+    addWidget(m_pageEdit);
+
+    m_pageLabel = new QLabel(this);
+    addWidget(m_pageLabel);
+
     m_nextAct = addAction(tr("Next"), this, SLOT(slotGoNext()));
     m_lastAct = addAction(tr("Last"), this, SLOT(slotGoLast()));
 
@@ -75,10 +84,12 @@ NavigationToolBar::~NavigationToolBar()
 void NavigationToolBar::documentLoaded()
 {
     const int pageCount = document()->numPages();
-    for (int i = 0; i < pageCount; ++i) {
-        m_pageCombo->addItem(QString::number(i + 1));
-    }
-    m_pageCombo->setEnabled(true);
+
+    m_pageLabel->setText(QString(" / %1").arg(pageCount));
+
+    m_pageEdit->setText("1");
+    m_pageEdit->setEnabled(true);
+    m_pageEdit->selectAll();
 }
 
 void NavigationToolBar::documentClosed()
@@ -87,8 +98,8 @@ void NavigationToolBar::documentClosed()
     m_prevAct->setEnabled(false);
     m_nextAct->setEnabled(false);
     m_lastAct->setEnabled(false);
-    m_pageCombo->clear();
-    m_pageCombo->setEnabled(false);
+    m_pageEdit->clear();
+    m_pageEdit->setEnabled(false);
 }
 
 void NavigationToolBar::pageChanged(int page)
@@ -98,7 +109,8 @@ void NavigationToolBar::pageChanged(int page)
     m_prevAct->setEnabled(page > 0);
     m_nextAct->setEnabled(page < (pageCount - 1));
     m_lastAct->setEnabled(page < (pageCount - 1));
-    m_pageCombo->setCurrentIndex(page);
+    m_pageEdit->setText(QString::number(page+1));
+    m_pageEdit->selectAll();
 }
 
 void NavigationToolBar::slotGoFirst()
@@ -121,9 +133,9 @@ void NavigationToolBar::slotGoLast()
     setPage(document()->numPages() - 1);
 }
 
-void NavigationToolBar::slotComboActivated(int index)
+void NavigationToolBar::slotPageSet()
 {
-    setPage(index);
+    setPage(m_pageEdit->text().toInt()-1);
 }
 
 void NavigationToolBar::slotZoomComboChanged(const QString &_text)
