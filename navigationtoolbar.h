@@ -52,6 +52,7 @@ private Q_SLOTS:
     void slotGoLast();
     void slotPageSet();
     void slotZoomComboChanged(const QString &text);
+    void slotFind();
 
 private:
     QAction *m_firstAct;
@@ -61,6 +62,7 @@ private:
     QAction *m_nextAct;
     QAction *m_lastAct;
     QComboBox *m_zoomCombo;
+    QLineEdit *m_findEdit;
 };
 
 #endif

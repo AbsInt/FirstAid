@@ -65,6 +65,20 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     connect(m_zoomCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(slotZoomComboChanged(QString)));
     addWidget(m_zoomCombo);
 
+    addSeparator();
+
+    m_findEdit = new QLineEdit(this);
+    m_findEdit->setPlaceholderText(tr("Find"));
+    connect(m_findEdit, SIGNAL(returnPressed()), this, SLOT(slotFind()));
+    addWidget(m_findEdit);
+
+    QAction *findAction=new QAction(this);
+    findAction->setShortcut(QKeySequence::Find);
+    addAction(findAction);
+
+    connect(findAction, SIGNAL(triggered()), m_findEdit, SLOT(setFocus()));
+    connect(findAction, SIGNAL(triggered()), m_findEdit, SLOT(selectAll()));
+
     documentClosed();
 }
 
@@ -137,6 +151,42 @@ void NavigationToolBar::slotZoomComboChanged(const QString &_text)
     int value = text.toInt(&ok);
     if (ok && value >= 10) {
         emit zoomChanged(qreal(value) / 100);
+    }
+}
+
+void NavigationToolBar::slotFind()
+{
+    int currentPage = m_pageEdit->text().toInt()-1;
+    QString text=m_findEdit->text();
+    QRectF searchLocation;
+    int page=currentPage;
+
+    while (page < document()->numPages()) {
+        Poppler::Page *p=document()->page(page);
+        QList<QRectF> matches=p->search(text, Poppler::Page::IgnoreCase);
+        delete p;
+
+        if (!matches.isEmpty()) {
+            setPage(page);
+            return;
+        }
+
+        page += 1;
+    }
+
+    page = 0;
+
+    while (page < currentPage) {
+        Poppler::Page *p=document()->page(page);
+        QList<QRectF> matches=p->search(text, Poppler::Page::IgnoreCase);
+        delete p;
+
+        if (!matches.isEmpty()) {
+            setPage(page);
+            return;
+        }
+
+        page += 1;
     }
 }
 
