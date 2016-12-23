@@ -145,7 +145,10 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
     m_fileOpenExternalAct->setEnabled(true);
     m_filePath=file;
 
-    setWindowTitle(QFileInfo(m_filePath).fileName());
+    if (m_doc->title().isEmpty())
+        setWindowTitle(QFileInfo(m_filePath).fileName());
+    else
+        setWindowTitle(m_doc->title());
 }
 
 void PdfViewer::closeDocument()
