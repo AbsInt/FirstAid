@@ -44,7 +44,6 @@ public:
 
 Q_SIGNALS:
     void zoomChanged(qreal value);
-    void rotationChanged(int rotation);
 
 private Q_SLOTS:
     void slotGoFirst();
@@ -53,7 +52,6 @@ private Q_SLOTS:
     void slotGoLast();
     void slotPageSet();
     void slotZoomComboChanged(const QString &text);
-    void slotRotationComboChanged(int idx);
 
 private:
     QAction *m_firstAct;
@@ -63,7 +61,6 @@ private:
     QAction *m_nextAct;
     QAction *m_lastAct;
     QComboBox *m_zoomCombo;
-    QComboBox *m_rotationCombo;
 };
 
 #endif
