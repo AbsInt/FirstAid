@@ -102,8 +102,14 @@ QSize PdfViewer::sizeHint() const
     return QSize(500, 600);
 }
 
-void PdfViewer::loadDocument(const QString &file)
+void PdfViewer::loadDocument(const QString &file, bool forceReload)
 {
+    if (file==m_filePath && !forceReload) {
+        raise();
+        activateWindow();
+        return;
+    }
+
     Poppler::Document *newdoc = Poppler::Document::load(file);
     if (!newdoc) {
         QMessageBox msgbox(QMessageBox::Critical, tr("Open Error"), tr("Cannot open:\n") + file,

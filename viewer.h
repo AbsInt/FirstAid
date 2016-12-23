@@ -43,7 +43,7 @@ public:
 
     QSize sizeHint() const override;
 
-    void loadDocument(const QString &file);
+    void loadDocument(const QString &file, bool forceReload=false);
     void closeDocument();
 
     bool event(QEvent *e) override;
