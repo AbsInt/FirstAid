@@ -27,6 +27,7 @@
 #include <QtGui/QDesktopServices>
 #include <QtGui/QImage>
 #include <QtGui/QMouseEvent>
+#include <QtGui/QPainter>
 #include <QtGui/QPixmap>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
@@ -98,7 +99,6 @@ void ImageLabel::mousePressEvent(QMouseEvent *e)
 
 PageView::PageView(QWidget *parent)
     : QScrollArea(parent)
-    , m_currentPage(-1)
     , m_zoom(1.0)
     , m_dpiX(QApplication::desktop()->physicalDpiX())
     , m_dpiY(QApplication::desktop()->physicalDpiY())
@@ -112,6 +112,7 @@ PageView::PageView(QWidget *parent)
 
     connect(m_imageLabel, SIGNAL(gotoRequested(QString)), SIGNAL(gotoRequested(QString)));
     connect(SearchEngine::globalInstance(), SIGNAL(highlightMatch(int,QRectF)), SLOT(slotHighlightMatch(int,QRectF)));
+    connect(SearchEngine::globalInstance(), SIGNAL(matchesFound(int,QList<QRectF>)), SLOT(slotMatchesFound(int,QList<QRectF>)));
 }
 
 PageView::~PageView()
@@ -120,18 +121,12 @@ PageView::~PageView()
 
 void PageView::documentLoaded()
 {
-    m_currentPage=-1;
-    slotSetMarker(QRectF());
 }
 
 void PageView::documentClosed()
 {
-    m_currentPage=-1;
-
     m_imageLabel->clear();
     m_imageLabel->resize(0, 0);
-
-    slotSetMarker(QRectF());
 }
 
 void PageView::pageChanged(int page)
@@ -140,26 +135,43 @@ void PageView::pageChanged(int page)
     const double resX = m_dpiX * m_zoom;
     const double resY = m_dpiY * m_zoom;
 
+    // get desired information
     QImage image = popplerPage->renderToImage(resX, resY, -1, -1, -1, -1, Poppler::Page::Rotate0);
+    QList<Poppler::Annotation *> annotations=popplerPage->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
+
+    int matchPage;
+    QRectF match;
+    SearchEngine::globalInstance()->currentMatch(matchPage, match);
+
     if (!image.isNull()) {
         m_imageLabel->resize(image.size());
+
+        // match furthe matches on page
+        double sx=resX/72.0;
+        double sy=resY/72.0;
+        QPainter p(&image);
+        p.setPen(Qt::NoPen);
+
+        foreach (QRectF rect, SearchEngine::globalInstance()->matchesFor(page)) {
+            QColor matchColor=QColor(255, 255, 0, 64);
+            if (page==matchPage && rect==match)
+                matchColor=QColor(255, 128, 0, 128);
+
+            QRectF r=QRectF(rect.left()*sx, rect.top()*sy, rect.width()*sx, rect.height()*sy);
+            r.adjust(-3, -5, 3, 2);
+            p.fillRect(r, matchColor);
+        }
+
         m_imageLabel->setPixmap(QPixmap::fromImage(image));
-    } else {
+    } 
+    else {
         m_imageLabel->resize(0, 0);
         m_imageLabel->setPixmap(QPixmap());
     }
 
-    QList<Poppler::Annotation *> annotations=popplerPage->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
     m_imageLabel->setAnnotations(annotations);
 
     delete popplerPage;
-
-    if (m_currentPage != page) {
-        m_currentPage=page;
-        m_marker=QRectF();
-    }
-
-    slotSetMarker(m_marker);
 }
 
 void PageView::slotZoomChanged(qreal value)
@@ -171,31 +183,15 @@ void PageView::slotZoomChanged(qreal value)
     reloadPage();
 }
 
-void PageView::slotSetMarker(const QRectF &rect)
+void PageView::slotHighlightMatch(int page, const QRectF &)
 {
-    m_marker=rect;
-
-    QList<QRubberBand *> l=viewport()->findChildren<QRubberBand *>();
-    qDeleteAll(l);
-
-    if (rect.isNull())
-        return;
-
-    double sx=m_zoom*m_dpiX/72.0;
-    double sy=m_zoom*m_dpiY/72.0;
-
-    QRectF r=QRectF(rect.left()*sx, rect.top()*sy, rect.width()*sx, rect.height()*sy);
-    r.adjust(-3, -5, 3, 2);
-
-    QRubberBand *rb=new QRubberBand(QRubberBand::Rectangle, viewport());
-    rb->setGeometry(r.toRect());
-    rb->show();
+    setPage(page);
 }
 
-void PageView::slotHighlightMatch(int pageno, const QRectF &match)
+void PageView::slotMatchesFound(int page, const QList<QRectF> &)
 {
-    setPage(pageno);
-    slotSetMarker(match);
+    if (page == this->page())
+        pageChanged(page);
 }
 
 #include "pageview.moc"

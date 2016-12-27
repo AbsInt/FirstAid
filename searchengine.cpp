@@ -119,6 +119,21 @@ SearchEngine::pageChanged(int page)
 
 
 
+void
+SearchEngine::currentMatch(int &page, QRectF &match) const
+{
+    if (m_matchesForPage.isEmpty()) {
+        page=0;
+        match=QRectF();
+    }
+    else {
+        page=m_currentMatchPage;
+        match=m_matchesForPage.value(m_currentMatchPage).at(m_currentMatchIndex);
+    }
+}
+
+
+
 QHash<int, QList<QRectF>>
 SearchEngine::matches() const
 {

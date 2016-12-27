@@ -44,6 +44,7 @@ public:
 
     void reset();
     
+    void currentMatch(int &page, QRectF &match) const;
     QHash<int, QList<QRectF>> matches() const;
     QList<QRectF> matchesFor(int page) const;
 

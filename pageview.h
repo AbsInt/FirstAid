@@ -63,8 +63,8 @@ public:
     void pageChanged(int page) override;
 
 public Q_SLOTS:
-    void slotSetMarker(const QRectF &rect);
-    void slotHighlightMatch(int pageno, const QRectF &match);
+    void slotHighlightMatch(int page, const QRectF &match);
+    void slotMatchesFound(int page, const QList<QRectF> &matches);
 
 signals:
     void gotoRequested(const QString &dest);
@@ -73,7 +73,6 @@ private Q_SLOTS:
     void slotZoomChanged(qreal value);
 
 private:
-    int m_currentPage;
     ImageLabel *m_imageLabel;
     qreal m_zoom;
     int m_dpiX;
