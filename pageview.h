@@ -64,6 +64,7 @@ public:
 
 public Q_SLOTS:
     void slotHighlightMatch(int page, const QRectF &match);
+    void slotFindStarted();
     void slotMatchesFound(int page, const QList<QRectF> &matches);
 
 signals:

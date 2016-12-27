@@ -110,8 +110,11 @@ PageView::PageView(QWidget *parent)
     setWidget(m_imageLabel);
 
     connect(m_imageLabel, SIGNAL(gotoRequested(QString)), SIGNAL(gotoRequested(QString)));
-    connect(SearchEngine::globalInstance(), SIGNAL(highlightMatch(int,QRectF)), SLOT(slotHighlightMatch(int,QRectF)));
-    connect(SearchEngine::globalInstance(), SIGNAL(matchesFound(int,QList<QRectF>)), SLOT(slotMatchesFound(int,QList<QRectF>)));
+
+    SearchEngine *se=SearchEngine::globalInstance();
+    connect(se, SIGNAL(started()), SLOT(slotFindStarted()));
+    connect(se, SIGNAL(highlightMatch(int,QRectF)), SLOT(slotHighlightMatch(int,QRectF)));
+    connect(se, SIGNAL(matchesFound(int,QList<QRectF>)), SLOT(slotMatchesFound(int,QList<QRectF>)));
 }
 
 PageView::~PageView()
@@ -180,6 +183,11 @@ void PageView::slotZoomChanged(qreal value)
         return;
     }
     reloadPage();
+}
+
+void PageView::slotFindStarted()
+{
+    pageChanged(page());
 }
 
 void PageView::slotHighlightMatch(int page, const QRectF &)

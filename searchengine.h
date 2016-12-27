@@ -54,9 +54,10 @@ public slots:
     void previousMatch();
 
 signals:
+    void started();
+    void finished();
     void highlightMatch(int page, const QRectF &match);
     void matchesFound(int page, const QList<QRectF> &matches);
-    void finished();
 
 protected slots:
     void find();

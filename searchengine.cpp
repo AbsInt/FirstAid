@@ -173,13 +173,17 @@ SearchEngine::find(const QString &text)
 {
     m_timer->stop();
 
-    if (text.isEmpty())
-        return;
-
     if (text == m_findText) {
         nextMatch();
         return;
     }
+
+    m_matchesForPage.clear();
+
+    emit started();
+
+    if (text.isEmpty())
+        return;
 
     m_findText=text;
 
@@ -189,8 +193,6 @@ SearchEngine::find(const QString &text)
     if (m_findStopAfterPage < 0)
         m_findStopAfterPage=document()->numPages()-1;
 
-    m_matchesForPage.clear();
-    
     m_timer->start();
 }
 
