@@ -23,6 +23,7 @@
 
 #include <poppler-qt5.h>
 
+#include <QtGui/QIntValidator>
 #include <QtWidgets/QAction>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QLabel>
@@ -40,6 +41,9 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     m_pageEdit->setFixedWidth(50);
     connect(m_pageEdit, SIGNAL(returnPressed()), this, SLOT(slotPageSet()));
     addWidget(m_pageEdit);
+
+    m_intValidator=new QIntValidator(this);
+    m_pageEdit->setValidator(m_intValidator);
 
     m_pageLabel = new QLabel(this);
     addWidget(m_pageLabel);
@@ -99,6 +103,8 @@ void NavigationToolBar::documentLoaded()
     m_pageEdit->setEnabled(true);
     m_pageEdit->selectAll();
     m_findEdit->setEnabled(true);
+
+    m_intValidator->setRange(1, 1+pageCount);
 }
 
 void NavigationToolBar::documentClosed()

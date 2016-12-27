@@ -27,6 +27,7 @@
 
 class QAction;
 class QComboBox;
+class QIntValidator;
 class QLabel;
 class QLineEdit;
 
@@ -64,6 +65,7 @@ private:
     QAction *m_lastAct;
     QComboBox *m_zoomCombo;
     QLineEdit *m_findEdit;
+    QIntValidator *m_intValidator;
 };
 
 #endif
