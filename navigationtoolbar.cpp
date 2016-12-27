@@ -27,6 +27,7 @@
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QShortcut>
 
 NavigationToolBar::NavigationToolBar(QWidget *parent)
     : QToolBar("Navigation", parent)
@@ -73,12 +74,13 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     connect(m_findEdit, SIGNAL(returnPressed()), this, SLOT(slotFind()));
     addWidget(m_findEdit);
 
-    QAction *findAction=new QAction(this);
-    findAction->setShortcut(QKeySequence::Find);
-    addAction(findAction);
+    QShortcut *findShortcut=new QShortcut(this);
+    findShortcut->setKey(QKeySequence::Find);
+    connect(findShortcut, SIGNAL(activated()), m_findEdit, SLOT(setFocus()));
+    connect(findShortcut, SIGNAL(activated()), m_findEdit, SLOT(selectAll()));
 
-    connect(findAction, SIGNAL(triggered()), m_findEdit, SLOT(setFocus()));
-    connect(findAction, SIGNAL(triggered()), m_findEdit, SLOT(selectAll()));
+    addAction(QIcon(":/icons/arrow-left.png"), tr("Previous"), SearchEngine::globalInstance(), SLOT(previousMatch()));
+    addAction(QIcon(":/icons/arrow-right.png"), tr("Next"), SearchEngine::globalInstance(), SLOT(nextMatch()));
 
     documentClosed();
 }

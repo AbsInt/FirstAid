@@ -157,6 +157,8 @@ SearchEngine::find(const QString &text)
     m_findStopAfterPage=m_findCurrentPage-1;
     if (m_findStopAfterPage < 0)
         m_findStopAfterPage=document()->numPages()-1;
+
+    m_matchesForPage.clear();
     
     m_timer->start();
 }
