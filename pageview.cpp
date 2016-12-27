@@ -185,7 +185,7 @@ void PageView::slotSetMarker(const QRectF &rect)
     double sy=m_zoom*m_dpiY/72.0;
 
     QRectF r=QRectF(rect.left()*sx, rect.top()*sy, rect.width()*sx, rect.height()*sy);
-    r.adjust(-2, -2, 2, 2);
+    r.adjust(-3, -5, 3, 2);
 
     QRubberBand *rb=new QRubberBand(QRubberBand::Rectangle, viewport());
     rb->setGeometry(r.toRect());

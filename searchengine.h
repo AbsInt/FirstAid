@@ -43,6 +43,9 @@ public:
     void pageChanged(int page);
 
     void reset();
+    
+    QHash<int, QList<QRectF>> matches() const;
+    QList<QRectF> matchesFor(int page) const;
 
 public slots:
     void find(const QString &text);
@@ -50,8 +53,9 @@ public slots:
     void previousMatch();
 
 signals:
-    void highlightMatch(int pageno, const QRectF &match);
-    void matchesFound(int pageno, const QList<QRectF> &matches);
+    void highlightMatch(int page, const QRectF &match);
+    void matchesFound(int page, const QList<QRectF> &matches);
+    void finished();
 
 protected slots:
     void find();

@@ -33,7 +33,7 @@
  */
 
 #define SearchInterval  10
-#define PagePileSize    10
+#define PagePileSize    20
 
 
 
@@ -115,6 +115,22 @@ void
 SearchEngine::pageChanged(int page)
 {
     Q_UNUSED(page)
+}
+
+
+
+QHash<int, QList<QRectF>>
+SearchEngine::matches() const
+{
+    return m_matchesForPage;
+}
+
+
+
+QList<QRectF>
+SearchEngine::matchesFor(int page) const
+{
+    return m_matchesForPage.value(page);
 }
 
 
@@ -206,6 +222,37 @@ SearchEngine::nextMatch()
 void
 SearchEngine::previousMatch()
 {
+    if (-1==m_currentMatchPage || m_matchesForPage.isEmpty())
+        return;
+
+    // more matches on current match page?
+    QList<QRectF> matches=m_matchesForPage.value(m_currentMatchPage);
+    if (m_currentMatchIndex > 0) {
+        m_currentMatchIndex--;
+        emit highlightMatch(m_currentMatchPage, matches.at(m_currentMatchIndex));
+        return;
+    }
+
+    // find previous match
+    for (int page=m_currentMatchPage-1; page>=0; page--) {
+        QList<QRectF> matches=m_matchesForPage.value(page);
+        if (!matches.isEmpty()) {
+            m_currentMatchPage=page;
+            m_currentMatchIndex=matches.count()-1;
+            emit highlightMatch(m_currentMatchPage, matches.last());
+            return;
+        }
+    }
+
+    for (int page=document()->numPages()-1; page>m_currentMatchPage; page--) {
+        QList<QRectF> matches=m_matchesForPage.value(page);
+        if (!matches.isEmpty()) {
+            m_currentMatchPage=page;
+            m_currentMatchIndex=matches.count()-1;
+            emit highlightMatch(m_currentMatchPage, matches.last());
+            return;
+        }
+    }
 }
 
 
@@ -217,35 +264,38 @@ SearchEngine::previousMatch()
 void
 SearchEngine::find()
 {
-    // find our text on the current search page
-    Poppler::Page *p=document()->page(m_findCurrentPage);
-    QList<QRectF> matches=p->search(m_findText, Poppler::Page::IgnoreCase);
-    delete p;
+    for (int count=0; count<PagePileSize; count++) {
+        // find our text on the current search page
+        Poppler::Page *p=document()->page(m_findCurrentPage);
+        QList<QRectF> matches=p->search(m_findText, Poppler::Page::IgnoreCase);
+        delete p;
 
-    // signal matches and remember them
-    if (!matches.isEmpty()) {
-        if (m_matchesForPage.isEmpty()) {
-            m_currentMatchPage=m_findCurrentPage;
-            m_currentMatchIndex=0;
-            emit highlightMatch(m_currentMatchPage, matches.first());
+        // signal matches and remember them
+        if (!matches.isEmpty()) {
+            if (m_matchesForPage.isEmpty()) {
+                m_currentMatchPage=m_findCurrentPage;
+                m_currentMatchIndex=0;
+                emit highlightMatch(m_currentMatchPage, matches.first());
+            }
+
+            m_matchesForPage.insert(m_findCurrentPage, matches);
+
+            emit matchesFound(m_findCurrentPage, matches);
         }
 
-        m_matchesForPage.insert(m_findCurrentPage, matches);
+        // are we done with our search
+        if (m_findCurrentPage == m_findStopAfterPage) {
+            emit finished();
+            return;
+        }
 
-        emit matchesFound(m_findCurrentPage, matches);
+        // no? proceed with next page or wrap around
+        m_findCurrentPage++;
+        if (m_findCurrentPage >= document()->numPages())
+            m_findCurrentPage=0;
     }
 
-    // are we done with our search
-    if (m_findCurrentPage == m_findStopAfterPage)
-        return;
-
-    // no? proceed with next page or wrap around
-    m_findCurrentPage++;
-    if (m_findCurrentPage >= document()->numPages())
-        m_findCurrentPage=0;
-
     m_timer->start();
-
 }
 
 
