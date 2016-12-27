@@ -88,7 +88,6 @@ PdfViewer::PdfViewer()
         obs->m_viewer = this;
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), view, SLOT(slotZoomChanged(qreal)));
-    connect(navbar, SIGNAL(markerRequested(QRectF)), view, SLOT(slotSetMarker(QRectF)));
     connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGoto(QString)));
     connect(view, SIGNAL(gotoRequested(QString)), SLOT(slotGoto(QString)));
 }
