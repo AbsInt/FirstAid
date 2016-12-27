@@ -19,6 +19,7 @@
  */
 
 #include "pageview.h"
+#include "searchengine.h"
 
 #include <poppler-qt5.h>
 
@@ -110,6 +111,7 @@ PageView::PageView(QWidget *parent)
     setWidget(m_imageLabel);
 
     connect(m_imageLabel, SIGNAL(gotoRequested(QString)), SIGNAL(gotoRequested(QString)));
+    connect(SearchEngine::globalInstance(), SIGNAL(highlightMatch(int,QRectF)), SLOT(slotHighlightMatch(int,QRectF)));
 }
 
 PageView::~PageView()
@@ -188,6 +190,12 @@ void PageView::slotSetMarker(const QRectF &rect)
     QRubberBand *rb=new QRubberBand(QRubberBand::Rectangle, viewport());
     rb->setGeometry(r.toRect());
     rb->show();
+}
+
+void PageView::slotHighlightMatch(int pageno, const QRectF &match)
+{
+    setPage(pageno);
+    slotSetMarker(match);
 }
 
 #include "pageview.moc"

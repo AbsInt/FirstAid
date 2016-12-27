@@ -38,9 +38,9 @@ public:
     NavigationToolBar(QWidget *parent = 0);
     ~NavigationToolBar();
 
-    /*virtual*/ void documentLoaded();
-    /*virtual*/ void documentClosed();
-    /*virtual*/ void pageChanged(int page);
+    void documentLoaded();
+    void documentClosed();
+    void pageChanged(int page);
 
 Q_SIGNALS:
     void zoomChanged(qreal value);
@@ -64,7 +64,6 @@ private:
     QAction *m_lastAct;
     QComboBox *m_zoomCombo;
     QLineEdit *m_findEdit;
-    QRectF m_lastSearchPos;
 };
 
 #endif

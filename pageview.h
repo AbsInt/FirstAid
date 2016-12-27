@@ -64,6 +64,7 @@ public:
 
 public Q_SLOTS:
     void slotSetMarker(const QRectF &rect);
+    void slotHighlightMatch(int pageno, const QRectF &match);
 
 signals:
     void gotoRequested(const QString &dest);

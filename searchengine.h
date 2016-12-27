@@ -19,24 +19,39 @@
 #ifndef SEARCHENGINE_H
 #define SEARCHENGINE_H
 
+#include "documentobserver.h"
+
+#include <QHash>
+#include <QList>
 #include <QObject>
 
 class QTimer;
 
-class SearchEngine: public QObject
+class SearchEngine: public QObject, public DocumentObserver
 {
+    Q_OBJECT
+
     SearchEngine();
     ~SearchEngine();
 
 public:
-    SearchEngine *globalInstance();
-    void destroy();
+    static SearchEngine *globalInstance();
+    static void destroy();
+
+    void documentLoaded();
+    void documentClosed();
+    void pageChanged(int page);
 
     void reset();
-    void setDocument();
+
+public slots:
+    void find(const QString &text);
+    void nextMatch();
+    void previousMatch();
 
 signals:
-    void matchesFound(int pageno, const QList<QRectF> &maches);
+    void highlightMatch(int pageno, const QRectF &match);
+    void matchesFound(int pageno, const QList<QRectF> &matches);
 
 protected slots:
     void find();
@@ -44,7 +59,16 @@ protected slots:
 private:
     static SearchEngine *s_globalInstance;
 
+    // members for finding text
+    QString m_findText;
+    int m_findCurrentPage;
+    int m_findStopAfterPage;
     QTimer *m_timer;
+
+    // members for navigating in find results
+    QHash<int, QList<QRectF>> m_matchesForPage;
+    int m_currentMatchPage;
+    int m_currentMatchIndex;
 };
 
 

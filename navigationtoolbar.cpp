@@ -19,6 +19,7 @@
  */
 
 #include "navigationtoolbar.h"
+#include "searchengine.h"
 
 #include <poppler-qt5.h>
 
@@ -95,8 +96,7 @@ void NavigationToolBar::documentLoaded()
     m_pageEdit->setText("1");
     m_pageEdit->setEnabled(true);
     m_pageEdit->selectAll();
-
-    m_lastSearchPos=QRectF();
+    m_findEdit->setEnabled(true);
 }
 
 void NavigationToolBar::documentClosed()
@@ -107,14 +107,12 @@ void NavigationToolBar::documentClosed()
     m_lastAct->setEnabled(false);
     m_pageEdit->clear();
     m_pageEdit->setEnabled(false);
-
-    m_lastSearchPos=QRectF();
+    m_findEdit->clear();
+    m_findEdit->setEnabled(false);
 }
 
 void NavigationToolBar::pageChanged(int page)
 {
-    int oldPage=m_pageEdit->text().toInt()-1;
-
     const int pageCount = document()->numPages();
     m_firstAct->setEnabled(page > 0);
     m_prevAct->setEnabled(page > 0);
@@ -122,9 +120,6 @@ void NavigationToolBar::pageChanged(int page)
     m_lastAct->setEnabled(page < (pageCount - 1));
     m_pageEdit->setText(QString::number(page+1));
     m_pageEdit->selectAll();
-
-    if (page != oldPage)
-        m_lastSearchPos=QRectF();
 }
 
 void NavigationToolBar::slotGoFirst()
@@ -165,52 +160,7 @@ void NavigationToolBar::slotZoomComboChanged(const QString &_text)
 
 void NavigationToolBar::slotFind()
 {
-    int currentPage = m_pageEdit->text().toInt()-1;
-    QString text=m_findEdit->text();
-    int page=currentPage;
-
-    while (page < document()->numPages()) {
-        Poppler::Page *p=document()->page(page);
-        QList<QRectF> matches=p->search(text, Poppler::Page::IgnoreCase);
-        delete p;
-
-        if (!matches.isEmpty()) {
-            if (!m_lastSearchPos.isNull()) {
-                int index=matches.indexOf(m_lastSearchPos); 
-                if (index < matches.count()-1) {
-                    m_lastSearchPos=matches.at(index+1);
-                    emit markerRequested(m_lastSearchPos);
-                    return;
-                }
-                m_lastSearchPos=QRectF();
-            }
-            else {
-                setPage(page);
-                m_lastSearchPos=matches.first();
-                emit markerRequested(m_lastSearchPos);
-                return;
-            }
-        }
-
-        page += 1;
-    }
-
-    page = 0;
-
-    while (page < currentPage) {
-        Poppler::Page *p=document()->page(page);
-        QList<QRectF> matches=p->search(text, Poppler::Page::IgnoreCase);
-        delete p;
-
-        if (!matches.isEmpty()) {
-            setPage(page);
-            m_lastSearchPos=matches.first();
-            emit markerRequested(m_lastSearchPos);
-            return;
-        }
-
-        page += 1;
-    }
+    SearchEngine::globalInstance()->find(m_findEdit->text());
 }
 
 #include "navigationtoolbar.moc"

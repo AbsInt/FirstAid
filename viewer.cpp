@@ -26,6 +26,7 @@
 
 #include "navigationtoolbar.h"
 #include "pageview.h"
+#include "searchengine.h"
 #include "toc.h"
 
 #include <poppler-qt5.h>
@@ -79,6 +80,9 @@ PdfViewer::PdfViewer()
     tocDock->hide();
     viewMenu->addAction(tocDock->toggleViewAction());
     m_observers.append(tocDock);
+
+    SearchEngine *se=SearchEngine::globalInstance();
+    m_observers << se;
 
     Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->m_viewer = this;
