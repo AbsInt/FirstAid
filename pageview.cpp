@@ -32,7 +32,6 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QRubberBand>
 
 ImageLabel::ImageLabel(QWidget *parent)
           : QLabel(parent)
