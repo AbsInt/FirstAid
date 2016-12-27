@@ -43,6 +43,7 @@ set(firstaid_SRCS
   main.cpp
   navigationtoolbar.cpp
   pageview.cpp
+  searchengine.cpp
   toc.cpp
   viewer.cpp
 )

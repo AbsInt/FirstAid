@@ -16,8 +16,8 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef STDINREADERTHREAD
-#define STDINREADERTHREAD
+#ifndef STDINREADERTHREAD_H
+#define STDINREADERTHREAD_H
 
 #include <QCoreApplication>
 #include <QEvent>
@@ -60,4 +60,4 @@ public:
 
 
 
-#endif // #ifndef STDINREADERTHREAD
+#endif // #ifndef STDINREADERTHREAD_H
