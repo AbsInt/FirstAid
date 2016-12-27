@@ -34,7 +34,12 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     : QToolBar("Navigation", parent)
 {
     m_firstAct = addAction(QIcon(":/icons/go-first-page.png"), tr("First"), this, SLOT(slotGoFirst()));
+    QShortcut *firstShortcut=new QShortcut(Qt::Key_Home, this);
+    connect(firstShortcut, SIGNAL(activated()), m_firstAct, SLOT(trigger()));
+
     m_prevAct = addAction(QIcon(":/icons/go-previous-page.png"), tr("Previous"), this, SLOT(slotGoPrev()));
+    QShortcut *previousShortcut=new QShortcut(Qt::Key_PageUp, this);
+    connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
     m_pageEdit = new QLineEdit(this);
     m_pageEdit->setMaxLength(6);
@@ -49,7 +54,12 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     addWidget(m_pageLabel);
 
     m_nextAct = addAction(QIcon(":/icons/go-next-page.png"), tr("Next"), this, SLOT(slotGoNext()));
+    QShortcut *nextShortcut=new QShortcut(Qt::Key_PageDown, this);
+    connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
+
     m_lastAct = addAction(QIcon(":/icons/go-last-page.png"), tr("Last"), this, SLOT(slotGoLast()));
+    QShortcut *lastShortcut=new QShortcut(Qt::Key_End, this);
+    connect(lastShortcut, SIGNAL(activated()), m_lastAct, SLOT(trigger()));
 
     addSeparator();
 
