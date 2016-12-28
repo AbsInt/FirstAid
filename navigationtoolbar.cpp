@@ -30,12 +30,28 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QShortcut>
 
-NavigationToolBar::NavigationToolBar(QWidget *parent)
-    : QToolBar("Navigation", parent)
+NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
+                 : QToolBar("Navigation", parent)
 {
-    m_firstAct = addAction(QIcon(":/icons/go-first-page.png"), tr("First"), this, SLOT(slotGoFirst()));
+    setFloatable(false);
+    setMovable(false);
+
+    // some shortcuts for first/last page
     QShortcut *firstShortcut=new QShortcut(Qt::Key_Home, this);
-    connect(firstShortcut, SIGNAL(activated()), m_firstAct, SLOT(trigger()));
+    connect(firstShortcut, SIGNAL(activated()), this, SLOT(slotGoFirst()));
+
+    QShortcut *lastShortcut=new QShortcut(Qt::Key_End, this);
+    connect(lastShortcut, SIGNAL(activated()), this, SLOT(slotGoLast()));
+
+    // widget on toolbar
+    tocAction->setIcon(QIcon(":/icons/bookmarks-organize.png"));
+    addAction(tocAction);
+    QShortcut *tocShortcut=new QShortcut(Qt::Key_F2, this);
+    connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
+
+    QWidget *spacer=new QWidget(this);
+    spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    addWidget(spacer);
 
     m_prevAct = addAction(QIcon(":/icons/go-previous-page.png"), tr("Previous"), this, SLOT(slotGoPrev()));
     QShortcut *previousShortcut=new QShortcut(Qt::Key_PageUp, this);
@@ -57,11 +73,9 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     QShortcut *nextShortcut=new QShortcut(Qt::Key_PageDown, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
-    m_lastAct = addAction(QIcon(":/icons/go-last-page.png"), tr("Last"), this, SLOT(slotGoLast()));
-    QShortcut *lastShortcut=new QShortcut(Qt::Key_End, this);
-    connect(lastShortcut, SIGNAL(activated()), m_lastAct, SLOT(trigger()));
-
-    addSeparator();
+    spacer=new QWidget(this);
+    spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    addWidget(spacer);
 
     m_zoomCombo = new QComboBox(this);
     m_zoomCombo->setEditable(true);
@@ -81,21 +95,6 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     connect(m_zoomCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(slotZoomComboChanged(QString)));
     addWidget(m_zoomCombo);
 
-    addSeparator();
-
-    m_findEdit = new QLineEdit(this);
-    m_findEdit->setPlaceholderText(tr("Find"));
-    connect(m_findEdit, SIGNAL(returnPressed()), this, SLOT(slotFind()));
-    addWidget(m_findEdit);
-
-    QShortcut *findShortcut=new QShortcut(this);
-    findShortcut->setKey(QKeySequence::Find);
-    connect(findShortcut, SIGNAL(activated()), m_findEdit, SLOT(setFocus()));
-    connect(findShortcut, SIGNAL(activated()), m_findEdit, SLOT(selectAll()));
-
-    addAction(QIcon(":/icons/arrow-left.png"), tr("Previous"), SearchEngine::globalInstance(), SLOT(previousMatch()));
-    addAction(QIcon(":/icons/arrow-right.png"), tr("Next"), SearchEngine::globalInstance(), SLOT(nextMatch()));
-
     documentClosed();
 }
 
@@ -112,30 +111,23 @@ void NavigationToolBar::documentLoaded()
     m_pageEdit->setText("1");
     m_pageEdit->setEnabled(true);
     m_pageEdit->selectAll();
-    m_findEdit->setEnabled(true);
 
     m_intValidator->setRange(1, 1+pageCount);
 }
 
 void NavigationToolBar::documentClosed()
 {
-    m_firstAct->setEnabled(false);
     m_prevAct->setEnabled(false);
     m_nextAct->setEnabled(false);
-    m_lastAct->setEnabled(false);
     m_pageEdit->clear();
     m_pageEdit->setEnabled(false);
-    m_findEdit->clear();
-    m_findEdit->setEnabled(false);
 }
 
 void NavigationToolBar::pageChanged(int page)
 {
     const int pageCount = document()->numPages();
-    m_firstAct->setEnabled(page > 0);
     m_prevAct->setEnabled(page > 0);
     m_nextAct->setEnabled(page < (pageCount - 1));
-    m_lastAct->setEnabled(page < (pageCount - 1));
     m_pageEdit->setText(QString::number(page+1));
     m_pageEdit->selectAll();
 }
@@ -174,11 +166,6 @@ void NavigationToolBar::slotZoomComboChanged(const QString &_text)
     if (ok && value >= 10) {
         emit zoomChanged(qreal(value) / 100);
     }
-}
-
-void NavigationToolBar::slotFind()
-{
-    SearchEngine::globalInstance()->find(m_findEdit->text());
 }
 
 #include "navigationtoolbar.moc"

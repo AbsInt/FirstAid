@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,51 +16,35 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef NAVIGATIONTOOLBAR_H
-#define NAVIGATIONTOOLBAR_H
+#ifndef FINDBAR_H
+#define FINDBAR_H
 
-#include <QtWidgets/QToolBar>
+#include <QtWidgets/QWidget>
 
 #include "documentobserver.h"
 
-class QAction;
-class QComboBox;
-class QIntValidator;
-class QLabel;
 class QLineEdit;
 
-class NavigationToolBar : public QToolBar, public DocumentObserver
+class FindBar : public QWidget, public DocumentObserver
 {
     Q_OBJECT
 
 public:
-    NavigationToolBar(QAction *tocAction, QWidget *parent=nullptr);
-    ~NavigationToolBar();
+    FindBar(QWidget *parent=nullptr);
+    ~FindBar();
 
     void documentLoaded();
     void documentClosed();
     void pageChanged(int page);
 
 signals:
-    void showToc(bool on);
-    void zoomChanged(qreal value);
     void markerRequested(const QRectF &rect);
 
 private slots:
-    void slotGoFirst();
-    void slotGoLast();
-    void slotGoPrev();
-    void slotGoNext();
-    void slotPageSet();
-    void slotZoomComboChanged(const QString &text);
+    void slotFind();
 
 private:
-    QAction *m_prevAct;
-    QLineEdit *m_pageEdit;
-    QLabel *m_pageLabel;
-    QAction *m_nextAct;
-    QComboBox *m_zoomCombo;
-    QIntValidator *m_intValidator;
+    QLineEdit *m_findEdit;
 };
 
-#endif
+#endif // #ifndef FINDBAR_H

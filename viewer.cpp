@@ -24,6 +24,7 @@
 
 #include "stdinreaderthread.h"
 
+#include "findbar.h"
 #include "navigationtoolbar.h"
 #include "singlepageview.h"
 #include "searchengine.h"
@@ -42,12 +43,22 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QVBoxLayout>
 
 PdfViewer::PdfViewer()
-    : QMainWindow(), m_currentPage(0), m_doc(0)
+         : QMainWindow(), m_currentPage(0), m_doc(0)
 {
     setWindowTitle(tr("FirstAid"));
     setWindowIcon(QIcon(":/firstaid.png"));
+
+    setStyleSheet(QString("QToolButton { border-width: 1px; border-radius: 6px; border-style: none; padding: 2px }"
+                          "QToolButton:hover { border-style: solid; border-color: gray; padding: 1px }"
+                          "QToolButton:focus { border-style: dotted; border-color: gray; padding: 1px }"
+                          "QToolButton:pressed { border-style: solid; border-color: gray; padding-left: 3px; padding-top: 3px; padding-right: 1px; padding-bottom: 1px }"
+                          "QToolButton:checked { border-style: solid; border-top-color: gray; border-left-color: gray; border-bottom-color: lightGray; border-right-color: lightGray; padding-left: 2px; padding-top: 2px; padding-right: 0px; padding-bottom: 0px }"
+                          "QMenu { padding: 1px }"));
+
+    // menuBar()->hide();
 
     m_thread=new StdinReaderThread(this);
     m_thread->start();
@@ -72,8 +83,18 @@ PdfViewer::PdfViewer()
     act = helpMenu->addAction(tr("&About"), this, SLOT(slotAbout()));
     act = helpMenu->addAction(tr("About &Qt"), this, SLOT(slotAboutQt()));
 
-    m_viewStack=new QStackedWidget(this);
-    setCentralWidget(m_viewStack);
+    QWidget *w=new QWidget(this);
+    QVBoxLayout *vbl=new QVBoxLayout(w);
+    vbl->setContentsMargins(0, 0, 0, 0);
+
+    m_viewStack=new QStackedWidget(w);
+    vbl->addWidget(m_viewStack);
+
+    FindBar *fb=new FindBar(w);
+    m_observers.append(fb);
+    vbl->addWidget(fb);
+
+    setCentralWidget(w);
 
     m_viewStack->addWidget(new SinglePageView(this));
 
@@ -81,15 +102,14 @@ PdfViewer::PdfViewer()
     l->setAlignment(Qt::AlignCenter);
     m_viewStack->addWidget(l);
 
-    NavigationToolBar *navbar = new NavigationToolBar(this);
-    addToolBar(navbar);
-    m_observers.append(navbar);
-
     TocDock *tocDock = new TocDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, tocDock);
     tocDock->hide();
-    viewMenu->addAction(tocDock->toggleViewAction());
     m_observers.append(tocDock);
+
+    NavigationToolBar *navbar = new NavigationToolBar(tocDock->toggleViewAction(), this);
+    addToolBar(navbar);
+    m_observers.append(navbar);
 
     SearchEngine *se=SearchEngine::globalInstance();
     m_observers << se;
