@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,187 +16,122 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/*
+ * includes
+ */
+
 #include "pageview.h"
-#include "searchengine.h"
 
 #include <poppler-qt5.h>
 
-#include <QtGui/QCursor>
-#include <QtGui/QDesktopServices>
-#include <QtGui/QImage>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QPainter>
-#include <QtGui/QPixmap>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QDesktopWidget>
-#include <QtWidgets/QLabel>
+#include <QApplication>
+#include <QDesktopWidget>
 
-ImageLabel::ImageLabel(QWidget *parent)
-          : QLabel(parent)
+
+
+/*
+ * constructors / destructor
+ */
+
+PageView::PageView()
+        : m_document(nullptr)
+        , m_currentPage(0)
+        , m_zoom(1.0)
 {
-    setMouseTracking(true);
-}
+    m_dpiX=QApplication::desktop()->physicalDpiX();
+    m_dpiY=QApplication::desktop()->physicalDpiY();
 
-ImageLabel::~ImageLabel()
-{
-    qDeleteAll(m_annotations);
-}
-
-void ImageLabel::setAnnotations(const QList<Poppler::Annotation *> &annotations)
-{
-    qDeleteAll(m_annotations);
-
-    m_annotations=annotations;
-}
-
-void ImageLabel::mouseMoveEvent(QMouseEvent *e)
-{
-    qreal xPos=e->x()/(qreal)width();
-    qreal yPos=e->y()/(qreal)height();
-
-    bool linkFound=false;
-
-    foreach (Poppler::Annotation *a, m_annotations) {
-        if (a->boundary().contains(QPointF(xPos, yPos))) {
-            linkFound=true;
-            break;
-        }
-    }
-    
-    setCursor(linkFound ? Qt::PointingHandCursor : Qt::ArrowCursor);
-}
-
-void ImageLabel::mousePressEvent(QMouseEvent *e)
-{
-    qreal xPos=e->x()/(qreal)width();
-    qreal yPos=e->y()/(qreal)height();
-
-    foreach (Poppler::Annotation *a, m_annotations) {
-        if (a->boundary().contains(QPointF(xPos, yPos))) {
-            Poppler::Link *link=static_cast<Poppler::LinkAnnotation *>(a)->linkDestination();
-            switch (link->linkType()) {
-                case Poppler::Link::Goto:
-                    emit gotoRequested(QString::number(static_cast<Poppler::LinkGoto *>(link)->destination().pageNumber()));
-                    break;
-
-                case Poppler::Link::Browse:
-                    QDesktopServices::openUrl(QUrl(static_cast<Poppler::LinkBrowse *>(link)->url()));
-                    break;
-
-                default:
-                    qDebug("Not yet handled link type %d.", link->linkType());
-            }
-
-            break;
-        }
-    }
-}
-
-
-
-PageView::PageView(QWidget *parent)
-    : QScrollArea(parent)
-    , m_zoom(1.0)
-    , m_dpiX(QApplication::desktop()->physicalDpiX())
-    , m_dpiY(QApplication::desktop()->physicalDpiY())
-{
-    // test
+    // for now to have correct aspect ratio on windows
     m_dpiX=m_dpiY;
-
-    m_imageLabel = new ImageLabel(this);
-    m_imageLabel->resize(0, 0);
-    setWidget(m_imageLabel);
-
-    connect(m_imageLabel, SIGNAL(gotoRequested(QString)), SIGNAL(gotoRequested(QString)));
-
-    SearchEngine *se=SearchEngine::globalInstance();
-    connect(se, SIGNAL(started()), SLOT(slotFindStarted()));
-    connect(se, SIGNAL(highlightMatch(int,QRectF)), SLOT(slotHighlightMatch(int,QRectF)));
-    connect(se, SIGNAL(matchesFound(int,QList<QRectF>)), SLOT(slotMatchesFound(int,QList<QRectF>)));
 }
+
+
 
 PageView::~PageView()
 {
 }
 
-void PageView::documentLoaded()
+
+
+/*
+ * public methods
+ */
+
+double
+PageView::resX() const
 {
+    return m_dpiX*m_zoom;
 }
 
-void PageView::documentClosed()
+
+
+double
+PageView::resY() const
 {
-    m_imageLabel->clear();
-    m_imageLabel->resize(0, 0);
+    return m_dpiY*m_zoom;
 }
 
-void PageView::pageChanged(int page)
+
+
+void
+PageView::reset()
 {
-    Poppler::Page *popplerPage = document()->page(page);
-    const double resX = m_dpiX * m_zoom;
-    const double resY = m_dpiY * m_zoom;
+    m_currentPage=0;
+}
 
-    // get desired information
-    QImage image = popplerPage->renderToImage(resX, resY, -1, -1, -1, -1, Poppler::Page::Rotate0);
-    QList<Poppler::Annotation *> annotations=popplerPage->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
 
-    int matchPage;
-    QRectF match;
-    SearchEngine::globalInstance()->currentMatch(matchPage, match);
 
-    if (!image.isNull()) {
-        m_imageLabel->resize(image.size());
+int
+PageView::currentPage() const
+{
+    return m_currentPage;
+}
 
-        // match furthe matches on page
-        double sx=resX/72.0;
-        double sy=resY/72.0;
-        QPainter p(&image);
-        p.setPen(Qt::NoPen);
 
-        foreach (QRectF rect, SearchEngine::globalInstance()->matchesFor(page)) {
-            QColor matchColor=QColor(255, 255, 0, 64);
-            if (page==matchPage && rect==match)
-                matchColor=QColor(255, 128, 0, 128);
 
-            QRectF r=QRectF(rect.left()*sx, rect.top()*sy, rect.width()*sx, rect.height()*sy);
-            r.adjust(-3, -5, 3, 2);
-            p.fillRect(r, matchColor);
+/*
+ * public slots
+ */
+
+void
+PageView::setDocument(Poppler::Document *document)
+{
+    m_document=document;
+    m_currentPage=0;
+    paint();
+}
+
+
+
+void
+PageView::setZoom(qreal zoom)
+{
+    if (zoom != m_zoom) {
+        m_zoom=zoom;
+        paint();
+    }
+}
+
+
+
+void
+PageView::gotoDestination(const QString &destination)
+{
+    bool ok;
+    int pageNumber=destination.toInt(&ok);
+
+    if (ok)
+        gotoPage(pageNumber-1);
+    else if (m_document) {
+        if (Poppler::LinkDestination *link=m_document->linkDestination(destination)) {
+            gotoPage(link->pageNumber()-1);
+            delete link;
         }
-
-        m_imageLabel->setPixmap(QPixmap::fromImage(image));
-    } 
-    else {
-        m_imageLabel->resize(0, 0);
-        m_imageLabel->setPixmap(QPixmap());
     }
-
-    m_imageLabel->setAnnotations(annotations);
-
-    delete popplerPage;
 }
 
-void PageView::slotZoomChanged(qreal value)
-{
-    m_zoom = value;
-    if (!document()) {
-        return;
-    }
-    reloadPage();
-}
 
-void PageView::slotFindStarted()
-{
-    pageChanged(page());
-}
 
-void PageView::slotHighlightMatch(int page, const QRectF &)
-{
-    setPage(page);
-}
-
-void PageView::slotMatchesFound(int page, const QList<QRectF> &)
-{
-    if (page == this->page())
-        pageChanged(page);
-}
-
-#include "pageview.moc"
+/*
+ * eof
+ */

@@ -44,6 +44,7 @@ set(firstaid_SRCS
   navigationtoolbar.cpp
   pageview.cpp
   searchengine.cpp
+  singlepageview.cpp
   toc.cpp
   viewer.cpp
 )

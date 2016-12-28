@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,65 +19,39 @@
 #ifndef PAGEVIEW_H
 #define PAGEVIEW_H
 
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QScrollArea>
-
-#include "documentobserver.h"
+#include <Qt>
 
 namespace Poppler {
-class Annotation;
+class Document;
 }
 
-class ImageLabel: public QLabel
+class PageView
 {
-    Q_OBJECT
+public:
+    PageView();
+    virtual ~PageView();
+
+    double resX() const;
+    double resY() const;
 
 public:
-    ImageLabel(QWidget *parent=nullptr);
-    ~ImageLabel();
+    void setDocument(Poppler::Document *document);
+    void setZoom(qreal zoom);
 
-    void setAnnotations(const QList<Poppler::Annotation *> &annotations);
-
-signals:
-    void gotoRequested(const QString &dest);
+    virtual void reset();
+    virtual int currentPage() const;
+    virtual void gotoPage(int page)=0;
+    virtual void gotoDestination(const QString &destination);
 
 protected:
-    void mouseMoveEvent(QMouseEvent *e) override;
-    void mousePressEvent(QMouseEvent *e) override;
+    virtual void paint()=0;
 
-private:
-    QList<Poppler::Annotation *> m_annotations;
-};
-
-class PageView : public QScrollArea, public DocumentObserver
-{
-    Q_OBJECT
-
-public:
-    PageView(QWidget *parent = 0);
-    ~PageView();
-
-    void documentLoaded() override;
-    void documentClosed() override;
-    void pageChanged(int page) override;
-
-public Q_SLOTS:
-    void slotHighlightMatch(int page, const QRectF &match);
-    void slotFindStarted();
-    void slotMatchesFound(int page, const QList<QRectF> &matches);
-
-signals:
-    void gotoRequested(const QString &dest);
-
-private Q_SLOTS:
-    void slotZoomChanged(qreal value);
-
-private:
-    ImageLabel *m_imageLabel;
-    qreal m_zoom;
+protected:
+    Poppler::Document *m_document;
     int m_dpiX;
     int m_dpiY;
-    QRectF m_marker;
+    int m_currentPage;
+    qreal m_zoom;
 };
 
-#endif
+#endif // #ifndef PAGEVIEW_H

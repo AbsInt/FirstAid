@@ -22,11 +22,12 @@
 
 #include <QtWidgets/QMainWindow>
 
+class DocumentObserver;
+class PageView;
 class QAction;
 class QActionGroup;
 class QLabel;
 class QThread;
-class DocumentObserver;
 namespace Poppler {
 class Document;
 }
@@ -53,7 +54,8 @@ private Q_SLOTS:
     void slotAbout();
     void slotAboutQt();
 
-    void slotGoto(const QString &dest);
+    void slotSetZoom(qreal zoom);
+    void slotGotoDestination(const QString &destination);
 
 private:
     void setPage(int page);
@@ -66,8 +68,10 @@ private:
     QList<DocumentObserver *> m_observers;
 
     Poppler::Document *m_doc;
-    QThread *m_thread;
     QString m_filePath;
+    QThread *m_thread;
+
+    PageView *m_view;
 };
 
 #endif

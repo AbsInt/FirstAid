@@ -25,7 +25,7 @@
 #include "stdinreaderthread.h"
 
 #include "navigationtoolbar.h"
-#include "pageview.h"
+#include "singlepageview.h"
 #include "searchengine.h"
 #include "toc.h"
 
@@ -67,13 +67,13 @@ PdfViewer::PdfViewer()
     act = helpMenu->addAction(tr("&About"), this, SLOT(slotAbout()));
     act = helpMenu->addAction(tr("About &Qt"), this, SLOT(slotAboutQt()));
 
+    SinglePageView *spv=new SinglePageView(this);
+    m_view=spv;
+    setCentralWidget(spv);
+
     NavigationToolBar *navbar = new NavigationToolBar(this);
     addToolBar(navbar);
     m_observers.append(navbar);
-
-    PageView *view = new PageView(this);
-    setCentralWidget(view);
-    m_observers.append(view);
 
     TocDock *tocDock = new TocDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, tocDock);
@@ -87,9 +87,8 @@ PdfViewer::PdfViewer()
     Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->m_viewer = this;
 
-    connect(navbar, SIGNAL(zoomChanged(qreal)), view, SLOT(slotZoomChanged(qreal)));
-    connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGoto(QString)));
-    connect(view, SIGNAL(gotoRequested(QString)), SLOT(slotGoto(QString)));
+    connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
+    connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 }
 
 PdfViewer::~PdfViewer()
@@ -141,6 +140,8 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
     m_doc->setRenderHint(Poppler::Document::Antialiasing, true);
     m_doc->setRenderBackend(Poppler::Document::SplashBackend);
 
+    m_view->setDocument(m_doc);
+
     Q_FOREACH(DocumentObserver *obs, m_observers) {
         obs->documentLoaded();
         obs->pageChanged(0);
@@ -159,6 +160,8 @@ void PdfViewer::closeDocument()
 {
     if (!m_doc)
         return;
+
+    m_view->setDocument(nullptr);
 
     Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->documentClosed();
@@ -183,7 +186,7 @@ bool PdfViewer::event(QEvent *e)
             loadDocument(command.mid(5));
 
         else if (command.startsWith("goto "))
-            slotGoto(command.mid(5));
+            slotGotoDestination(command.mid(5));
 
         else if (command.startsWith("close"))
             qApp->quit();
@@ -211,16 +214,14 @@ void PdfViewer::slotAboutQt()
     QMessageBox::aboutQt(this);
 }
 
-void PdfViewer::slotGoto(const QString &dest)
+void PdfViewer::slotSetZoom(qreal zoom)
 {
-    bool ok;
-    int pageNumber=dest.toInt(&ok);
-    if (ok)
-        setPage(pageNumber-1);
-    else if (Poppler::LinkDestination *link=m_doc->linkDestination(dest)) {
-        setPage(link->pageNumber()-1);
-        delete link;
-    }
+    m_view->setZoom(zoom);
+}
+
+void PdfViewer::slotGotoDestination(const QString &destination)
+{
+    m_view->gotoDestination(destination);
 }
 
 void PdfViewer::setPage(int page)
@@ -228,15 +229,18 @@ void PdfViewer::setPage(int page)
     if (!m_doc || 0>page || page>=m_doc->numPages())
         return;
 
+    if (page == this->page())
+        return;
+
+    m_view->gotoPage(page);
+
     Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->pageChanged(page);
-
-    m_currentPage = page;
 }
 
 int PdfViewer::page() const
 {
-    return m_currentPage;
+    return m_view->currentPage();
 }
 
 #include "viewer.moc"
