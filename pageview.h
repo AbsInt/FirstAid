@@ -20,6 +20,7 @@
 #define PAGEVIEW_H
 
 #include <Qt>
+#include <QColor>
 
 namespace Poppler {
 class Document;
@@ -33,6 +34,9 @@ public:
 
     double resX() const;
     double resY() const;
+
+    QColor matchColor() const;
+    QColor highlightColor() const;
 
 public:
     void setDocument(Poppler::Document *document);

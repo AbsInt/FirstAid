@@ -206,13 +206,13 @@ SinglePageView::paint()
         //p.setPen(Qt::NoPen);
 
         foreach (QRectF rect, se->matchesFor(m_currentPage)) {
-            QColor matchColor=QColor(255, 255, 0, 64);
+            QColor c=matchColor();
             if (m_currentPage==matchPage && rect==matchRect)
-                matchColor=QColor(255, 128, 0, 128);
+                c=highlightColor();
 
             QRectF r=QRectF(rect.left()*sx, rect.top()*sy, rect.width()*sx, rect.height()*sy);
             r.adjust(-3, -5, 3, 2);
-            p.fillRect(r, matchColor);
+            p.fillRect(r, c);
         }
         p.end();
 

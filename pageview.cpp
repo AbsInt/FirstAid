@@ -73,6 +73,23 @@ PageView::resY() const
 
 
 
+QColor
+PageView::matchColor() const
+{
+    return QColor(255, 255, 0, 64);
+}
+
+
+
+QColor
+PageView::highlightColor() const
+{
+    return QColor(255, 128, 0, 128);
+}
+
+
+
+
 void
 PageView::reset()
 {
