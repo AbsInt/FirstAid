@@ -198,19 +198,16 @@ SinglePageView::paint()
         m_imageLabel->setPixmap(QPixmap());
     }
     else {
-        // match furthe matches on page
-        double sx=resX()/72.0;
-        double sy=resY()/72.0;
+        // mark further matches on page
         QPainter p(&image);
         p.setRenderHint(QPainter::Antialiasing);
-        //p.setPen(Qt::NoPen);
 
         foreach (QRectF rect, se->matchesFor(m_currentPage)) {
             QColor c=matchColor();
             if (m_currentPage==matchPage && rect==matchRect)
                 c=highlightColor();
 
-            QRectF r=QRectF(rect.left()*sx, rect.top()*sy, rect.width()*sx, rect.height()*sy);
+            QRectF r=fromPoints(rect);
             r.adjust(-3, -5, 3, 2);
             p.fillRect(r, c);
         }

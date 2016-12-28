@@ -37,6 +37,7 @@ PageView::PageView()
         : m_document(nullptr)
         , m_currentPage(0)
         , m_zoom(1.0)
+        , m_doubleSided(false)
 {
     m_dpiX=QApplication::desktop()->physicalDpiX();
     m_dpiY=QApplication::desktop()->physicalDpiY();
@@ -57,7 +58,7 @@ PageView::~PageView()
  * public methods
  */
 
-double
+qreal
 PageView::resX() const
 {
     return m_dpiX*m_zoom;
@@ -65,10 +66,18 @@ PageView::resX() const
 
 
 
-double
+qreal
 PageView::resY() const
 {
     return m_dpiY*m_zoom;
+}
+
+
+
+QRectF
+PageView::fromPoints(const QRectF &pointsRect) const
+{
+    return QRectF(pointsRect.left()/72.0*resX(), pointsRect.top()/72.0*resY(), pointsRect.width()/72.0*resX(), pointsRect.height()/72.0*resY());
 }
 
 
@@ -125,6 +134,17 @@ PageView::setZoom(qreal zoom)
 {
     if (zoom != m_zoom) {
         m_zoom=zoom;
+        paint();
+    }
+}
+
+
+
+void
+PageView::setDoubleSided(bool on)
+{
+    if (on != m_doubleSided) {
+        m_doubleSided=on;
         paint();
     }
 }

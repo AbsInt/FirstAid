@@ -19,8 +19,8 @@
 #ifndef PAGEVIEW_H
 #define PAGEVIEW_H
 
-#include <Qt>
 #include <QColor>
+#include <QRectF>
 
 namespace Poppler {
 class Document;
@@ -32,8 +32,10 @@ public:
     PageView();
     virtual ~PageView();
 
-    double resX() const;
-    double resY() const;
+    qreal resX() const;
+    qreal resY() const;
+
+    QRectF fromPoints(const QRectF &pointsRect) const;
 
     QColor matchColor() const;
     QColor highlightColor() const;
@@ -41,6 +43,7 @@ public:
 public:
     void setDocument(Poppler::Document *document);
     void setZoom(qreal zoom);
+    void setDoubleSided(bool on);
 
     virtual void reset();
     virtual int currentPage() const;
@@ -56,6 +59,7 @@ protected:
     int m_dpiY;
     int m_currentPage;
     qreal m_zoom;
+    bool m_doubleSided;
 };
 
 #endif // #ifndef PAGEVIEW_H
