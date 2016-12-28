@@ -202,7 +202,8 @@ SinglePageView::paint()
         double sx=resX()/72.0;
         double sy=resY()/72.0;
         QPainter p(&image);
-        p.setPen(Qt::NoPen);
+        p.setRenderHint(QPainter::Antialiasing);
+        //p.setPen(Qt::NoPen);
 
         foreach (QRectF rect, se->matchesFor(m_currentPage)) {
             QColor matchColor=QColor(255, 255, 0, 64);
@@ -227,7 +228,10 @@ SinglePageView::paint()
             centeredImage.fill(Qt::gray);
 
             QPainter p(&centeredImage);
+            p.setRenderHint(QPainter::Antialiasing);
             p.drawImage(offset, image);
+            p.setPen(Qt::darkGray);
+            p.drawRect(QRect(offset, image.size()).adjusted(-1, -1, 1, 1));
             p.end();
 
             image=centeredImage;
