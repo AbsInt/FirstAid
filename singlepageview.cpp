@@ -188,8 +188,6 @@ SinglePageView::paint()
         m_imageLabel->setPixmap(QPixmap());
     }
     else {
-        m_imageLabel->resize(image.size());
-
         // match furthe matches on page
         double sx=resX()/72.0;
         double sy=resY()/72.0;
@@ -205,11 +203,33 @@ SinglePageView::paint()
             r.adjust(-3, -5, 3, 2);
             p.fillRect(r, matchColor);
         }
+        p.end();
 
+        QSize vs=viewport()->size();
+        if (vs.width()>image.width() || vs.height()>image.height()) {
+            QImage centeredImage(image.size().expandedTo(viewport()->size()), QImage::Format_ARGB32_Premultiplied);
+            centeredImage.fill(Qt::gray);
+            QPainter p(&centeredImage);
+            p.drawImage(QPoint(qMax(0, vs.width()-image.width()), qMax(0, vs.height()-image.height()))/2, image);
+            p.end();
+
+            image=centeredImage;
+        }
+
+        m_imageLabel->resize(image.size());
         m_imageLabel->setPixmap(QPixmap::fromImage(image));
     } 
 
     m_imageLabel->setAnnotations(annotations);
+}
+
+
+
+void
+SinglePageView::resizeEvent(QResizeEvent *resizeEvent)
+{
+    QScrollArea::resizeEvent(resizeEvent);
+    paint();
 }
 
 

@@ -64,6 +64,7 @@ public:
 
 protected:
     void paint() override;
+    void resizeEvent(QResizeEvent *resizeEvent) override;
 
 private slots:
     void slotGotoRequested(const QString &destination);
