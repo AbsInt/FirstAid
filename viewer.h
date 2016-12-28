@@ -23,10 +23,10 @@
 #include <QtWidgets/QMainWindow>
 
 class DocumentObserver;
-class PageView;
 class QAction;
 class QActionGroup;
 class QLabel;
+class QStackedWidget;
 class QThread;
 namespace Poppler {
 class Document;
@@ -56,6 +56,7 @@ private Q_SLOTS:
 
     void slotSetZoom(qreal zoom);
     void slotGotoDestination(const QString &destination);
+    void slotToggleContinous(bool on);
 
 private:
     void setPage(int page);
@@ -71,7 +72,7 @@ private:
     QString m_filePath;
     QThread *m_thread;
 
-    PageView *m_view;
+    QStackedWidget *m_viewStack;
 };
 
 #endif

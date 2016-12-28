@@ -41,6 +41,7 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
+#include <QtWidgets/QStackedWidget>
 
 PdfViewer::PdfViewer()
     : QMainWindow(), m_currentPage(0), m_doc(0)
@@ -62,14 +63,23 @@ PdfViewer::PdfViewer()
     act->setShortcut(Qt::CTRL + Qt::Key_Q);
 
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
+    QAction *continousAction=viewMenu->addAction(tr("&Continous"));
+    continousAction->setCheckable(true);
+    connect(continousAction, SIGNAL(toggled(bool)), SLOT(slotToggleContinous(bool)));
+    viewMenu->addSeparator();
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     act = helpMenu->addAction(tr("&About"), this, SLOT(slotAbout()));
     act = helpMenu->addAction(tr("About &Qt"), this, SLOT(slotAboutQt()));
 
-    SinglePageView *spv=new SinglePageView(this);
-    m_view=spv;
-    setCentralWidget(spv);
+    m_viewStack=new QStackedWidget(this);
+    setCentralWidget(m_viewStack);
+
+    m_viewStack->addWidget(new SinglePageView(this));
+
+    QLabel *l=new QLabel("Continous View", this);
+    l->setAlignment(Qt::AlignCenter);
+    m_viewStack->addWidget(l);
 
     NavigationToolBar *navbar = new NavigationToolBar(this);
     addToolBar(navbar);
@@ -140,7 +150,7 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
     m_doc->setRenderHint(Poppler::Document::Antialiasing, true);
     m_doc->setRenderBackend(Poppler::Document::SplashBackend);
 
-    m_view->setDocument(m_doc);
+    static_cast<SinglePageView *>(m_viewStack->widget(0))->setDocument(m_doc);
 
     Q_FOREACH(DocumentObserver *obs, m_observers) {
         obs->documentLoaded();
@@ -161,7 +171,7 @@ void PdfViewer::closeDocument()
     if (!m_doc)
         return;
 
-    m_view->setDocument(nullptr);
+    static_cast<SinglePageView *>(m_viewStack->widget(0))->setDocument(nullptr);
 
     Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->documentClosed();
@@ -216,12 +226,17 @@ void PdfViewer::slotAboutQt()
 
 void PdfViewer::slotSetZoom(qreal zoom)
 {
-    m_view->setZoom(zoom);
+    static_cast<SinglePageView *>(m_viewStack->widget(0))->setZoom(zoom);
 }
 
 void PdfViewer::slotGotoDestination(const QString &destination)
 {
-    m_view->gotoDestination(destination);
+    static_cast<SinglePageView *>(m_viewStack->widget(0))->gotoDestination(destination);
+}
+
+void PdfViewer::slotToggleContinous(bool on)
+{
+    m_viewStack->setCurrentIndex(on);
 }
 
 void PdfViewer::setPage(int page)
@@ -232,7 +247,7 @@ void PdfViewer::setPage(int page)
     if (page == this->page())
         return;
 
-    m_view->gotoPage(page);
+    static_cast<SinglePageView *>(m_viewStack->widget(0))->gotoPage(page);
 
     Q_FOREACH(DocumentObserver *obs, m_observers)
         obs->pageChanged(page);
@@ -240,7 +255,7 @@ void PdfViewer::setPage(int page)
 
 int PdfViewer::page() const
 {
-    return m_view->currentPage();
+    return static_cast<SinglePageView *>(m_viewStack->currentWidget())->currentPage();
 }
 
 #include "viewer.moc"
