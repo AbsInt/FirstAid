@@ -59,6 +59,14 @@ ImageLabel::~ImageLabel()
 
 
 void
+ImageLabel::setDisplayRect(const QRect &rect)
+{
+    m_displayRect=rect;
+}
+
+
+
+void
 ImageLabel::setAnnotations(const QList<Poppler::Annotation *> &annotations)
 {
     qDeleteAll(m_annotations);
@@ -71,13 +79,14 @@ ImageLabel::setAnnotations(const QList<Poppler::Annotation *> &annotations)
 void
 ImageLabel::mouseMoveEvent(QMouseEvent *e)
 {
-    qreal xPos=e->x()/(qreal)width();
-    qreal yPos=e->y()/(qreal)height();
+    qreal xPos=(e->x()-m_displayRect.x())/(qreal)m_displayRect.width();
+    qreal yPos=(e->y()-m_displayRect.y())/(qreal)m_displayRect.height();
+    QPointF p=QPointF(xPos, yPos);
 
     bool linkFound=false;
 
     foreach (Poppler::Annotation *a, m_annotations) {
-        if (a->boundary().contains(QPointF(xPos, yPos))) {
+        if (a->boundary().contains(p)) {
             linkFound=true;
             break;
         }
@@ -91,11 +100,12 @@ ImageLabel::mouseMoveEvent(QMouseEvent *e)
 void
 ImageLabel::mousePressEvent(QMouseEvent *e)
 {
-    qreal xPos=e->x()/(qreal)width();
-    qreal yPos=e->y()/(qreal)height();
+    qreal xPos=(e->x()-m_displayRect.x())/(qreal)m_displayRect.width();
+    qreal yPos=(e->y()-m_displayRect.y())/(qreal)m_displayRect.height();
+    QPointF p=QPointF(xPos, yPos);
 
     foreach (Poppler::Annotation *a, m_annotations) {
-        if (a->boundary().contains(QPointF(xPos, yPos))) {
+        if (a->boundary().contains(p)) {
             Poppler::Link *link=static_cast<Poppler::LinkAnnotation *>(a)->linkDestination();
             switch (link->linkType()) {
                 case Poppler::Link::Goto:
@@ -205,19 +215,28 @@ SinglePageView::paint()
         }
         p.end();
 
+        QRect displayRect(QPoint(), image.size());
+
         QSize vs=viewport()->size();
         if (vs.width()>image.width() || vs.height()>image.height()) {
+            int xOffset=qMax(0, vs.width()-image.width())/2;
+            int yOffset=qMax(0, vs.height()-image.height())/2;
+            QPoint offset(xOffset, yOffset);
+
             QImage centeredImage(image.size().expandedTo(viewport()->size()), QImage::Format_ARGB32_Premultiplied);
             centeredImage.fill(Qt::gray);
+
             QPainter p(&centeredImage);
-            p.drawImage(QPoint(qMax(0, vs.width()-image.width()), qMax(0, vs.height()-image.height()))/2, image);
+            p.drawImage(offset, image);
             p.end();
 
             image=centeredImage;
+            displayRect.moveTo(offset);
         }
 
         m_imageLabel->resize(image.size());
         m_imageLabel->setPixmap(QPixmap::fromImage(image));
+        m_imageLabel->setDisplayRect(displayRect);
     } 
 
     m_imageLabel->setAnnotations(annotations);

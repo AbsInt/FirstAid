@@ -39,6 +39,7 @@ public:
     ImageLabel(QWidget *parent=nullptr);
     ~ImageLabel();
 
+    void setDisplayRect(const QRect &rect);
     void setAnnotations(const QList<Poppler::Annotation *> &annotations);
 
 signals:
@@ -49,6 +50,7 @@ protected:
     void mousePressEvent(QMouseEvent *e) override;
 
 private:
+    QRect m_displayRect;
     QList<Poppler::Annotation *> m_annotations;
 };
 
