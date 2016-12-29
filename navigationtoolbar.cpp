@@ -232,5 +232,3 @@ void NavigationToolBar::slotZoomComboChanged()
             emit zoomChanged(qreal(value) / 100);
     }
 }
-
-#include "navigationtoolbar.moc"

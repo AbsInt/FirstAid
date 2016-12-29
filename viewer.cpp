@@ -326,5 +326,3 @@ int PdfViewer::page() const
 {
     return dynamic_cast<PageView *>(m_viewStack->currentWidget())->currentPage();
 }
-
-#include "viewer.moc"

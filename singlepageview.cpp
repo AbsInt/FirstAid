@@ -321,9 +321,3 @@ void SinglePageView::slotMatchesFound(int page, const QList<QRectF> &)
     if (page == m_currentPage)
         paint();
 }
-
-#include "singlepageview.moc"
-
-/*
- * eof
- */

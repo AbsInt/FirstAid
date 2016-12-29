@@ -1,4 +1,3 @@
-*.moc
 moc_*
 *.depends
 qrc_*

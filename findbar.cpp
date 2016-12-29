@@ -107,5 +107,3 @@ void FindBar::slotResetStyle()
 {
     m_findEdit->setStyleSheet(QString());
 }
-
-#include "findbar.moc"

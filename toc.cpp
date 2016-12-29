@@ -96,5 +96,3 @@ void TocDock::itemClicked(QTreeWidgetItem *item, int column)
     QString dest = item->data(column, Qt::UserRole).toString();
     emit gotoRequested(dest);
 }
-
-#include "toc.moc"

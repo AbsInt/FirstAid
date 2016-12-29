@@ -291,9 +291,3 @@ void ContinousPageView::slotMatchesFound(int page, const QList<QRectF> &)
     if (page == m_currentPage)
         paint();
 }
-
-#include "continouspageview.moc"
-
-/*
- * eof
- */
