@@ -72,11 +72,6 @@ PdfViewer::PdfViewer()
     m_fileOpenExternalAct->setEnabled(false);
     m_menu->addSeparator();
 
-    QAction *continousAction=m_menu->addAction(tr("&Continous Scrolling"));
-    continousAction->setCheckable(true);
-    connect(continousAction, SIGNAL(toggled(bool)), SLOT(slotToggleContinous(bool)));
-    m_menu->addSeparator();
-
     QAction *act = m_menu->addAction(tr("&About"), this, SLOT(slotAbout()));
     m_menu->addSeparator();
 
