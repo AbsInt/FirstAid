@@ -78,7 +78,10 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     addWidget(spacer);
 
     m_zoomCombo = new QComboBox(this);
+    m_zoomCombo->setInsertPolicy(QComboBox::NoInsert);
     m_zoomCombo->setEditable(true);
+    m_zoomCombo->addItem(tr("Fit width"));
+    m_zoomCombo->addItem(tr("Fit page"));
     m_zoomCombo->addItem(tr("10%"));
     m_zoomCombo->addItem(tr("25%"));
     m_zoomCombo->addItem(tr("33%"));
@@ -91,8 +94,9 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     m_zoomCombo->addItem(tr("200%"));
     m_zoomCombo->addItem(tr("300%"));
     m_zoomCombo->addItem(tr("400%"));
-    m_zoomCombo->setCurrentIndex(6); // "100%"
-    connect(m_zoomCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(slotZoomComboChanged(QString)));
+    m_zoomCombo->setCurrentIndex(8); // "100%"
+    connect(m_zoomCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotZoomComboChanged()));
+    connect(m_zoomCombo->lineEdit(), SIGNAL(returnPressed()), this, SLOT(slotZoomComboChanged()));
     addWidget(m_zoomCombo);
 
     documentClosed();
@@ -157,14 +161,21 @@ void NavigationToolBar::slotPageSet()
     setPage(m_pageEdit->text().toInt()-1);
 }
 
-void NavigationToolBar::slotZoomComboChanged(const QString &_text)
+void NavigationToolBar::slotZoomComboChanged()
 {
-    QString text = _text;
-    text.remove(QLatin1Char('%'));
-    bool ok = false;
-    int value = text.toInt(&ok);
-    if (ok && value >= 10) {
-        emit zoomChanged(qreal(value) / 100);
+    QString text=m_zoomCombo->currentText();
+
+    if ("Fit width" == text) {
+    }
+    else if ("Fit page" == text) {
+    }
+    else {
+        text.remove("%");
+        bool ok;
+        int value=text.toInt(&ok);
+
+        if (ok && value>=10 && value <=400)
+            emit zoomChanged(qreal(value)/100);
     }
 }
 

@@ -54,7 +54,7 @@ private slots:
     void slotGoPrev();
     void slotGoNext();
     void slotPageSet();
-    void slotZoomComboChanged(const QString &text);
+    void slotZoomComboChanged();
 
 private:
     QAction *m_prevAct;

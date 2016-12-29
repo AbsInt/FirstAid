@@ -24,6 +24,7 @@
 
 #include <poppler-qt5.h>
 
+#include <QGuiApplication>
 #include <QTimer>
 
 
@@ -174,7 +175,11 @@ SearchEngine::find(const QString &text)
     m_timer->stop();
 
     if (text == m_findText) {
-        nextMatch();
+        if (QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
+            previousMatch();
+        else
+            nextMatch();
+
         return;
     }
 
