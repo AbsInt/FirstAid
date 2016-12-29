@@ -111,8 +111,8 @@ PdfViewer::PdfViewer()
     SearchEngine *se=SearchEngine::globalInstance();
     m_observers << se;
 
-    Q_FOREACH(DocumentObserver *obs, m_observers)
-        obs->m_viewer = this;
+    foreach (DocumentObserver *obs, m_observers)
+        obs->m_viewer=this;
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
@@ -181,11 +181,6 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
 
     static_cast<SinglePageView *>(m_viewStack->widget(0))->setDocument(m_doc);
 
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
-        obs->documentLoaded();
-        obs->pageChanged(0);
-    }
-
     m_fileOpenExternalAct->setEnabled(true);
     m_filePath=file;
 
@@ -193,6 +188,16 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
         setWindowTitle(QFileInfo(m_filePath).fileName());
     else
         setWindowTitle(m_doc->title());
+
+    QSettings settings;
+    settings.beginGroup("Files");
+    setPage(settings.value(m_filePath, 0).toInt());
+    settings.endGroup();
+
+    foreach (DocumentObserver *obs, m_observers) {
+        obs->documentLoaded();
+        obs->pageChanged(page());
+    }
 }
 
 void PdfViewer::closeDocument()
@@ -200,9 +205,14 @@ void PdfViewer::closeDocument()
     if (!m_doc)
         return;
 
+    QSettings settings;
+    settings.beginGroup("Files");
+    settings.setValue(m_filePath, page());
+    settings.endGroup();
+
     static_cast<SinglePageView *>(m_viewStack->widget(0))->setDocument(nullptr);
 
-    Q_FOREACH(DocumentObserver *obs, m_observers)
+    foreach (DocumentObserver *obs, m_observers)
         obs->documentClosed();
 
     m_currentPage = 0;
@@ -288,7 +298,7 @@ void PdfViewer::slotToggleContinous(bool on)
 
 void PdfViewer::slotCurrentPageChanged(int page)
 {
-    Q_FOREACH(DocumentObserver *obs, m_observers)
+    foreach (DocumentObserver *obs, m_observers)
         obs->pageChanged(page);
 }
 
