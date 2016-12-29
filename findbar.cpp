@@ -21,6 +21,7 @@
 
 #include <poppler-qt5.h>
 
+#include <QtCore/QTimer>
 #include <QtWidgets/QAction>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLineEdit>
@@ -58,6 +59,8 @@ FindBar::FindBar(QWidget *parent)
     addAction(closeAction);
     connect(closeAction, SIGNAL(triggered()), SLOT(slotHide()));
 
+    connect(SearchEngine::globalInstance(), SIGNAL(finished()), SLOT(slotFindDone()));
+
     documentClosed();
 }
 
@@ -90,6 +93,19 @@ void FindBar::slotHide()
 {
     hide();
     SearchEngine::globalInstance()->find(QString());
+}
+
+void FindBar::slotFindDone()
+{
+    if (SearchEngine::globalInstance()->matches().isEmpty()) {
+        m_findEdit->setStyleSheet("background-color: #f08080");
+        QTimer::singleShot(1000, this, SLOT(slotResetStyle()));
+    }
+}
+
+void FindBar::slotResetStyle()
+{
+    m_findEdit->setStyleSheet(QString());
 }
 
 #include "findbar.moc"

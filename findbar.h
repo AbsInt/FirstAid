@@ -44,6 +44,9 @@ private slots:
     void slotFind();
     void slotHide();
 
+    void slotFindDone();
+    void slotResetStyle();
+
 private:
     QLineEdit *m_findEdit;
 };
