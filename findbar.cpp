@@ -34,7 +34,7 @@ FindBar::FindBar(QWidget *parent)
 
     QToolButton *tb=new QToolButton(this);
     tb->setIcon(QIcon(":/icons/window-close.png"));
-    connect(tb, SIGNAL(clicked()), this, SLOT(hide()));
+    connect(tb, SIGNAL(clicked()), this, SLOT(slotHide()));
     hbl->addWidget(tb);
 
     m_findEdit = new QLineEdit(this);
@@ -58,7 +58,7 @@ FindBar::FindBar(QWidget *parent)
     closeAction->setShortcut(Qt::Key_Escape);
     closeAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     addAction(closeAction);
-    connect(closeAction, SIGNAL(triggered()), SLOT(hide()));
+    connect(closeAction, SIGNAL(triggered()), SLOT(slotHide()));
 
     documentClosed();
 }
@@ -74,7 +74,7 @@ void FindBar::documentLoaded()
 
 void FindBar::documentClosed()
 {
-    hide();
+    slotHide();
     m_findEdit->clear();
     m_findEdit->setEnabled(false);
 }
@@ -86,6 +86,12 @@ void FindBar::pageChanged(int)
 void FindBar::slotFind()
 {
     SearchEngine::globalInstance()->find(m_findEdit->text());
+}
+
+void FindBar::slotHide()
+{
+    hide();
+    SearchEngine::globalInstance()->find(QString());
 }
 
 #include "findbar.moc"

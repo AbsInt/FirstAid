@@ -187,10 +187,12 @@ SearchEngine::find(const QString &text)
 
     emit started();
 
-    if (text.isEmpty())
-        return;
-
     m_findText=text;
+
+    if (text.isEmpty()) {
+        emit finished();
+        return;
+    }
 
     m_findCurrentPage=page();
 

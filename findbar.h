@@ -42,6 +42,7 @@ signals:
 
 private slots:
     void slotFind();
+    void slotHide();
 
 private:
     QLineEdit *m_findEdit;
