@@ -48,6 +48,7 @@ public:
     void closeDocument();
 
     bool event(QEvent *e) override;
+    void closeEvent(QCloseEvent *e) override;
 
 private Q_SLOTS:
     void slotOpenFileExternal();

@@ -33,10 +33,12 @@
 #include <poppler-qt5.h>
 
 #include <QtCore/QDir>
+#include <QtCore/QSettings>
 #include <QtCore/QUrl>
 #include <QtGui/QDesktopServices>
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QInputDialog>
 #include <QtWidgets/QMenu>
@@ -119,6 +121,14 @@ PdfViewer::PdfViewer()
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
     connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
+
+    // restore old geometry
+    QRect r=QApplication::desktop()->availableGeometry(this);
+    QSettings settings;
+    settings.beginGroup("MainWindow");
+    resize(settings.value("size", 3*r.size()/4).toSize());
+    move(settings.value("pos", QPoint(r.width()/8, r.height()/8)).toPoint());
+    settings.endGroup();
 }
 
 PdfViewer::~PdfViewer()
@@ -225,6 +235,18 @@ bool PdfViewer::event(QEvent *e)
     }
     else
         return QMainWindow::event(e);
+}
+
+void PdfViewer::closeEvent(QCloseEvent *event)
+{
+    // save geometry
+    QSettings settings;
+    settings.beginGroup("MainWindow");
+    settings.setValue("size", size());
+    settings.setValue("pos", pos());
+    settings.endGroup();
+
+    QMainWindow::closeEvent(event);
 }
 
 void PdfViewer::slotOpenFileExternal()

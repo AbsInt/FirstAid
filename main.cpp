@@ -50,6 +50,10 @@ int main(int argc, char *argv[])
     Q_IMPORT_PLUGIN(QCupsPrinterSupportPlugin)
 #endif
 
+    QCoreApplication::setOrganizationName("AbsInt");
+    QCoreApplication::setOrganizationDomain("absint.com");
+    QCoreApplication::setApplicationName("FirstAid");
+
     QApplication app(argc, argv);
     const QStringList args=QCoreApplication::arguments();
 
