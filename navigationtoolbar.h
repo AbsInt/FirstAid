@@ -57,11 +57,17 @@ private slots:
     void slotGoNext();
     void slotPageSet();
     void slotZoomComboChanged();
+    void slotGoto();
+    void slotHideGoto();
 
 private:
     QAction *m_prevAct;
+    QLabel *m_pageFullLabel;
+    QAction *m_pageFullLabelAct;
     QLineEdit *m_pageEdit;
+    QAction *m_pageEditAct;
     QLabel *m_pageLabel;
+    QAction *m_pageLabelAct;
     QAction *m_nextAct;
     QComboBox *m_zoomCombo;
     QIntValidator *m_intValidator;

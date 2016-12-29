@@ -62,21 +62,24 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QShortcut *previousShortcut=new QShortcut(Qt::Key_Backspace, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
+    m_pageFullLabel=new QLabel(this);
+    m_pageFullLabelAct=addWidget(m_pageFullLabel);
+
     m_pageEdit = new QLineEdit(this);
     m_pageEdit->setMaxLength(6);
     m_pageEdit->setFixedWidth(50);
     connect(m_pageEdit, SIGNAL(returnPressed()), this, SLOT(slotPageSet()));
-    addWidget(m_pageEdit);
-
-    QShortcut *gotoShortCut=new QShortcut(Qt::ControlModifier+Qt::Key_G, this);
-    connect(gotoShortCut, SIGNAL(activated()), m_pageEdit, SLOT(setFocus()));
-    connect(gotoShortCut, SIGNAL(activated()), m_pageEdit, SLOT(selectAll()));
+    connect(m_pageEdit, SIGNAL(editingFinished()), this, SLOT(slotHideGoto()));
+    m_pageEditAct=addWidget(m_pageEdit);
 
     m_intValidator=new QIntValidator(this);
     m_pageEdit->setValidator(m_intValidator);
 
-    m_pageLabel = new QLabel(this);
-    addWidget(m_pageLabel);
+    QShortcut *gotoShortCut=new QShortcut(Qt::ControlModifier+Qt::Key_G, this);
+    connect(gotoShortCut, SIGNAL(activated()), SLOT(slotGoto()));
+
+    m_pageLabel=new QLabel(this);
+    m_pageLabelAct=addWidget(m_pageLabel);
 
     m_nextAct = addAction(QIcon(":/icons/go-next.svg"), tr("Next"), this, SLOT(slotGoNext()));
     QShortcut *nextShortcut=new QShortcut(Qt::Key_Space, this);
@@ -124,8 +127,9 @@ NavigationToolBar::~NavigationToolBar()
 
 void NavigationToolBar::documentLoaded()
 {
-    const int pageCount = document()->numPages();
+    const int pageCount=document()->numPages();
 
+    m_pageFullLabel->setText(QString("%1 / %2").arg(page()).arg(pageCount));
     m_pageLabel->setText(QString(" / %1").arg(pageCount));
 
     m_pageEdit->setText("1");
@@ -137,6 +141,8 @@ void NavigationToolBar::documentLoaded()
 
 void NavigationToolBar::documentClosed()
 {
+    slotHideGoto();
+
     m_prevAct->setEnabled(false);
     m_nextAct->setEnabled(false);
     m_pageEdit->clear();
@@ -175,6 +181,22 @@ void NavigationToolBar::slotGoLast()
 void NavigationToolBar::slotPageSet()
 {
     setPage(m_pageEdit->text().toInt()-1);
+}
+
+void NavigationToolBar::slotGoto()
+{
+    m_pageFullLabelAct->setVisible(false);
+    m_pageEditAct->setVisible(true);
+    m_pageEdit->selectAll();
+    m_pageEdit->setFocus();
+    m_pageLabelAct->setVisible(true);
+}
+
+void NavigationToolBar::slotHideGoto()
+{
+    m_pageFullLabelAct->setVisible(true);
+    m_pageEditAct->setVisible(false);
+    m_pageLabelAct->setVisible(false);
 }
 
 void NavigationToolBar::slotZoomComboChanged()

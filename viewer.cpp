@@ -306,6 +306,7 @@ void PdfViewer::setPage(int page)
         return;
 
     static_cast<SinglePageView *>(m_viewStack->widget(0))->gotoPage(page);
+    m_viewStack->currentWidget()->setFocus();
 }
 
 int PdfViewer::page() const
