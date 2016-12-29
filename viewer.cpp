@@ -280,6 +280,9 @@ void PdfViewer::slotSetZoomMode(PageView::ZoomMode mode)
 void PdfViewer::slotGotoDestination(const QString &destination)
 {
     static_cast<SinglePageView *>(m_viewStack->widget(0))->gotoDestination(destination);
+
+    Q_FOREACH(DocumentObserver *obs, m_observers)
+        obs->pageChanged(page());
 }
 
 void PdfViewer::slotToggleContinous(bool on)

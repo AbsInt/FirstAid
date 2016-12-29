@@ -45,7 +45,7 @@ public:
     QRectF toPoints(const QRectF &rect) const;
 
 public:
-    void setDocument(Poppler::Document *document);
+    virtual void setDocument(Poppler::Document *document);
     void setZoomMode(ZoomMode mode);
     void setZoom(qreal zoom);
     void setDoubleSideMode(DoubleSideMode mode);
