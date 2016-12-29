@@ -294,7 +294,7 @@ SinglePageView::keyPressEvent(QKeyEvent *event)
     QScrollBar *vsb=verticalScrollBar();
 
     if (m_document && event->key()==Qt::Key_PageDown && (!vsb->isVisible() || vsb->value()==vsb->maximum())) {
-        if (m_currentPage < m_document->numPages()-2) {
+        if (m_currentPage < m_document->numPages()-1) {
             gotoPage(m_currentPage+1);
             verticalScrollBar()->setValue(0);
             return;

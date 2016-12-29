@@ -49,6 +49,10 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     QShortcut *tocShortcut=new QShortcut(Qt::Key_F7, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
 
+    QAction *toggleContinous=addAction(QIcon(":/icons/zoom-select-y.png"), tr("Toggle continous mode"));
+    toggleContinous->setCheckable(true);
+    connect(toggleContinous, SIGNAL(toggled(bool)), SIGNAL(toggleContinous(bool)));
+
     QWidget *spacer=new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
     addWidget(spacer);

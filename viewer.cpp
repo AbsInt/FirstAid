@@ -75,12 +75,6 @@ PdfViewer::PdfViewer()
     QAction *act = fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()));
     act->setShortcut(Qt::CTRL + Qt::Key_Q);
 
-    QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
-    QAction *continousAction=viewMenu->addAction(tr("&Continous"));
-    continousAction->setCheckable(true);
-    connect(continousAction, SIGNAL(toggled(bool)), SLOT(slotToggleContinous(bool)));
-    viewMenu->addSeparator();
-
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     act = helpMenu->addAction(tr("&About"), this, SLOT(slotAbout()));
     act = helpMenu->addAction(tr("About &Qt"), this, SLOT(slotAboutQt()));
@@ -122,6 +116,8 @@ PdfViewer::PdfViewer()
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
+    connect(navbar, SIGNAL(toggleContinous(bool)), SLOT(slotToggleContinous(bool)));
+
     connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
     // restore old geometry

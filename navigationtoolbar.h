@@ -48,7 +48,7 @@ signals:
     void showToc(bool on);
     void zoomChanged(qreal value);
     void zoomModeChanged(PageView::ZoomMode mode);
-    void markerRequested(const QRectF &rect);
+    void toggleContinous(bool on);
 
 private slots:
     void slotGoFirst();

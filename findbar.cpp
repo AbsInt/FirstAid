@@ -43,8 +43,6 @@ FindBar::FindBar(QWidget *parent)
     connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotFind()));
     hbl->addWidget(m_findEdit);
 
-    hbl->addStretch();
-
     QAction *findAction=new QAction(parent);
     findAction->setShortcutContext(Qt::ApplicationShortcut);
     findAction->setShortcut(QKeySequence::Find);
