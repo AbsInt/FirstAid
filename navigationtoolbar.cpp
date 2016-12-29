@@ -54,7 +54,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     addWidget(spacer);
 
     m_prevAct = addAction(QIcon(":/icons/go-previous.png"), tr("Previous"), this, SLOT(slotGoPrev()));
-    QShortcut *previousShortcut=new QShortcut(Qt::Key_PageUp, this);
+    QShortcut *previousShortcut=new QShortcut(Qt::Key_Backspace, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
     m_pageEdit = new QLineEdit(this);
@@ -70,7 +70,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     addWidget(m_pageLabel);
 
     m_nextAct = addAction(QIcon(":/icons/go-next.png"), tr("Next"), this, SLOT(slotGoNext()));
-    QShortcut *nextShortcut=new QShortcut(Qt::Key_PageDown, this);
+    QShortcut *nextShortcut=new QShortcut(Qt::Key_Space, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
     spacer=new QWidget(this);
