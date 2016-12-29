@@ -71,6 +71,9 @@ public:
 
     void gotoPage(int page) override;
 
+signals:
+    void currentPageChanged(int page);
+
 protected:
     void paint() override;
     void resizeEvent(QResizeEvent *event) override;

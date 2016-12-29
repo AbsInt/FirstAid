@@ -194,6 +194,8 @@ SinglePageView::gotoPage(int page)
 
     m_currentPage=page;
     paint();
+
+    emit currentPageChanged(m_currentPage);
 }
 
 

@@ -98,18 +98,19 @@ PdfViewer::PdfViewer()
 
     setCentralWidget(w);
 
-    m_viewStack->addWidget(new SinglePageView(this));
+    SinglePageView *spv=new SinglePageView(this);
+    m_viewStack->addWidget(spv);
+    connect(spv, SIGNAL(currentPageChanged(int)), SLOT(slotCurrentPageChanged(int)));
 
     QLabel *l=new QLabel("Continous View", this);
     l->setAlignment(Qt::AlignCenter);
     m_viewStack->addWidget(l);
 
-    TocDock *tocDock = new TocDock(this);
-    addDockWidget(Qt::LeftDockWidgetArea, tocDock);
-    tocDock->hide();
-    m_observers.append(tocDock);
+    m_tocDock = new TocDock(this);
+    addDockWidget(Qt::LeftDockWidgetArea, m_tocDock);
+    m_observers.append(m_tocDock);
 
-    NavigationToolBar *navbar = new NavigationToolBar(tocDock->toggleViewAction(), this);
+    NavigationToolBar *navbar = new NavigationToolBar(m_tocDock->toggleViewAction(), this);
     addToolBar(navbar);
     m_observers.append(navbar);
 
@@ -121,7 +122,7 @@ PdfViewer::PdfViewer()
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
-    connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
+    connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
     // restore old geometry
     QRect r=QApplication::desktop()->availableGeometry(this);
@@ -129,6 +130,7 @@ PdfViewer::PdfViewer()
     settings.beginGroup("MainWindow");
     resize(settings.value("size", 3*r.size()/4).toSize());
     move(settings.value("pos", QPoint(r.width()/8, r.height()/8)).toPoint());
+    m_tocDock->setVisible(settings.value("tocVisible", false).toBool());
     settings.endGroup();
 }
 
@@ -245,6 +247,7 @@ void PdfViewer::closeEvent(QCloseEvent *event)
     settings.beginGroup("MainWindow");
     settings.setValue("size", size());
     settings.setValue("pos", pos());
+    settings.setValue("tocVisible", m_tocDock->isVisible());
     settings.endGroup();
 
     QMainWindow::closeEvent(event);
@@ -280,14 +283,17 @@ void PdfViewer::slotSetZoomMode(PageView::ZoomMode mode)
 void PdfViewer::slotGotoDestination(const QString &destination)
 {
     static_cast<SinglePageView *>(m_viewStack->widget(0))->gotoDestination(destination);
-
-    Q_FOREACH(DocumentObserver *obs, m_observers)
-        obs->pageChanged(page());
 }
 
 void PdfViewer::slotToggleContinous(bool on)
 {
     m_viewStack->setCurrentIndex(on);
+}
+
+void PdfViewer::slotCurrentPageChanged(int page)
+{
+    Q_FOREACH(DocumentObserver *obs, m_observers)
+        obs->pageChanged(page);
 }
 
 void PdfViewer::setPage(int page)
@@ -299,9 +305,6 @@ void PdfViewer::setPage(int page)
         return;
 
     static_cast<SinglePageView *>(m_viewStack->widget(0))->gotoPage(page);
-
-    Q_FOREACH(DocumentObserver *obs, m_observers)
-        obs->pageChanged(page);
 }
 
 int PdfViewer::page() const

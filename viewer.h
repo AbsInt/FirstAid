@@ -24,6 +24,7 @@
 #include "pageview.h"
 
 class DocumentObserver;
+class TocDock;
 class QAction;
 class QActionGroup;
 class QLabel;
@@ -61,6 +62,8 @@ private Q_SLOTS:
     void slotGotoDestination(const QString &destination);
     void slotToggleContinous(bool on);
 
+    void slotCurrentPageChanged(int page);
+
 private:
     void setPage(int page);
     int page() const;
@@ -76,6 +79,7 @@ private:
     QThread *m_thread;
 
     QStackedWidget *m_viewStack;
+    TocDock *m_tocDock;
 };
 
 #endif
