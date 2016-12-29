@@ -118,6 +118,11 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     menuButton->setPopupMode(QToolButton::InstantPopup);
     addWidget(menuButton);
 
+    // esc to hide goto widgets
+    QShortcut *closeGoto=new QShortcut(Qt::Key_Escape, this);
+    closeGoto->setContext(Qt::WidgetWithChildrenShortcut);
+    connect(closeGoto, SIGNAL(activated()), SLOT(slotHideGoto()));
+
     documentClosed();
 }
 
@@ -197,6 +202,8 @@ void NavigationToolBar::slotHideGoto()
     m_pageFullLabelAct->setVisible(true);
     m_pageEditAct->setVisible(false);
     m_pageLabelAct->setVisible(false);
+
+    emit lostFocus();
 }
 
 void NavigationToolBar::slotZoomComboChanged()

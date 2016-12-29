@@ -49,6 +49,7 @@ signals:
     void zoomChanged(qreal value);
     void zoomModeChanged(PageView::ZoomMode mode);
     void toggleContinous(bool on);
+    void lostFocus();
 
 private slots:
     void slotGoFirst();

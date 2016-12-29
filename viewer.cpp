@@ -85,6 +85,7 @@ PdfViewer::PdfViewer()
 
     m_viewStack=new QStackedWidget(w);
     vbl->addWidget(m_viewStack);
+    setFocusProxy(m_viewStack);
 
     FindBar *fb=new FindBar(w);
     m_observers.append(fb);
@@ -117,6 +118,7 @@ PdfViewer::PdfViewer()
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
     connect(navbar, SIGNAL(toggleContinous(bool)), SLOT(slotToggleContinous(bool)));
+    connect(navbar, SIGNAL(lostFocus()), SLOT(slotSetFocus()));
 
     connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
@@ -297,6 +299,11 @@ void PdfViewer::slotCurrentPageChanged(int page)
         obs->pageChanged(page);
 }
 
+void PdfViewer::slotSetFocus()
+{
+    m_viewStack->currentWidget()->setFocus();
+}
+
 void PdfViewer::setPage(int page)
 {
     if (!m_doc || 0>page || page>=m_doc->numPages())
@@ -306,7 +313,6 @@ void PdfViewer::setPage(int page)
         return;
 
     static_cast<SinglePageView *>(m_viewStack->widget(0))->gotoPage(page);
-    m_viewStack->currentWidget()->setFocus();
 }
 
 int PdfViewer::page() const
