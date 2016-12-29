@@ -1,11 +1,15 @@
 <RCC>
     <qresource>
         <file>firstaid.png</file>
-        <file>icons/bookmark-new.png</file>
-        <file>icons/edit-copy.png</file>
-        <file>icons/go-next.png</file>
-        <file>icons/go-previous.png</file>
-        <file>icons/window-close.png</file>
-        <file>icons/zoom-select-y.png</file>
+        <file>icons/acrobat.svg</file>
+        <file>icons/application-menu.svg</file>
+        <file>icons/application-exit.svg</file>
+        <file>icons/bookmark-new.svg</file>
+        <file>icons/edit-copy.svg</file>
+        <file>icons/go-next.svg</file>
+        <file>icons/go-previous.svg</file>
+        <file>icons/help-about.svg</file>
+        <file>icons/window-close.svg</file>
+        <file>icons/zoom-select-y.svg</file>
     </qresource>
 </RCC>

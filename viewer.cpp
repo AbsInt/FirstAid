@@ -58,6 +58,7 @@ PdfViewer::PdfViewer()
                           "QToolButton:focus { border-style: dotted; border-color: gray; padding: 1px }"
                           "QToolButton:pressed { border-style: solid; border-color: gray; padding-left: 3px; padding-top: 3px; padding-right: 1px; padding-bottom: 1px }"
                           "QToolButton:checked { border-style: solid; border-top-color: gray; border-left-color: gray; border-bottom-color: lightGray; border-right-color: lightGray; padding-left: 2px; padding-top: 2px; padding-right: 0px; padding-bottom: 0px }"
+                          "QToolButton::menu-indicator { image: url(empty.png) }"
                           "QMenu { padding: 1px }"));
 
     // menuBar()->hide();
@@ -67,15 +68,15 @@ PdfViewer::PdfViewer()
 
     // setup the menu action
     m_menu = new QMenu(this);
-    m_fileOpenExternalAct = m_menu->addAction(tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
+    m_fileOpenExternalAct = m_menu->addAction(QIcon(":/icons/acrobat.svg"), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
     m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
     m_fileOpenExternalAct->setEnabled(false);
     m_menu->addSeparator();
 
-    QAction *act = m_menu->addAction(tr("&About"), this, SLOT(slotAbout()));
+    QAction *act = m_menu->addAction(QIcon(":/icons/help-about.svg"), tr("&About"), this, SLOT(slotAbout()));
     m_menu->addSeparator();
 
-    act = m_menu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()));
+    act = m_menu->addAction(QIcon(":/icons/application-exit.svg"), tr("&Quit"), qApp, SLOT(closeAllWindows()));
     act->setShortcut(Qt::CTRL + Qt::Key_Q);
 
     QWidget *w=new QWidget(this);

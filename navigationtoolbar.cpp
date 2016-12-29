@@ -45,12 +45,12 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     connect(lastShortcut, SIGNAL(activated()), this, SLOT(slotGoLast()));
 
     // left side is table of content action
-    tocAction->setIcon(QIcon(":/icons/bookmark-new.png"));
+    tocAction->setIcon(QIcon(":/icons/bookmark-new.svg"));
     addAction(tocAction);
     QShortcut *tocShortcut=new QShortcut(Qt::Key_F7, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
 
-    QAction *toggleContinous=addAction(QIcon(":/icons/zoom-select-y.png"), tr("Toggle continous mode"));
+    QAction *toggleContinous=addAction(QIcon(":/icons/zoom-select-y.svg"), tr("Toggle continous mode"));
     toggleContinous->setCheckable(true);
     connect(toggleContinous, SIGNAL(toggled(bool)), SIGNAL(toggleContinous(bool)));
 
@@ -58,7 +58,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
     addWidget(spacer);
 
-    m_prevAct = addAction(QIcon(":/icons/go-previous.png"), tr("Previous"), this, SLOT(slotGoPrev()));
+    m_prevAct = addAction(QIcon(":/icons/go-previous.svg"), tr("Previous"), this, SLOT(slotGoPrev()));
     QShortcut *previousShortcut=new QShortcut(Qt::Key_Backspace, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
@@ -78,7 +78,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_pageLabel = new QLabel(this);
     addWidget(m_pageLabel);
 
-    m_nextAct = addAction(QIcon(":/icons/go-next.png"), tr("Next"), this, SLOT(slotGoNext()));
+    m_nextAct = addAction(QIcon(":/icons/go-next.svg"), tr("Next"), this, SLOT(slotGoNext()));
     QShortcut *nextShortcut=new QShortcut(Qt::Key_Space, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
@@ -110,7 +110,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 
     // add menu replacement action to right side
     QToolButton *menuButton = new QToolButton();
-    menuButton->setIcon(QIcon(":/icons/bookmark-new.png"));
+    menuButton->setIcon(QIcon(":/icons/application-menu.svg"));
     menuButton->setMenu(menu);
     menuButton->setPopupMode(QToolButton::InstantPopup);
     addWidget(menuButton);

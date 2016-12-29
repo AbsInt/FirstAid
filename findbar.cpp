@@ -34,7 +34,7 @@ FindBar::FindBar(QWidget *parent)
     hbl->setContentsMargins(0, 0, 0, 0);
 
     QToolButton *tb=new QToolButton(this);
-    tb->setIcon(QIcon(":/icons/window-close.png"));
+    tb->setIcon(QIcon(":/icons/window-close.svg"));
     connect(tb, SIGNAL(clicked()), this, SLOT(slotHide()));
     hbl->addWidget(tb);
 
