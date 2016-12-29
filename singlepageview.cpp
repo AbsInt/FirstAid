@@ -36,6 +36,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QScrollBar>
 
 
 
@@ -249,6 +250,9 @@ void
 SinglePageView::resizeEvent(QResizeEvent *resizeEvent)
 {
     QScrollArea::resizeEvent(resizeEvent);
+
+    setSize(viewport()->size()-QSize(1, 1));
+
     paint();
 }
 

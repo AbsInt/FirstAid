@@ -21,6 +21,7 @@
 #define PDFVIEWER_H
 
 #include <QtWidgets/QMainWindow>
+#include "pageview.h"
 
 class DocumentObserver;
 class QAction;
@@ -56,6 +57,7 @@ private Q_SLOTS:
     void slotAboutQt();
 
     void slotSetZoom(qreal zoom);
+    void slotSetZoomMode(PageView::ZoomMode mode);
     void slotGotoDestination(const QString &destination);
     void slotToggleContinous(bool on);
 

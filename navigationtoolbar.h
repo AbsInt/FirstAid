@@ -24,6 +24,7 @@
 #include <QtWidgets/QToolBar>
 
 #include "documentobserver.h"
+#include "pageview.h"
 
 class QAction;
 class QComboBox;
@@ -46,6 +47,7 @@ public:
 signals:
     void showToc(bool on);
     void zoomChanged(qreal value);
+    void zoomModeChanged(PageView::ZoomMode mode);
     void markerRequested(const QRectF &rect);
 
 private slots:

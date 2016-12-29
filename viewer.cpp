@@ -120,6 +120,7 @@ PdfViewer::PdfViewer()
         obs->m_viewer = this;
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
+    connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
     connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
     // restore old geometry
@@ -269,6 +270,11 @@ void PdfViewer::slotAboutQt()
 void PdfViewer::slotSetZoom(qreal zoom)
 {
     static_cast<SinglePageView *>(m_viewStack->widget(0))->setZoom(zoom);
+}
+
+void PdfViewer::slotSetZoomMode(PageView::ZoomMode mode)
+{
+    static_cast<SinglePageView *>(m_viewStack->widget(0))->setZoomMode(mode);
 }
 
 void PdfViewer::slotGotoDestination(const QString &destination)

@@ -130,8 +130,21 @@ PageView::setDocument(Poppler::Document *document)
 
 
 void
+PageView::setZoomMode(ZoomMode mode)
+{
+    if (mode != m_zoomMode) {
+        m_zoomMode=mode;
+        setSize(m_size);
+    }
+}
+
+
+
+void
 PageView::setZoom(qreal zoom)
 {
+    m_zoomMode=Absolute;
+
     if (zoom != m_zoom) {
         m_zoom=zoom;
         paint();
@@ -145,6 +158,37 @@ PageView::setDoubleSided(bool on)
 {
     if (on != m_doubleSided) {
         m_doubleSided=on;
+        paint();
+    }
+}
+
+
+
+void
+PageView::setSize(const QSize &size)
+{
+    m_size=size;
+
+    if (!m_document)
+        return;
+
+    if (FitWidth == m_zoomMode) {
+        Poppler::Page *page=m_document->page(m_currentPage);
+        QSizeF pageSize=page->pageSize();
+        delete page;
+
+        m_zoom=m_size.width()/(m_dpiX*pageSize.width()/72.0);
+        paint();
+    }
+    else if (FitPage == m_zoomMode) {
+        Poppler::Page *page=m_document->page(m_currentPage);
+        QSizeF pageSize=page->pageSize();
+        delete page;
+
+        qreal zx=m_size.width()/(m_dpiX*pageSize.width()/72.0);
+        qreal zy=m_size.height()/(m_dpiY*pageSize.height()/72.0);
+
+        m_zoom=qMin(zx, zy);
         paint();
     }
 }

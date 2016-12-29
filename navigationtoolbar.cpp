@@ -165,10 +165,10 @@ void NavigationToolBar::slotZoomComboChanged()
 {
     QString text=m_zoomCombo->currentText();
 
-    if ("Fit width" == text) {
-    }
-    else if ("Fit page" == text) {
-    }
+    if ("Fit width" == text)
+        emit zoomModeChanged(PageView::FitWidth);
+    else if ("Fit page" == text)
+        emit zoomModeChanged(PageView::FitPage);
     else {
         text.remove("%");
         bool ok;
