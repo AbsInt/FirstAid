@@ -30,6 +30,7 @@ class PageView
 {
 public:
     enum ZoomMode { FitWidth, FitPage, Absolute };
+    enum DoubleSideMode { None, DoubleSided, DoubleSidedNotFirst };
 
     PageView();
     virtual ~PageView();
@@ -46,7 +47,7 @@ public:
     void setDocument(Poppler::Document *document);
     void setZoomMode(ZoomMode mode);
     void setZoom(qreal zoom);
-    void setDoubleSided(bool on);
+    void setDoubleSideMode(DoubleSideMode mode);
     void setSize(const QSize &size);
 
     virtual void reset();
@@ -64,7 +65,7 @@ protected:
     int m_currentPage;
     ZoomMode m_zoomMode;
     qreal m_zoom;
-    bool m_doubleSided;
+    DoubleSideMode m_doubleSideMode;
     QSize m_size;
 };
 

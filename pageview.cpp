@@ -37,7 +37,7 @@ PageView::PageView()
         : m_document(nullptr)
         , m_currentPage(0)
         , m_zoom(1.0)
-        , m_doubleSided(false)
+        , m_doubleSideMode(None)
 {
     m_dpiX=QApplication::desktop()->physicalDpiX();
     m_dpiY=QApplication::desktop()->physicalDpiY();
@@ -154,10 +154,11 @@ PageView::setZoom(qreal zoom)
 
 
 void
-PageView::setDoubleSided(bool on)
+PageView::setDoubleSideMode(DoubleSideMode mode)
 {
-    if (on != m_doubleSided) {
-        m_doubleSided=on;
+    if (mode != m_doubleSideMode) {
+        m_doubleSideMode=mode;
+        setSize(m_size);
         paint();
     }
 }
@@ -177,6 +178,13 @@ PageView::setSize(const QSize &size)
         QSizeF pageSize=page->pageSize();
         delete page;
 
+        if (DoubleSided==m_doubleSideMode || (DoubleSidedNotFirst==m_doubleSideMode && m_currentPage>0)) {
+            if (Poppler::Page *page=m_document->page(m_currentPage+1)) {
+                pageSize.setWidth(pageSize.width()+page->pageSize().width());
+                delete page;
+            }
+        }
+
         m_zoom=m_size.width()/(m_dpiX*pageSize.width()/72.0);
         paint();
     }
@@ -184,6 +192,13 @@ PageView::setSize(const QSize &size)
         Poppler::Page *page=m_document->page(m_currentPage);
         QSizeF pageSize=page->pageSize();
         delete page;
+
+        if (DoubleSided==m_doubleSideMode || (DoubleSidedNotFirst==m_doubleSideMode && m_currentPage>0)) {
+            if (Poppler::Page *page=m_document->page(m_currentPage+1)) {
+                pageSize.setWidth(pageSize.width()+page->pageSize().width());
+                delete page;
+            }
+        }
 
         qreal zx=m_size.width()/(m_dpiX*pageSize.width()/72.0);
         qreal zy=m_size.height()/(m_dpiY*pageSize.height()/72.0);

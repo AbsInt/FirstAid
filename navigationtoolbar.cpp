@@ -46,7 +46,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     // widget on toolbar
     tocAction->setIcon(QIcon(":/icons/bookmark-new.png"));
     addAction(tocAction);
-    QShortcut *tocShortcut=new QShortcut(Qt::Key_F2, this);
+    QShortcut *tocShortcut=new QShortcut(Qt::Key_F7, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
 
     QWidget *spacer=new QWidget(this);
