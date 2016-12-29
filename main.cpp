@@ -23,9 +23,9 @@
 
 int main(int argc, char *argv[])
 {
-    /**
-     * if you want static binaries, init plugins
-     */
+/**
+ * if you want static binaries, init plugins
+ */
 #ifdef AI_LINK_QT_STATIC_WINDOWS
     Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
     Q_IMPORT_PLUGIN(QSvgIconPlugin)
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("FirstAid");
 
     QApplication app(argc, argv);
-    const QStringList args=QCoreApplication::arguments();
+    const QStringList args = QCoreApplication::arguments();
 
     PdfViewer viewer;
     viewer.show();

@@ -27,7 +27,7 @@
 
 class QTimer;
 
-class SearchEngine: public QObject, public DocumentObserver
+class SearchEngine : public QObject, public DocumentObserver
 {
     Q_OBJECT
 
@@ -43,7 +43,7 @@ public:
     void pageChanged(int page);
 
     void reset();
-    
+
     void currentMatch(int &page, QRectF &match) const;
     QHash<int, QList<QRectF>> matches() const;
     QList<QRectF> matchesFor(int page) const;
@@ -76,7 +76,5 @@ private:
     int m_currentMatchPage;
     int m_currentMatchIndex;
 };
-
-
 
 #endif // #ifndef SEARCHENGINE_H

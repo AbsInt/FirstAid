@@ -34,61 +34,61 @@
 #include <QToolButton>
 
 NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent)
-                 : QToolBar("Navigation", parent)
+    : QToolBar("Navigation", parent)
 {
     setFloatable(false);
     setMovable(false);
 
     // some shortcuts for first/last page
-    QShortcut *firstShortcut=new QShortcut(Qt::Key_Home, this);
+    QShortcut *firstShortcut = new QShortcut(Qt::Key_Home, this);
     connect(firstShortcut, SIGNAL(activated()), this, SLOT(slotGoFirst()));
 
-    QShortcut *lastShortcut=new QShortcut(Qt::Key_End, this);
+    QShortcut *lastShortcut = new QShortcut(Qt::Key_End, this);
     connect(lastShortcut, SIGNAL(activated()), this, SLOT(slotGoLast()));
 
     // left side is table of content action
     tocAction->setIcon(QIcon(":/icons/bookmark-new.svg"));
     addAction(tocAction);
-    QShortcut *tocShortcut=new QShortcut(Qt::Key_F7, this);
+    QShortcut *tocShortcut = new QShortcut(Qt::Key_F7, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
 
-    QAction *toggleContinous=addAction(QIcon(":/icons/zoom-select-y.svg"), tr("Toggle continous mode"));
+    QAction *toggleContinous = addAction(QIcon(":/icons/zoom-select-y.svg"), tr("Toggle continous mode"));
     toggleContinous->setCheckable(true);
     connect(toggleContinous, SIGNAL(toggled(bool)), SIGNAL(toggleContinous(bool)));
 
-    QWidget *spacer=new QWidget(this);
-    spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    QWidget *spacer = new QWidget(this);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(spacer);
 
     m_prevAct = addAction(QIcon(":/icons/go-previous.svg"), tr("Previous"), this, SLOT(slotGoPrev()));
-    QShortcut *previousShortcut=new QShortcut(Qt::Key_Backspace, this);
+    QShortcut *previousShortcut = new QShortcut(Qt::Key_Backspace, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
-    m_pageFullLabel=new QLabel(this);
-    m_pageFullLabelAct=addWidget(m_pageFullLabel);
+    m_pageFullLabel = new QLabel(this);
+    m_pageFullLabelAct = addWidget(m_pageFullLabel);
 
     m_pageEdit = new QLineEdit(this);
     m_pageEdit->setMaxLength(6);
     m_pageEdit->setFixedWidth(50);
     connect(m_pageEdit, SIGNAL(returnPressed()), this, SLOT(slotPageSet()));
     connect(m_pageEdit, SIGNAL(editingFinished()), this, SLOT(slotHideGoto()));
-    m_pageEditAct=addWidget(m_pageEdit);
+    m_pageEditAct = addWidget(m_pageEdit);
 
-    m_intValidator=new QIntValidator(this);
+    m_intValidator = new QIntValidator(this);
     m_pageEdit->setValidator(m_intValidator);
 
-    QShortcut *gotoShortCut=new QShortcut(Qt::ControlModifier+Qt::Key_G, this);
+    QShortcut *gotoShortCut = new QShortcut(Qt::ControlModifier + Qt::Key_G, this);
     connect(gotoShortCut, SIGNAL(activated()), SLOT(slotGoto()));
 
-    m_pageLabel=new QLabel(this);
-    m_pageLabelAct=addWidget(m_pageLabel);
+    m_pageLabel = new QLabel(this);
+    m_pageLabelAct = addWidget(m_pageLabel);
 
     m_nextAct = addAction(QIcon(":/icons/go-next.svg"), tr("Next"), this, SLOT(slotGoNext()));
-    QShortcut *nextShortcut=new QShortcut(Qt::Key_Space, this);
+    QShortcut *nextShortcut = new QShortcut(Qt::Key_Space, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
-    spacer=new QWidget(this);
-    spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    spacer = new QWidget(this);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(spacer);
 
     m_zoomCombo = new QComboBox(this);
@@ -124,7 +124,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     addWidget(menuButton);
 
     // esc to hide goto widgets
-    QShortcut *closeGoto=new QShortcut(Qt::Key_Escape, this);
+    QShortcut *closeGoto = new QShortcut(Qt::Key_Escape, this);
     closeGoto->setContext(Qt::WidgetWithChildrenShortcut);
     connect(closeGoto, SIGNAL(activated()), SLOT(slotHideGoto()));
 
@@ -141,7 +141,7 @@ NavigationToolBar::~NavigationToolBar()
 
 void NavigationToolBar::documentLoaded()
 {
-    const int pageCount=document()->numPages();
+    const int pageCount = document()->numPages();
 
     m_pageFullLabel->setText(QString("%1 / %2").arg(page()).arg(pageCount));
     m_pageLabel->setText(QString(" / %1").arg(pageCount));
@@ -150,7 +150,7 @@ void NavigationToolBar::documentLoaded()
     m_pageEdit->setEnabled(true);
     m_pageEdit->selectAll();
 
-    m_intValidator->setRange(1, 1+pageCount);
+    m_intValidator->setRange(1, 1 + pageCount);
 }
 
 void NavigationToolBar::documentClosed()
@@ -168,7 +168,7 @@ void NavigationToolBar::pageChanged(int page)
     const int pageCount = document()->numPages();
     m_prevAct->setEnabled(page > 0);
     m_nextAct->setEnabled(page < (pageCount - 1));
-    m_pageEdit->setText(QString::number(page+1));
+    m_pageEdit->setText(QString::number(page + 1));
     m_pageEdit->selectAll();
 }
 
@@ -194,7 +194,7 @@ void NavigationToolBar::slotGoLast()
 
 void NavigationToolBar::slotPageSet()
 {
-    setPage(m_pageEdit->text().toInt()-1);
+    setPage(m_pageEdit->text().toInt() - 1);
 }
 
 void NavigationToolBar::slotGoto()
@@ -217,7 +217,7 @@ void NavigationToolBar::slotHideGoto()
 
 void NavigationToolBar::slotZoomComboChanged()
 {
-    QString text=m_zoomCombo->currentText();
+    QString text = m_zoomCombo->currentText();
 
     if ("Fit width" == text)
         emit zoomModeChanged(PageView::FitWidth);
@@ -226,10 +226,10 @@ void NavigationToolBar::slotZoomComboChanged()
     else {
         text.remove("%");
         bool ok;
-        int value=text.toInt(&ok);
+        int value = text.toInt(&ok);
 
-        if (ok && value>=10 && value <=400)
-            emit zoomChanged(qreal(value)/100);
+        if (ok && value >= 10 && value <= 400)
+            emit zoomChanged(qreal(value) / 100);
     }
 }
 

@@ -73,7 +73,14 @@ endif()
 # install viewer to prefix
 install(TARGETS firstaid DESTINATION bin)
 
-# sign result binary for AbsInt internal compilation
+# AbsInt internal stuff
 if(ABSINT)
+    # sign result binary for AbsInt internal compilation
     ur_install_win_executable (firstaid)
+    
+    #
+    # generate "make reformat" target for given 'file-list bash expression'
+    # here: all *.cpp + *.h files
+    #
+    ur_reformat ("`git ls-files | grep -e \".*\\\\.cpp$\" -e \".*\\\\.h$\" | xargs`")
 endif()

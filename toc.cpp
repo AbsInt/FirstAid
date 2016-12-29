@@ -26,21 +26,21 @@
 
 static void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
 {
-    QTreeWidgetItem *newitem=nullptr;
-    for (QDomNode node=parent.firstChild(); !node.isNull(); node=node.nextSibling()) {
-        QDomElement e=node.toElement();
+    QTreeWidgetItem *newitem = nullptr;
+    for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
+        QDomElement e = node.toElement();
 
         if (!parentItem)
-            newitem=new QTreeWidgetItem(tree, newitem);
+            newitem = new QTreeWidgetItem(tree, newitem);
         else
-            newitem=new QTreeWidgetItem(parentItem, newitem);
+            newitem = new QTreeWidgetItem(parentItem, newitem);
 
         newitem->setText(0, e.tagName());
         newitem->setData(0, Qt::UserRole, e.attribute("DestinationName"));
 
         bool isOpen = false;
         if (e.hasAttribute(QString::fromLatin1("Open")))
-            isOpen=QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
+            isOpen = QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
 
         if (isOpen)
             tree->expandItem(newitem);
@@ -50,20 +50,19 @@ static void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *
     }
 }
 
-
 TocDock::TocDock(QWidget *parent)
     : AbstractInfoDock(parent)
 {
     setWindowTitle(tr("Table of contents"));
 
-    m_tree=new QTreeWidget(this);
+    m_tree = new QTreeWidget(this);
     m_tree->setAlternatingRowColors(true);
     m_tree->header()->hide();
     m_tree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     setWidget(m_tree);
 
-    connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem*,int)), SLOT(itemClicked(QTreeWidgetItem*,int)));
+    connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), SLOT(itemClicked(QTreeWidgetItem *, int)));
 }
 
 TocDock::~TocDock()
@@ -94,7 +93,7 @@ void TocDock::itemClicked(QTreeWidgetItem *item, int column)
     if (!item)
         return;
 
-    QString dest=item->data(column, Qt::UserRole).toString();
+    QString dest = item->data(column, Qt::UserRole).toString();
     emit gotoRequested(dest);
 }
 

@@ -20,13 +20,14 @@
 #define DOCUMENTOBSERVER_H
 
 class PdfViewer;
-namespace Poppler {
+namespace Poppler
+{
 class Document;
 }
 
 class DocumentObserver
 {
-friend class PdfViewer;
+    friend class PdfViewer;
 
 public:
     virtual ~DocumentObserver();
@@ -38,7 +39,7 @@ public:
 protected:
     DocumentObserver();
 
-    Poppler::Document* document() const;
+    Poppler::Document *document() const;
     void setPage(int page);
     int page() const;
     void reloadPage();

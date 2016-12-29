@@ -49,22 +49,26 @@
 #include <QtWidgets/QVBoxLayout>
 
 PdfViewer::PdfViewer()
-         : QMainWindow(), m_currentPage(0), m_doc(0)
+    : QMainWindow()
+    , m_currentPage(0)
+    , m_doc(0)
 {
     setWindowTitle(tr("FirstAid"));
     setWindowIcon(QIcon(":/firstaid.png"));
 
-    setStyleSheet(QString("QToolButton { border-width: 1px; border-radius: 6px; border-style: none; padding: 2px }"
-                          "QToolButton:hover { border-style: solid; border-color: gray; padding: 1px }"
-                          "QToolButton:focus { border-style: dotted; border-color: gray; padding: 1px }"
-                          "QToolButton:pressed { border-style: solid; border-color: gray; padding-left: 3px; padding-top: 3px; padding-right: 1px; padding-bottom: 1px }"
-                          "QToolButton:checked { border-style: solid; border-top-color: gray; border-left-color: gray; border-bottom-color: lightGray; border-right-color: lightGray; padding-left: 2px; padding-top: 2px; padding-right: 0px; padding-bottom: 0px }"
-                          "QToolButton::menu-indicator { image: url(empty.png) }"
-                          "QMenu { padding: 1px }"));
+    setStyleSheet(
+        QString("QToolButton { border-width: 1px; border-radius: 6px; border-style: none; padding: 2px }"
+                "QToolButton:hover { border-style: solid; border-color: gray; padding: 1px }"
+                "QToolButton:focus { border-style: dotted; border-color: gray; padding: 1px }"
+                "QToolButton:pressed { border-style: solid; border-color: gray; padding-left: 3px; padding-top: 3px; padding-right: 1px; padding-bottom: 1px }"
+                "QToolButton:checked { border-style: solid; border-top-color: gray; border-left-color: gray; border-bottom-color: lightGray; border-right-color: lightGray; padding-left: 2px; padding-top: 2px; padding-right: 0px; "
+                "padding-bottom: 0px }"
+                "QToolButton::menu-indicator { image: url(empty.png) }"
+                "QMenu { padding: 1px }"));
 
     // menuBar()->hide();
 
-    m_thread=new StdinReaderThread(this);
+    m_thread = new StdinReaderThread(this);
     m_thread->start();
 
     // setup the menu action
@@ -80,21 +84,21 @@ PdfViewer::PdfViewer()
     act = m_menu->addAction(QIcon(":/icons/application-exit.svg"), tr("&Quit"), qApp, SLOT(closeAllWindows()));
     act->setShortcut(Qt::CTRL + Qt::Key_Q);
 
-    QWidget *w=new QWidget(this);
-    QVBoxLayout *vbl=new QVBoxLayout(w);
+    QWidget *w = new QWidget(this);
+    QVBoxLayout *vbl = new QVBoxLayout(w);
     vbl->setContentsMargins(0, 0, 0, 0);
 
-    m_viewStack=new QStackedWidget(w);
+    m_viewStack = new QStackedWidget(w);
     vbl->addWidget(m_viewStack);
     setFocusProxy(m_viewStack);
 
-    FindBar *fb=new FindBar(w);
+    FindBar *fb = new FindBar(w);
     m_observers.append(fb);
     vbl->addWidget(fb);
 
     setCentralWidget(w);
 
-    SinglePageView *spv=new SinglePageView(this);
+    SinglePageView *spv = new SinglePageView(this);
     m_viewStack->addWidget(spv);
     connect(spv, SIGNAL(currentPageChanged(int)), SLOT(slotCurrentPageChanged(int)));
 
@@ -110,11 +114,11 @@ PdfViewer::PdfViewer()
     addToolBar(navbar);
     m_observers.append(navbar);
 
-    SearchEngine *se=SearchEngine::globalInstance();
+    SearchEngine *se = SearchEngine::globalInstance();
     m_observers << se;
 
     foreach (DocumentObserver *obs, m_observers)
-        obs->m_viewer=this;
+        obs->m_viewer = this;
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
@@ -124,11 +128,11 @@ PdfViewer::PdfViewer()
     connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
     // restore old geometry
-    QRect r=QApplication::desktop()->availableGeometry(this);
+    QRect r = QApplication::desktop()->availableGeometry(this);
     QSettings settings;
     settings.beginGroup("MainWindow");
-    resize(settings.value("size", 3*r.size()/4).toSize());
-    move(settings.value("pos", QPoint(r.width()/8, r.height()/8)).toPoint());
+    resize(settings.value("size", 3 * r.size() / 4).toSize());
+    move(settings.value("pos", QPoint(r.width() / 8, r.height() / 8)).toPoint());
     m_tocDock->setVisible(settings.value("tocVisible", false).toBool());
     settings.endGroup();
 }
@@ -148,7 +152,7 @@ QSize PdfViewer::sizeHint() const
 
 void PdfViewer::loadDocument(const QString &file, bool forceReload)
 {
-    if (file==m_filePath && !forceReload) {
+    if (file == m_filePath && !forceReload) {
         raise();
         activateWindow();
         return;
@@ -156,17 +160,14 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
 
     Poppler::Document *newdoc = Poppler::Document::load(file);
     if (!newdoc) {
-        QMessageBox msgbox(QMessageBox::Critical, tr("Open Error"), tr("Cannot open:\n") + file,
-                           QMessageBox::Ok, this);
+        QMessageBox msgbox(QMessageBox::Critical, tr("Open Error"), tr("Cannot open:\n") + file, QMessageBox::Ok, this);
         msgbox.exec();
         return;
     }
 
     while (newdoc->isLocked()) {
         bool ok = true;
-        QString password = QInputDialog::getText(this, tr("Document Password"),
-                                                 tr("Please insert the password of the document:"),
-                                                 QLineEdit::Password, QString(), &ok);
+        QString password = QInputDialog::getText(this, tr("Document Password"), tr("Please insert the password of the document:"), QLineEdit::Password, QString(), &ok);
         if (!ok) {
             delete newdoc;
             return;
@@ -182,11 +183,11 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
     m_doc->setRenderHint(Poppler::Document::Antialiasing, true);
     m_doc->setRenderBackend(Poppler::Document::SplashBackend);
 
-    for(int i = 0; i < m_viewStack->count();++i)
+    for (int i = 0; i < m_viewStack->count(); ++i)
         dynamic_cast<PageView *>(m_viewStack->widget(i))->setDocument(m_doc);
 
     m_fileOpenExternalAct->setEnabled(true);
-    m_filePath=file;
+    m_filePath = file;
 
     if (m_doc->title().isEmpty())
         setWindowTitle(QFileInfo(m_filePath).fileName());
@@ -214,7 +215,7 @@ void PdfViewer::closeDocument()
     settings.setValue(m_filePath, page());
     settings.endGroup();
 
-    for(int i = 0; i < m_viewStack->count();++i)
+    for (int i = 0; i < m_viewStack->count(); ++i)
         dynamic_cast<PageView *>(m_viewStack->widget(i))->setDocument(nullptr);
 
     foreach (DocumentObserver *obs, m_observers)
@@ -233,8 +234,8 @@ void PdfViewer::closeDocument()
 bool PdfViewer::event(QEvent *e)
 {
     if (QEvent::User == e->type()) {
-        StdinReadEvent *sre=static_cast<StdinReadEvent *>(e);
-        QString command=sre->text().trimmed();
+        StdinReadEvent *sre = static_cast<StdinReadEvent *>(e);
+        QString command = sre->text().trimmed();
 
         if (command.startsWith("open "))
             loadDocument(command.mid(5));
@@ -246,8 +247,7 @@ bool PdfViewer::event(QEvent *e)
             qApp->quit();
 
         return true;
-    }
-    else
+    } else
         return QMainWindow::event(e);
 }
 
@@ -278,19 +278,19 @@ void PdfViewer::slotAbout()
 
 void PdfViewer::slotSetZoom(qreal zoom)
 {
-    for(int i = 0; i < m_viewStack->count();++i)
+    for (int i = 0; i < m_viewStack->count(); ++i)
         dynamic_cast<PageView *>(m_viewStack->widget(i))->setZoom(zoom);
 }
 
 void PdfViewer::slotSetZoomMode(PageView::ZoomMode mode)
 {
-    for(int i = 0; i < m_viewStack->count();++i)
+    for (int i = 0; i < m_viewStack->count(); ++i)
         dynamic_cast<PageView *>(m_viewStack->widget(i))->setZoomMode(mode);
 }
 
 void PdfViewer::slotGotoDestination(const QString &destination)
 {
-    for(int i = 0; i < m_viewStack->count();++i)
+    for (int i = 0; i < m_viewStack->count(); ++i)
         dynamic_cast<PageView *>(m_viewStack->widget(i))->gotoDestination(destination);
 }
 
@@ -312,14 +312,13 @@ void PdfViewer::slotSetFocus()
 
 void PdfViewer::setPage(int page)
 {
-    if (!m_doc || 0>page || page>=m_doc->numPages())
+    if (!m_doc || 0 > page || page >= m_doc->numPages())
         return;
 
     if (page == this->page())
         return;
 
-
-    for(int i = 0; i < m_viewStack->count();++i)
+    for (int i = 0; i < m_viewStack->count(); ++i)
         dynamic_cast<PageView *>(m_viewStack->widget(i))->gotoPage(page);
 }
 

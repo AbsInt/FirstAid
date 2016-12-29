@@ -30,7 +30,7 @@ class FindBar : public QWidget, public DocumentObserver
     Q_OBJECT
 
 public:
-    FindBar(QWidget *parent=nullptr);
+    FindBar(QWidget *parent = nullptr);
     ~FindBar();
 
     void documentLoaded();

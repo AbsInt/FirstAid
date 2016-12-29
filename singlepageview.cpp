@@ -40,53 +40,40 @@
 #include <QtWidgets/QRubberBand>
 #include <QtWidgets/QScrollBar>
 
-
-
 /*
  * helper class
  */
 
 ImageLabel::ImageLabel(QWidget *parent)
-          : QLabel(parent)
+    : QLabel(parent)
 {
-    m_rubberBand=new QRubberBand(QRubberBand::Rectangle, this);
+    m_rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
 
     setMouseTracking(true);
 }
-
-
 
 ImageLabel::~ImageLabel()
 {
     qDeleteAll(m_annotations);
 }
 
-
-
-void
-ImageLabel::setDisplayRect(const QRect &rect)
+void ImageLabel::setDisplayRect(const QRect &rect)
 {
-    m_displayRect=rect;
+    m_displayRect = rect;
 }
 
-
-
-void
-ImageLabel::setAnnotations(const QList<Poppler::Annotation *> &annotations)
+void ImageLabel::setAnnotations(const QList<Poppler::Annotation *> &annotations)
 {
     qDeleteAll(m_annotations);
 
-    m_annotations=annotations;
+    m_annotations = annotations;
 }
 
-
-
-void
-ImageLabel::mouseMoveEvent(QMouseEvent *event)
+void ImageLabel::mouseMoveEvent(QMouseEvent *event)
 {
-    qreal xPos=(event->x()-m_displayRect.x())/(qreal)m_displayRect.width();
-    qreal yPos=(event->y()-m_displayRect.y())/(qreal)m_displayRect.height();
-    QPointF p=QPointF(xPos, yPos);
+    qreal xPos = (event->x() - m_displayRect.x()) / (qreal)m_displayRect.width();
+    qreal yPos = (event->y() - m_displayRect.y()) / (qreal)m_displayRect.height();
+    QPointF p = QPointF(xPos, yPos);
 
     foreach (Poppler::Annotation *a, m_annotations) {
         if (a->boundary().contains(p)) {
@@ -94,25 +81,22 @@ ImageLabel::mouseMoveEvent(QMouseEvent *event)
             return;
         }
     }
-    
+
     setCursor(Qt::ArrowCursor);
 
     if (!m_rubberBandOrigin.isNull())
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin, event->pos()).normalized());
 }
 
-
-
-void
-ImageLabel::mousePressEvent(QMouseEvent *event)
+void ImageLabel::mousePressEvent(QMouseEvent *event)
 {
-    qreal xPos=(event->x()-m_displayRect.x())/(qreal)m_displayRect.width();
-    qreal yPos=(event->y()-m_displayRect.y())/(qreal)m_displayRect.height();
-    QPointF p=QPointF(xPos, yPos);
+    qreal xPos = (event->x() - m_displayRect.x()) / (qreal)m_displayRect.width();
+    qreal yPos = (event->y() - m_displayRect.y()) / (qreal)m_displayRect.height();
+    QPointF p = QPointF(xPos, yPos);
 
     foreach (Poppler::Annotation *a, m_annotations) {
         if (a->boundary().contains(p)) {
-            Poppler::Link *link=static_cast<Poppler::LinkAnnotation *>(a)->linkDestination();
+            Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(a)->linkDestination();
             switch (link->linkType()) {
                 case Poppler::Link::Goto:
                     emit gotoRequested(QString::number(static_cast<Poppler::LinkGoto *>(link)->destination().pageNumber()));
@@ -131,94 +115,81 @@ ImageLabel::mousePressEvent(QMouseEvent *event)
         }
     }
 
-    m_rubberBandOrigin=event->pos();
+    m_rubberBandOrigin = event->pos();
     m_rubberBand->setGeometry(QRect(m_rubberBandOrigin, QSize()));
     m_rubberBand->show();
 }
 
-
-
-void
-ImageLabel::mouseReleaseEvent(QMouseEvent *)
+void ImageLabel::mouseReleaseEvent(QMouseEvent *)
 {
-    m_rubberBandOrigin=QPoint(0, 0);
+    m_rubberBandOrigin = QPoint(0, 0);
     m_rubberBand->hide();
 
     emit copyRequested(m_rubberBand->geometry().intersected(m_displayRect).translated(-m_displayRect.topLeft()));
 }
-
-
 
 /*
  * constructors / destructor
  */
 
 SinglePageView::SinglePageView(QWidget *parent)
-              : QScrollArea(parent)
-              , PageView()
+    : QScrollArea(parent)
+    , PageView()
 {
     setMouseTracking(true);
 
-    m_imageLabel=new ImageLabel(this);
+    m_imageLabel = new ImageLabel(this);
     m_imageLabel->resize(0, 0);
     setWidget(m_imageLabel);
 
     connect(m_imageLabel, SIGNAL(gotoRequested(QString)), SLOT(slotGotoRequested(QString)));
     connect(m_imageLabel, SIGNAL(copyRequested(QRectF)), SLOT(slotCopyRequested(QRectF)));
 
-    SearchEngine *se=SearchEngine::globalInstance();
+    SearchEngine *se = SearchEngine::globalInstance();
     connect(se, SIGNAL(started()), SLOT(slotFindStarted()));
-    connect(se, SIGNAL(highlightMatch(int,QRectF)), SLOT(slotHighlightMatch(int,QRectF)));
-    connect(se, SIGNAL(matchesFound(int,QList<QRectF>)), SLOT(slotMatchesFound(int,QList<QRectF>)));
+    connect(se, SIGNAL(highlightMatch(int, QRectF)), SLOT(slotHighlightMatch(int, QRectF)));
+    connect(se, SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotMatchesFound(int, QList<QRectF>)));
 
     reset();
 }
-
-
 
 SinglePageView::~SinglePageView()
 {
 }
 
-
-
 /*
  * public methods
  */
 
-void
-SinglePageView::gotoPage(int page)
+void SinglePageView::gotoPage(int page)
 {
-    if (!m_document || page<0 || page>=m_document->numPages())
+    if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
-    m_currentPage=page;
+    m_currentPage = page;
     paint();
 
     emit currentPageChanged(m_currentPage);
 }
 
-
-
 /*
  * protected methods
  */
 
-void
-SinglePageView::paint()
+void SinglePageView::paint()
 {
     QImage image;
     QList<Poppler::Annotation *> annotations;
 
     if (m_document) {
-        if (Poppler::Page *page=m_document->page(m_currentPage)) {
-            image=page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0);
-            annotations=page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
+        if (Poppler::Page *page = m_document->page(m_currentPage)) {
+            image = page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0);
+            annotations = page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
             delete page;
         }
     }
 
-    SearchEngine *se=SearchEngine::globalInstance();
+    SearchEngine *se = SearchEngine::globalInstance();
     int matchPage;
     QRectF matchRect;
     se->currentMatch(matchPage, matchRect);
@@ -226,18 +197,17 @@ SinglePageView::paint()
     if (image.isNull()) {
         m_imageLabel->resize(0, 0);
         m_imageLabel->setPixmap(QPixmap());
-    }
-    else {
+    } else {
         // mark further matches on page
         QPainter p(&image);
         p.setRenderHint(QPainter::Antialiasing);
 
         foreach (QRectF rect, se->matchesFor(m_currentPage)) {
-            QColor c=matchColor();
-            if (m_currentPage==matchPage && rect==matchRect)
-                c=highlightColor();
+            QColor c = matchColor();
+            if (m_currentPage == matchPage && rect == matchRect)
+                c = highlightColor();
 
-            QRectF r=fromPoints(rect);
+            QRectF r = fromPoints(rect);
             r.adjust(-3, -5, 3, 2);
             p.fillRect(r, c);
         }
@@ -245,10 +215,10 @@ SinglePageView::paint()
 
         QRect displayRect(QPoint(), image.size());
 
-        QSize vs=viewport()->size();
-        if (vs.width()>image.width() || vs.height()>image.height()) {
-            int xOffset=qMax(0, vs.width()-image.width())/2;
-            int yOffset=qMax(0, vs.height()-image.height())/2;
+        QSize vs = viewport()->size();
+        if (vs.width() > image.width() || vs.height() > image.height()) {
+            int xOffset = qMax(0, vs.width() - image.width()) / 2;
+            int yOffset = qMax(0, vs.height() - image.height()) / 2;
             QPoint offset(xOffset, yOffset);
 
             QImage centeredImage(image.size().expandedTo(viewport()->size()), QImage::Format_ARGB32_Premultiplied);
@@ -261,49 +231,42 @@ SinglePageView::paint()
             p.drawRect(QRect(offset, image.size()).adjusted(-1, -1, 1, 1));
             p.end();
 
-            image=centeredImage;
+            image = centeredImage;
             displayRect.moveTo(offset);
         }
 
         m_imageLabel->resize(image.size());
         m_imageLabel->setPixmap(QPixmap::fromImage(image));
         m_imageLabel->setDisplayRect(displayRect);
-    } 
+    }
 
     m_imageLabel->setAnnotations(annotations);
 }
 
-
-
-void
-SinglePageView::resizeEvent(QResizeEvent *event)
+void SinglePageView::resizeEvent(QResizeEvent *event)
 {
     QScrollArea::resizeEvent(event);
 
-    setSize(viewport()->size()-QSize(1, 1));
+    setSize(viewport()->size() - QSize(1, 1));
 
     paint();
 }
 
-
-
-
-void
-SinglePageView::keyPressEvent(QKeyEvent *event)
+void SinglePageView::keyPressEvent(QKeyEvent *event)
 {
-    QScrollBar *vsb=verticalScrollBar();
+    QScrollBar *vsb = verticalScrollBar();
 
-    if (m_document && event->key()==Qt::Key_PageDown && (!vsb->isVisible() || vsb->value()==vsb->maximum())) {
-        if (m_currentPage < m_document->numPages()-1) {
-            gotoPage(m_currentPage+1);
+    if (m_document && event->key() == Qt::Key_PageDown && (!vsb->isVisible() || vsb->value() == vsb->maximum())) {
+        if (m_currentPage < m_document->numPages() - 1) {
+            gotoPage(m_currentPage + 1);
             verticalScrollBar()->setValue(0);
             return;
         }
     }
 
-    if (m_document && event->key()==Qt::Key_PageUp && (!vsb->isVisible() || vsb->value()==0)) {
+    if (m_document && event->key() == Qt::Key_PageUp && (!vsb->isVisible() || vsb->value() == 0)) {
         if (m_currentPage > 0) {
-            gotoPage(currentPage()-1);
+            gotoPage(currentPage() - 1);
             verticalScrollBar()->setValue(verticalScrollBar()->maximum());
             return;
         }
@@ -312,70 +275,52 @@ SinglePageView::keyPressEvent(QKeyEvent *event)
     QScrollArea::keyPressEvent(event);
 }
 
-
-
-
 /*
  * protected slots
  */
 
-void
-SinglePageView::slotGotoRequested(const QString &destination)
+void SinglePageView::slotGotoRequested(const QString &destination)
 {
     gotoDestination(destination);
 }
 
-
-
-void
-SinglePageView::slotCopyRequested(const QRectF &rect)
+void SinglePageView::slotCopyRequested(const QRectF &rect)
 {
     if (rect.isNull())
         return;
 
     QMenu m(this);
-    QAction *copyAction=m.addAction(QIcon(":/icons/edit-copy.svg"), "Copy");
+    QAction *copyAction = m.addAction(QIcon(":/icons/edit-copy.svg"), "Copy");
 
     if (copyAction != m.exec(QCursor::pos()))
         return;
 
-    if (Poppler::Page *page=m_document->page(m_currentPage)) {
-        QRectF r=toPoints(rect);
-        QString text=page->text(r);
+    if (Poppler::Page *page = m_document->page(m_currentPage)) {
+        QRectF r = toPoints(rect);
+        QString text = page->text(r);
         delete page;
 
-        QClipboard *clipboard=QGuiApplication::clipboard();
+        QClipboard *clipboard = QGuiApplication::clipboard();
         clipboard->setText(text, QClipboard::Clipboard);
         clipboard->setText(text, QClipboard::Selection);
     }
 }
 
-
-
-void
-SinglePageView::slotFindStarted()
+void SinglePageView::slotFindStarted()
 {
     paint();
 }
 
-
-
-void
-SinglePageView::slotHighlightMatch(int page, const QRectF &)
+void SinglePageView::slotHighlightMatch(int page, const QRectF &)
 {
     gotoPage(page);
 }
 
-
-
-void
-SinglePageView::slotMatchesFound(int page, const QList<QRectF> &)
+void SinglePageView::slotMatchesFound(int page, const QList<QRectF> &)
 {
     if (page == m_currentPage)
         paint();
 }
-
-
 
 #include "singlepageview.moc"
 

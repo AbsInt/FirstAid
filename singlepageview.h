@@ -30,16 +30,17 @@
 
 class QRubberBand;
 
-namespace Poppler {
+namespace Poppler
+{
 class Annotation;
 }
 
-class ImageLabel: public QLabel
+class ImageLabel : public QLabel
 {
     Q_OBJECT
 
 public:
-    ImageLabel(QWidget *parent=nullptr);
+    ImageLabel(QWidget *parent = nullptr);
     ~ImageLabel();
 
     void setDisplayRect(const QRect &rect);
@@ -61,12 +62,12 @@ private:
     QRubberBand *m_rubberBand;
 };
 
-class SinglePageView: public QScrollArea, public PageView
+class SinglePageView : public QScrollArea, public PageView
 {
     Q_OBJECT
 
 public:
-    SinglePageView(QWidget *parent=nullptr);
+    SinglePageView(QWidget *parent = nullptr);
     ~SinglePageView();
 
     void gotoPage(int page) override;

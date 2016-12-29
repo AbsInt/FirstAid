@@ -28,12 +28,12 @@
 #include <QtWidgets/QToolButton>
 
 FindBar::FindBar(QWidget *parent)
-       : QWidget(parent)
+    : QWidget(parent)
 {
-    QHBoxLayout *hbl=new QHBoxLayout(this);
+    QHBoxLayout *hbl = new QHBoxLayout(this);
     hbl->setContentsMargins(0, 0, 0, 0);
 
-    QToolButton *tb=new QToolButton(this);
+    QToolButton *tb = new QToolButton(this);
     tb->setIcon(QIcon(":/icons/window-close.svg"));
     connect(tb, SIGNAL(clicked()), this, SLOT(slotHide()));
     hbl->addWidget(tb);
@@ -44,7 +44,7 @@ FindBar::FindBar(QWidget *parent)
     connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotFind()));
     hbl->addWidget(m_findEdit);
 
-    QAction *findAction=new QAction(parent);
+    QAction *findAction = new QAction(parent);
     findAction->setShortcutContext(Qt::ApplicationShortcut);
     findAction->setShortcut(QKeySequence::Find);
     parent->addAction(findAction);
@@ -53,7 +53,7 @@ FindBar::FindBar(QWidget *parent)
     connect(findAction, SIGNAL(triggered()), m_findEdit, SLOT(setFocus()));
     connect(findAction, SIGNAL(triggered()), m_findEdit, SLOT(selectAll()));
 
-    QAction *closeAction=new QAction(this);
+    QAction *closeAction = new QAction(this);
     closeAction->setShortcut(Qt::Key_Escape);
     closeAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     addAction(closeAction);

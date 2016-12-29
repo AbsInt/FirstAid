@@ -26,17 +26,17 @@
 #include "pageview.h"
 #include "singlepageview.h"
 
-namespace Poppler {
+namespace Poppler
+{
 class Annotation;
 }
-
 
 class ContinousPageView : public QAbstractScrollArea, public PageView
 {
     Q_OBJECT
 
 public:
-    ContinousPageView(QWidget *parent=nullptr);
+    ContinousPageView(QWidget *parent = nullptr);
     ~ContinousPageView();
 
     void gotoPage(int page) override;
@@ -62,7 +62,6 @@ private:
     ImageLabel *m_imageLabel;
 
     int m_offset = 0;
-
 };
 
 #endif // SCROLLVIEW_H

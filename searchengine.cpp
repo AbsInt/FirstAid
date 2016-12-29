@@ -27,33 +27,27 @@
 #include <QGuiApplication>
 #include <QTimer>
 
-
-
 /*
  * defines
  */
 
-#define SearchInterval  10
-#define PagePileSize    20
-
-
+#define SearchInterval 10
+#define PagePileSize 20
 
 /*
  * class members
  */
 
-SearchEngine *SearchEngine::s_globalInstance=nullptr;
-
-
+SearchEngine *SearchEngine::s_globalInstance = nullptr;
 
 /*
  * constructors / destructor
  */
 
 SearchEngine::SearchEngine()
-            : DocumentObserver()
+    : DocumentObserver()
 {
-    m_timer=new QTimer(this);
+    m_timer = new QTimer(this);
     m_timer->setInterval(SearchInterval);
     m_timer->setSingleShot(true);
 
@@ -62,115 +56,82 @@ SearchEngine::SearchEngine()
     reset();
 }
 
-
-
 SearchEngine::~SearchEngine()
 {
 }
-
-
 
 /*
  * public methods
  */
 
-SearchEngine *
-SearchEngine::globalInstance()
+SearchEngine *SearchEngine::globalInstance()
 {
     if (!s_globalInstance)
-        s_globalInstance=new SearchEngine();
+        s_globalInstance = new SearchEngine();
 
     return s_globalInstance;
 }
 
-
-
-void
-SearchEngine::destroy()
+void SearchEngine::destroy()
 {
     if (s_globalInstance) {
         delete s_globalInstance;
-        s_globalInstance=nullptr;
+        s_globalInstance = nullptr;
     }
 }
 
-
-
-void
-SearchEngine::documentLoaded()
+void SearchEngine::documentLoaded()
 {
     reset();
 }
 
-
-
-void
-SearchEngine::documentClosed()
+void SearchEngine::documentClosed()
 {
     reset();
 }
 
-
-
-void
-SearchEngine::pageChanged(int page)
+void SearchEngine::pageChanged(int page)
 {
     Q_UNUSED(page)
 }
 
-
-
-void
-SearchEngine::currentMatch(int &page, QRectF &match) const
+void SearchEngine::currentMatch(int &page, QRectF &match) const
 {
     if (m_matchesForPage.isEmpty()) {
-        page=0;
-        match=QRectF();
-    }
-    else {
-        page=m_currentMatchPage;
-        match=m_matchesForPage.value(m_currentMatchPage).at(m_currentMatchIndex);
+        page = 0;
+        match = QRectF();
+    } else {
+        page = m_currentMatchPage;
+        match = m_matchesForPage.value(m_currentMatchPage).at(m_currentMatchIndex);
     }
 }
 
-
-
-QHash<int, QList<QRectF>>
-SearchEngine::matches() const
+QHash<int, QList<QRectF>> SearchEngine::matches() const
 {
     return m_matchesForPage;
 }
 
-
-
-QList<QRectF>
-SearchEngine::matchesFor(int page) const
+QList<QRectF> SearchEngine::matchesFor(int page) const
 {
     return m_matchesForPage.value(page);
 }
-
-
 
 /*
  * public slots
  */
 
-void
-SearchEngine::reset()
+void SearchEngine::reset()
 {
     m_timer->stop();
 
     m_matchesForPage.clear();
-    m_currentMatchPage=0;
-    m_currentMatchIndex=0;
+    m_currentMatchPage = 0;
+    m_currentMatchIndex = 0;
 
     m_findText.clear();
 }
 
-
-
-void
-SearchEngine::find(const QString &text)
+void SearchEngine::find(const QString &text)
 {
     m_timer->stop();
 
@@ -187,70 +148,64 @@ SearchEngine::find(const QString &text)
 
     emit started();
 
-    m_findText=text;
+    m_findText = text;
 
     if (text.isEmpty()) {
         emit finished();
         return;
     }
 
-    m_findCurrentPage=page();
+    m_findCurrentPage = page();
 
-    m_findStopAfterPage=m_findCurrentPage-1;
+    m_findStopAfterPage = m_findCurrentPage - 1;
     if (m_findStopAfterPage < 0)
-        m_findStopAfterPage=document()->numPages()-1;
+        m_findStopAfterPage = document()->numPages() - 1;
 
     m_timer->start();
 }
 
-
-
-void
-SearchEngine::nextMatch()
+void SearchEngine::nextMatch()
 {
-    if (-1==m_currentMatchPage || m_matchesForPage.isEmpty())
+    if (-1 == m_currentMatchPage || m_matchesForPage.isEmpty())
         return;
 
     // more matches on current match page?
-    QList<QRectF> matches=m_matchesForPage.value(m_currentMatchPage);
-    if (m_currentMatchIndex < matches.count()-1) {
+    QList<QRectF> matches = m_matchesForPage.value(m_currentMatchPage);
+    if (m_currentMatchIndex < matches.count() - 1) {
         m_currentMatchIndex++;
         emit highlightMatch(m_currentMatchPage, matches.at(m_currentMatchIndex));
         return;
     }
 
     // find next match
-    for (int page=m_currentMatchPage+1; page<document()->numPages(); page++) {
-        QList<QRectF> matches=m_matchesForPage.value(page);
+    for (int page = m_currentMatchPage + 1; page < document()->numPages(); page++) {
+        QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
-            m_currentMatchPage=page;
-            m_currentMatchIndex=0;
+            m_currentMatchPage = page;
+            m_currentMatchIndex = 0;
             emit highlightMatch(m_currentMatchPage, matches.first());
             return;
         }
     }
 
-    for (int page=0; page<m_currentMatchPage; page++) {
-        QList<QRectF> matches=m_matchesForPage.value(page);
+    for (int page = 0; page < m_currentMatchPage; page++) {
+        QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
-            m_currentMatchPage=page;
-            m_currentMatchIndex=0;
+            m_currentMatchPage = page;
+            m_currentMatchIndex = 0;
             emit highlightMatch(m_currentMatchPage, matches.first());
             return;
         }
     }
 }
 
-
-
-void
-SearchEngine::previousMatch()
+void SearchEngine::previousMatch()
 {
-    if (-1==m_currentMatchPage || m_matchesForPage.isEmpty())
+    if (-1 == m_currentMatchPage || m_matchesForPage.isEmpty())
         return;
 
     // more matches on current match page?
-    QList<QRectF> matches=m_matchesForPage.value(m_currentMatchPage);
+    QList<QRectF> matches = m_matchesForPage.value(m_currentMatchPage);
     if (m_currentMatchIndex > 0) {
         m_currentMatchIndex--;
         emit highlightMatch(m_currentMatchPage, matches.at(m_currentMatchIndex));
@@ -258,47 +213,44 @@ SearchEngine::previousMatch()
     }
 
     // find previous match
-    for (int page=m_currentMatchPage-1; page>=0; page--) {
-        QList<QRectF> matches=m_matchesForPage.value(page);
+    for (int page = m_currentMatchPage - 1; page >= 0; page--) {
+        QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
-            m_currentMatchPage=page;
-            m_currentMatchIndex=matches.count()-1;
+            m_currentMatchPage = page;
+            m_currentMatchIndex = matches.count() - 1;
             emit highlightMatch(m_currentMatchPage, matches.last());
             return;
         }
     }
 
-    for (int page=document()->numPages()-1; page>m_currentMatchPage; page--) {
-        QList<QRectF> matches=m_matchesForPage.value(page);
+    for (int page = document()->numPages() - 1; page > m_currentMatchPage; page--) {
+        QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
-            m_currentMatchPage=page;
-            m_currentMatchIndex=matches.count()-1;
+            m_currentMatchPage = page;
+            m_currentMatchIndex = matches.count() - 1;
             emit highlightMatch(m_currentMatchPage, matches.last());
             return;
         }
     }
 }
 
-
-
 /*
  * private slots
  */
 
-void
-SearchEngine::find()
+void SearchEngine::find()
 {
-    for (int count=0; count<PagePileSize; count++) {
+    for (int count = 0; count < PagePileSize; count++) {
         // find our text on the current search page
-        Poppler::Page *p=document()->page(m_findCurrentPage);
-        QList<QRectF> matches=p->search(m_findText, Poppler::Page::IgnoreCase);
+        Poppler::Page *p = document()->page(m_findCurrentPage);
+        QList<QRectF> matches = p->search(m_findText, Poppler::Page::IgnoreCase);
         delete p;
 
         // signal matches and remember them
         if (!matches.isEmpty()) {
             if (m_matchesForPage.isEmpty()) {
-                m_currentMatchPage=m_findCurrentPage;
-                m_currentMatchIndex=0;
+                m_currentMatchPage = m_findCurrentPage;
+                m_currentMatchIndex = 0;
                 emit highlightMatch(m_currentMatchPage, matches.first());
             }
 
@@ -316,13 +268,11 @@ SearchEngine::find()
         // no? proceed with next page or wrap around
         m_findCurrentPage++;
         if (m_findCurrentPage >= document()->numPages())
-            m_findCurrentPage=0;
+            m_findCurrentPage = 0;
     }
 
     m_timer->start();
 }
-
-
 
 /*
  * eof

@@ -24,26 +24,29 @@
 #include <QThread>
 #include <stdio.h>
 
-class StdinReadEvent: public QEvent
+class StdinReadEvent : public QEvent
 {
 public:
-    StdinReadEvent(const QString &text): QEvent(QEvent::User)
-                                       , m_text(text)
+    StdinReadEvent(const QString &text)
+        : QEvent(QEvent::User)
+        , m_text(text)
     {
     }
 
-    QString text() const { return m_text; }
+    QString text() const
+    {
+        return m_text;
+    }
 
 private:
     QString m_text;
 };
 
-
-
-class StdinReaderThread: public QThread
+class StdinReaderThread : public QThread
 {
 public:
-    StdinReaderThread(QObject *parent): QThread(parent)
+    StdinReaderThread(QObject *parent)
+        : QThread(parent)
     {
     }
 
@@ -57,7 +60,5 @@ public:
         }
     }
 };
-
-
 
 #endif // #ifndef STDINREADERTHREAD_H

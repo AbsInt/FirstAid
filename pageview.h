@@ -22,7 +22,8 @@
 #include <QColor>
 #include <QRectF>
 
-namespace Poppler {
+namespace Poppler
+{
 class Document;
 }
 
@@ -53,11 +54,11 @@ public:
 
     virtual void reset();
     virtual int currentPage() const;
-    virtual void gotoPage(int page)=0;
+    virtual void gotoPage(int page) = 0;
     virtual void gotoDestination(const QString &destination);
 
 protected:
-    virtual void paint()=0;
+    virtual void paint() = 0;
 
 protected:
     Poppler::Document *m_document;

@@ -37,7 +37,7 @@ class NavigationToolBar : public QToolBar, public DocumentObserver
     Q_OBJECT
 
 public:
-    NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent=nullptr);
+    NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent = nullptr);
     ~NavigationToolBar();
 
     void documentLoaded();
