@@ -55,7 +55,6 @@ public:
 private Q_SLOTS:
     void slotOpenFileExternal();
     void slotAbout();
-    void slotAboutQt();
 
     void slotSetZoom(qreal zoom);
     void slotSetZoomMode(PageView::ZoomMode mode);
@@ -80,6 +79,8 @@ private:
 
     QStackedWidget *m_viewStack;
     TocDock *m_tocDock;
+
+    QMenu *m_menu;
 };
 
 #endif

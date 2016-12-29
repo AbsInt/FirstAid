@@ -65,19 +65,23 @@ PdfViewer::PdfViewer()
     m_thread=new StdinReaderThread(this);
     m_thread->start();
 
-    // setup the menus
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    m_fileOpenExternalAct = fileMenu->addAction(tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
+    // setup the menu action
+    m_menu = new QMenu(this);
+    m_fileOpenExternalAct = m_menu->addAction(tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
     m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
     m_fileOpenExternalAct->setEnabled(false);
-    fileMenu->addSeparator();
-    fileMenu->addSeparator();
-    QAction *act = fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()));
-    act->setShortcut(Qt::CTRL + Qt::Key_Q);
+    m_menu->addSeparator();
 
-    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    act = helpMenu->addAction(tr("&About"), this, SLOT(slotAbout()));
-    act = helpMenu->addAction(tr("About &Qt"), this, SLOT(slotAboutQt()));
+    QAction *continousAction=m_menu->addAction(tr("&Continous Scrolling"));
+    continousAction->setCheckable(true);
+    connect(continousAction, SIGNAL(toggled(bool)), SLOT(slotToggleContinous(bool)));
+    m_menu->addSeparator();
+
+    QAction *act = m_menu->addAction(tr("&About"), this, SLOT(slotAbout()));
+    m_menu->addSeparator();
+
+    act = m_menu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()));
+    act->setShortcut(Qt::CTRL + Qt::Key_Q);
 
     QWidget *w=new QWidget(this);
     QVBoxLayout *vbl=new QVBoxLayout(w);
@@ -104,7 +108,7 @@ PdfViewer::PdfViewer()
     addDockWidget(Qt::LeftDockWidgetArea, m_tocDock);
     m_observers.append(m_tocDock);
 
-    NavigationToolBar *navbar = new NavigationToolBar(m_tocDock->toggleViewAction(), this);
+    NavigationToolBar *navbar = new NavigationToolBar(m_tocDock->toggleViewAction(), m_menu, this);
     addToolBar(navbar);
     m_observers.append(navbar);
 
@@ -269,11 +273,6 @@ void PdfViewer::slotAbout()
 {
     const QString text("FirstAid is a simple PDF viewer based on libpoppler.");
     QMessageBox::about(this, QString::fromLatin1("About FirstAid"), text);
-}
-
-void PdfViewer::slotAboutQt()
-{
-    QMessageBox::aboutQt(this);
 }
 
 void PdfViewer::slotSetZoom(qreal zoom)

@@ -23,14 +23,15 @@
 
 #include <poppler-qt5.h>
 
-#include <QtGui/QIntValidator>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QShortcut>
+#include <QIntValidator>
+#include <QAction>
+#include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QShortcut>
+#include <QToolButton>
 
-NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
+NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent)
                  : QToolBar("Navigation", parent)
 {
     setFloatable(false);
@@ -43,7 +44,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     QShortcut *lastShortcut=new QShortcut(Qt::Key_End, this);
     connect(lastShortcut, SIGNAL(activated()), this, SLOT(slotGoLast()));
 
-    // widget on toolbar
+    // left side is table of content action
     tocAction->setIcon(QIcon(":/icons/bookmark-new.png"));
     addAction(tocAction);
     QShortcut *tocShortcut=new QShortcut(Qt::Key_F7, this);
@@ -106,6 +107,13 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     connect(m_zoomCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotZoomComboChanged()));
     connect(m_zoomCombo->lineEdit(), SIGNAL(returnPressed()), this, SLOT(slotZoomComboChanged()));
     addWidget(m_zoomCombo);
+
+    // add menu replacement action to right side
+    QToolButton *menuButton = new QToolButton();
+    menuButton->setIcon(QIcon(":/icons/bookmark-new.png"));
+    menuButton->setMenu(menu);
+    menuButton->setPopupMode(QToolButton::InstantPopup);
+    addWidget(menuButton);
 
     documentClosed();
 }
