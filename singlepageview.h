@@ -27,6 +27,8 @@
 #include "documentobserver.h"
 #include "pageview.h"
 
+class QRubberBand;
+
 namespace Poppler {
 class Annotation;
 }
@@ -44,14 +46,18 @@ public:
 
 signals:
     void gotoRequested(const QString &dest);
+    void copyRequested(const QRect &area);
 
 protected:
-    void mouseMoveEvent(QMouseEvent *e) override;
-    void mousePressEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
     QRect m_displayRect;
     QList<Poppler::Annotation *> m_annotations;
+    QPoint m_rubberBandOrigin;
+    QRubberBand *m_rubberBand;
 };
 
 class SinglePageView: public QScrollArea, public PageView

@@ -36,6 +36,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QRubberBand>
 #include <QtWidgets/QScrollBar>
 
 
@@ -47,6 +48,8 @@
 ImageLabel::ImageLabel(QWidget *parent)
           : QLabel(parent)
 {
+    m_rubberBand=new QRubberBand(QRubberBand::Rectangle, this);
+
     setMouseTracking(true);
 }
 
@@ -78,31 +81,32 @@ ImageLabel::setAnnotations(const QList<Poppler::Annotation *> &annotations)
 
 
 void
-ImageLabel::mouseMoveEvent(QMouseEvent *e)
+ImageLabel::mouseMoveEvent(QMouseEvent *event)
 {
-    qreal xPos=(e->x()-m_displayRect.x())/(qreal)m_displayRect.width();
-    qreal yPos=(e->y()-m_displayRect.y())/(qreal)m_displayRect.height();
+    qreal xPos=(event->x()-m_displayRect.x())/(qreal)m_displayRect.width();
+    qreal yPos=(event->y()-m_displayRect.y())/(qreal)m_displayRect.height();
     QPointF p=QPointF(xPos, yPos);
-
-    bool linkFound=false;
 
     foreach (Poppler::Annotation *a, m_annotations) {
         if (a->boundary().contains(p)) {
-            linkFound=true;
-            break;
+            setCursor(Qt::PointingHandCursor);
+            return;
         }
     }
     
-    setCursor(linkFound ? Qt::PointingHandCursor : Qt::ArrowCursor);
+    setCursor(Qt::ArrowCursor);
+
+    if (!m_rubberBandOrigin.isNull())
+        m_rubberBand->setGeometry(QRect(m_rubberBandOrigin, event->pos()).normalized());
 }
 
 
 
 void
-ImageLabel::mousePressEvent(QMouseEvent *e)
+ImageLabel::mousePressEvent(QMouseEvent *event)
 {
-    qreal xPos=(e->x()-m_displayRect.x())/(qreal)m_displayRect.width();
-    qreal yPos=(e->y()-m_displayRect.y())/(qreal)m_displayRect.height();
+    qreal xPos=(event->x()-m_displayRect.x())/(qreal)m_displayRect.width();
+    qreal yPos=(event->y()-m_displayRect.y())/(qreal)m_displayRect.height();
     QPointF p=QPointF(xPos, yPos);
 
     foreach (Poppler::Annotation *a, m_annotations) {
@@ -111,19 +115,33 @@ ImageLabel::mousePressEvent(QMouseEvent *e)
             switch (link->linkType()) {
                 case Poppler::Link::Goto:
                     emit gotoRequested(QString::number(static_cast<Poppler::LinkGoto *>(link)->destination().pageNumber()));
-                    break;
+                    return;
 
                 case Poppler::Link::Browse:
                     QDesktopServices::openUrl(QUrl(static_cast<Poppler::LinkBrowse *>(link)->url()));
-                    break;
+                    return;
 
                 default:
                     qDebug("Not yet handled link type %d.", link->linkType());
+                    return;
             }
 
             break;
         }
     }
+
+    m_rubberBandOrigin=event->pos();
+    m_rubberBand->setGeometry(QRect(m_rubberBandOrigin, QSize()));
+    m_rubberBand->show();
+}
+
+
+
+void
+ImageLabel::mouseReleaseEvent(QMouseEvent *)
+{
+    m_rubberBandOrigin=QPoint(0, 0);
+    m_rubberBand->hide();
 }
 
 
@@ -136,6 +154,8 @@ SinglePageView::SinglePageView(QWidget *parent)
               : QScrollArea(parent)
               , PageView()
 {
+    setMouseTracking(true);
+
     m_imageLabel=new ImageLabel(this);
     m_imageLabel->resize(0, 0);
     setWidget(m_imageLabel);
@@ -247,14 +267,15 @@ SinglePageView::paint()
 
 
 void
-SinglePageView::resizeEvent(QResizeEvent *resizeEvent)
+SinglePageView::resizeEvent(QResizeEvent *event)
 {
-    QScrollArea::resizeEvent(resizeEvent);
+    QScrollArea::resizeEvent(event);
 
     setSize(viewport()->size()-QSize(1, 1));
 
     paint();
 }
+
 
 
 
