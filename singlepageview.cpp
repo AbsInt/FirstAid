@@ -189,6 +189,9 @@ SinglePageView::~SinglePageView()
 void
 SinglePageView::gotoPage(int page)
 {
+    if (!m_document || page<0 || page>=m_document->numPages())
+        return;
+
     m_currentPage=page;
     paint();
 }
@@ -278,6 +281,33 @@ SinglePageView::resizeEvent(QResizeEvent *event)
     setSize(viewport()->size()-QSize(1, 1));
 
     paint();
+}
+
+
+
+
+void
+SinglePageView::keyPressEvent(QKeyEvent *event)
+{
+    QScrollBar *vsb=verticalScrollBar();
+
+    if (m_document && event->key()==Qt::Key_PageDown && (!vsb->isVisible() || vsb->value()==vsb->maximum())) {
+        if (m_currentPage < m_document->numPages()-2) {
+            gotoPage(m_currentPage+1);
+            verticalScrollBar()->setValue(0);
+            return;
+        }
+    }
+
+    if (m_document && event->key()==Qt::Key_PageUp && (!vsb->isVisible() || vsb->value()==0)) {
+        if (m_currentPage > 0) {
+            gotoPage(currentPage()-1);
+            verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+            return;
+        }
+    }
+
+    QScrollArea::keyPressEvent(event);
 }
 
 
