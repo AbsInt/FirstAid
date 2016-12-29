@@ -28,7 +28,9 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QSettings>
 #include <QShortcut>
+#include <QTimer>
 #include <QToolButton>
 
 NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent)
@@ -106,7 +108,10 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomCombo->addItem(tr("200%"));
     m_zoomCombo->addItem(tr("300%"));
     m_zoomCombo->addItem(tr("400%"));
-    m_zoomCombo->setCurrentIndex(8); // "100%"
+
+    QSettings s;
+    m_zoomCombo->setCurrentText(s.value("MainWindow/zoom", "100%").toString());
+
     connect(m_zoomCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotZoomComboChanged()));
     connect(m_zoomCombo->lineEdit(), SIGNAL(returnPressed()), this, SLOT(slotZoomComboChanged()));
     addWidget(m_zoomCombo);
@@ -124,10 +129,14 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     connect(closeGoto, SIGNAL(activated()), SLOT(slotHideGoto()));
 
     documentClosed();
+
+    QTimer::singleShot(0, this, SLOT(slotZoomComboChanged()));
 }
 
 NavigationToolBar::~NavigationToolBar()
 {
+    QSettings s;
+    s.setValue("MainWindow/zoom", m_zoomCombo->currentText());
 }
 
 void NavigationToolBar::documentLoaded()
