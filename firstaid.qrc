@@ -2,6 +2,7 @@
     <qresource>
         <file>firstaid.png</file>
         <file>icons/bookmark-new.png</file>
+        <file>icons/edit-copy.png</file>
         <file>icons/go-next.png</file>
         <file>icons/go-previous.png</file>
         <file>icons/window-close.png</file>

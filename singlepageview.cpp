@@ -334,7 +334,7 @@ SinglePageView::slotCopyRequested(const QRectF &rect)
         return;
 
     QMenu m(this);
-    QAction *copyAction=m.addAction("Copy");
+    QAction *copyAction=m.addAction(QIcon(":/icons/edit-copy.png"), "Copy");
 
     if (copyAction != m.exec(QCursor::pos()))
         return;
