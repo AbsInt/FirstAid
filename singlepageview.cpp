@@ -27,6 +27,7 @@
 
 #include <poppler-qt5.h>
 
+#include <QtGui/QClipboard>
 #include <QtGui/QCursor>
 #include <QtGui/QDesktopServices>
 #include <QtGui/QImage>
@@ -142,6 +143,8 @@ ImageLabel::mouseReleaseEvent(QMouseEvent *)
 {
     m_rubberBandOrigin=QPoint(0, 0);
     m_rubberBand->hide();
+
+    emit copyRequested(m_rubberBand->geometry().intersected(m_displayRect).translated(-m_displayRect.topLeft()));
 }
 
 
@@ -161,6 +164,7 @@ SinglePageView::SinglePageView(QWidget *parent)
     setWidget(m_imageLabel);
 
     connect(m_imageLabel, SIGNAL(gotoRequested(QString)), SLOT(slotGotoRequested(QString)));
+    connect(m_imageLabel, SIGNAL(copyRequested(QRectF)), SLOT(slotCopyRequested(QRectF)));
 
     SearchEngine *se=SearchEngine::globalInstance();
     connect(se, SIGNAL(started()), SLOT(slotFindStarted()));
@@ -287,6 +291,31 @@ void
 SinglePageView::slotGotoRequested(const QString &destination)
 {
     gotoDestination(destination);
+}
+
+
+
+void
+SinglePageView::slotCopyRequested(const QRectF &rect)
+{
+    if (rect.isNull())
+        return;
+
+    QMenu m(this);
+    QAction *copyAction=m.addAction("Copy");
+
+    if (copyAction != m.exec(QCursor::pos()))
+        return;
+
+    if (Poppler::Page *page=m_document->page(m_currentPage)) {
+        QRectF r=toPoints(rect);
+        QString text=page->text(r);
+        delete page;
+
+        QClipboard *clipboard=QGuiApplication::clipboard();
+        clipboard->setText(text, QClipboard::Clipboard);
+        clipboard->setText(text, QClipboard::Selection);
+    }
 }
 
 

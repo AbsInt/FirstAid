@@ -30,6 +30,27 @@
 
 
 /*
+ * class methods
+ */
+
+QColor
+PageView::matchColor()
+{
+    return QColor(255, 255, 0, 64);
+}
+
+
+
+QColor
+PageView::highlightColor()
+{
+    return QColor(255, 128, 0, 128);
+}
+
+
+
+
+/*
  * constructors / destructor
  */
 
@@ -75,27 +96,18 @@ PageView::resY() const
 
 
 QRectF
-PageView::fromPoints(const QRectF &pointsRect) const
+PageView::fromPoints(const QRectF &rect) const
 {
-    return QRectF(pointsRect.left()/72.0*resX(), pointsRect.top()/72.0*resY(), pointsRect.width()/72.0*resX(), pointsRect.height()/72.0*resY());
+    return QRectF(rect.left()/72.0*resX(), rect.top()/72.0*resY(), rect.width()/72.0*resX(), rect.height()/72.0*resY());
 }
 
 
 
-QColor
-PageView::matchColor() const
+QRectF
+PageView::toPoints(const QRectF &rect) const
 {
-    return QColor(255, 255, 0, 64);
+    return QRectF(rect.left()*72.0/resX(), rect.top()*72.0/resY(), rect.width()*72.0/resX(), rect.height()*72.0/resY());
 }
-
-
-
-QColor
-PageView::highlightColor() const
-{
-    return QColor(255, 128, 0, 128);
-}
-
 
 
 

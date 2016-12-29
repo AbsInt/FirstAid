@@ -21,6 +21,7 @@
 #ifndef SINGLEPAGEVIEW_H
 #define SINGLEPAGEVIEW_H
 
+#include <QtWidgets/QMenu>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QScrollArea>
 
@@ -46,7 +47,7 @@ public:
 
 signals:
     void gotoRequested(const QString &dest);
-    void copyRequested(const QRect &area);
+    void copyRequested(const QRectF &area);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -76,6 +77,8 @@ protected:
 
 private slots:
     void slotGotoRequested(const QString &destination);
+    void slotCopyRequested(const QRectF &rect);
+
     void slotFindStarted();
     void slotHighlightMatch(int page, const QRectF &match);
     void slotMatchesFound(int page, const QList<QRectF> &matches);

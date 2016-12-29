@@ -32,16 +32,17 @@ public:
     enum ZoomMode { FitWidth, FitPage, Absolute };
     enum DoubleSideMode { None, DoubleSided, DoubleSidedNotFirst };
 
+    static QColor matchColor();
+    static QColor highlightColor();
+
     PageView();
     virtual ~PageView();
 
     qreal resX() const;
     qreal resY() const;
 
-    QRectF fromPoints(const QRectF &pointsRect) const;
-
-    QColor matchColor() const;
-    QColor highlightColor() const;
+    QRectF fromPoints(const QRectF &rect) const;
+    QRectF toPoints(const QRectF &rect) const;
 
 public:
     void setDocument(Poppler::Document *document);
