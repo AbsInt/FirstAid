@@ -63,6 +63,10 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     connect(m_pageEdit, SIGNAL(returnPressed()), this, SLOT(slotPageSet()));
     addWidget(m_pageEdit);
 
+    QShortcut *gotoShortCut=new QShortcut(Qt::ControlModifier+Qt::Key_G, this);
+    connect(gotoShortCut, SIGNAL(activated()), m_pageEdit, SLOT(setFocus()));
+    connect(gotoShortCut, SIGNAL(activated()), m_pageEdit, SLOT(selectAll()));
+
     m_intValidator=new QIntValidator(this);
     m_pageEdit->setValidator(m_intValidator);
 
