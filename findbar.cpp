@@ -33,12 +33,13 @@ FindBar::FindBar(QWidget *parent)
     hbl->setContentsMargins(0, 0, 0, 0);
 
     QToolButton *tb=new QToolButton(this);
-    tb->setIcon(QIcon(":/icons/dialog-close.png"));
+    tb->setIcon(QIcon(":/icons/window-close.png"));
     connect(tb, SIGNAL(clicked()), this, SLOT(hide()));
     hbl->addWidget(tb);
 
     m_findEdit = new QLineEdit(this);
     m_findEdit->setPlaceholderText(tr("Find"));
+    m_findEdit->setClearButtonEnabled(true);
     connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotFind()));
     hbl->addWidget(m_findEdit);
 

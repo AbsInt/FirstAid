@@ -1,11 +1,9 @@
 <RCC>
     <qresource>
         <file>firstaid.png</file>
-        <file>icons/arrow-left.png</file>
-        <file>icons/arrow-right.png</file>
-        <file>icons/bookmarks-organize.png</file>
-        <file>icons/dialog-close.png</file>
-        <file>icons/go-next-page.png</file>
-        <file>icons/go-previous-page.png</file>
+        <file>icons/bookmark-new.png</file>
+        <file>icons/go-next.png</file>
+        <file>icons/go-previous.png</file>
+        <file>icons/window-close.png</file>
     </qresource>
 </RCC>

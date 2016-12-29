@@ -1,6 +1,48 @@
-Icons are taken from http://www.kde.org/ and are available under the following license:
+The Breeze Icon Theme in icons/
 
-                   GNU LESSER GENERAL PUBLIC LICENSE
+    Copyright (C) 2014 Uri Herrera <uri_herrera@nitrux.in> and others
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 3 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library. If not, see <http://www.gnu.org/licenses/>.
+
+Clarification:
+
+  The GNU Lesser General Public License or LGPL is written for
+  software libraries in the first place. We expressly want the LGPL to
+  be valid for this artwork library too.
+
+  KDE Breeze theme icons is a special kind of software library, it is an
+  artwork library, it's elements can be used in a Graphical User Interface, or
+  GUI.
+
+  Source code, for this library means:
+   - where they exist, SVG;
+   - otherwise, if applicable, the multi-layered formats xcf or psd, or
+  otherwise png.
+
+  The LGPL in some sections obliges you to make the files carry
+  notices. With images this is in some cases impossible or hardly useful.
+
+  With this library a notice is placed at a prominent place in the directory
+  containing the elements. You may follow this practice.
+
+  The exception in section 5 of the GNU Lesser General Public License covers
+  the use of elements of this art library in a GUI.
+
+ https://vdesign.kde.org/
+
+-----
+		   GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
@@ -12,7 +54,7 @@ Icons are taken from http://www.kde.org/ and are available under the following l
 the terms and conditions of version 3 of the GNU General Public
 License, supplemented by the additional permissions listed below.
 
-  0. Additional Definitions.
+  0. Additional Definitions. 
 
   As used herein, "this License" refers to version 3 of the GNU Lesser
 General Public License, and the "GNU GPL" refers to version 3 of the GNU
@@ -113,7 +155,7 @@ the following:
        a copy of the Library already present on the user's computer
        system, and (b) will operate properly with a modified version
        of the Library that is interface-compatible with the Linked
-       Version.
+       Version. 
 
    e) Provide Installation Information, but only if you would otherwise
    be required to provide such information under section 6 of the
@@ -165,4 +207,3 @@ whether future versions of the GNU Lesser General Public License shall
 apply, that proxy's public statement of acceptance of any version is
 permanent authorization for you to choose that version for the
 Library.
-

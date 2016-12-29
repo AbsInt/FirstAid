@@ -44,7 +44,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     connect(lastShortcut, SIGNAL(activated()), this, SLOT(slotGoLast()));
 
     // widget on toolbar
-    tocAction->setIcon(QIcon(":/icons/bookmarks-organize.png"));
+    tocAction->setIcon(QIcon(":/icons/bookmark-new.png"));
     addAction(tocAction);
     QShortcut *tocShortcut=new QShortcut(Qt::Key_F2, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
@@ -53,7 +53,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
     addWidget(spacer);
 
-    m_prevAct = addAction(QIcon(":/icons/go-previous-page.png"), tr("Previous"), this, SLOT(slotGoPrev()));
+    m_prevAct = addAction(QIcon(":/icons/go-previous.png"), tr("Previous"), this, SLOT(slotGoPrev()));
     QShortcut *previousShortcut=new QShortcut(Qt::Key_PageUp, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
@@ -69,7 +69,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QWidget *parent)
     m_pageLabel = new QLabel(this);
     addWidget(m_pageLabel);
 
-    m_nextAct = addAction(QIcon(":/icons/go-next-page.png"), tr("Next"), this, SLOT(slotGoNext()));
+    m_nextAct = addAction(QIcon(":/icons/go-next.png"), tr("Next"), this, SLOT(slotGoNext()));
     QShortcut *nextShortcut=new QShortcut(Qt::Key_PageDown, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
