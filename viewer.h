@@ -27,7 +27,6 @@
 
 class ContinousPageView;
 class DocumentObserver;
-class TocDock;
 class QAction;
 class QActionGroup;
 class QLabel;
@@ -84,8 +83,6 @@ private:
      */
     void updateOnDocumentChange();
 
-    int m_currentPage;
-
     QAction *m_fileOpenExternalAct;
     QAction *m_fileReloadAct;
     QAction *m_filePrintAct;
@@ -95,10 +92,6 @@ private:
 
     Poppler::Document *m_doc;
     QString m_filePath;
-
-    TocDock *m_tocDock;
-
-    QMenu *m_menu;
 
     /**
      * watcher to auto-reload

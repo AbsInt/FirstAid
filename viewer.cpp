@@ -51,7 +51,6 @@
 
 PdfViewer::PdfViewer(const QString &file)
     : QMainWindow()
-    , m_currentPage(0)
     , m_doc(0)
 {
     setWindowTitle(tr("FirstAid"));
@@ -68,22 +67,22 @@ PdfViewer::PdfViewer(const QString &file)
                 "QMenu { padding: 1px }"));
 
     // setup the menu action
-    m_menu = new QMenu(this);
-    m_fileOpenExternalAct = m_menu->addAction(QIcon(":/icons/acrobat.svg"), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
+    QMenu *menu = new QMenu(this);
+    m_fileOpenExternalAct = menu->addAction(QIcon(":/icons/acrobat.svg"), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
     m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
 
-    m_fileReloadAct = m_menu->addAction(QIcon(":/icons/view-refresh.svg"), tr("&Reload"), this, SLOT(slotReload()));
+    m_fileReloadAct = menu->addAction(QIcon(":/icons/view-refresh.svg"), tr("&Reload"), this, SLOT(slotReload()));
     m_fileReloadAct->setShortcut(QKeySequence::Refresh);
-    m_menu->addSeparator();
+    menu->addSeparator();
 
-    m_filePrintAct = m_menu->addAction(QIcon(":/icons/document-print.svg"), tr("&Print..."), this, SLOT(slotPrint()));
+    m_filePrintAct = menu->addAction(QIcon(":/icons/document-print.svg"), tr("&Print..."), this, SLOT(slotPrint()));
     m_filePrintAct->setShortcut(QKeySequence::Print);
-    m_menu->addSeparator();
+    menu->addSeparator();
 
-    QAction *act = m_menu->addAction(QIcon(":/icons/help-about.svg"), tr("&About"), this, SLOT(slotAbout()));
-    m_menu->addSeparator();
+    QAction *act = menu->addAction(QIcon(":/icons/help-about.svg"), tr("&About"), this, SLOT(slotAbout()));
+    menu->addSeparator();
 
-    act = m_menu->addAction(QIcon(":/icons/application-exit.svg"), tr("&Quit"), qApp, SLOT(closeAllWindows()));
+    act = menu->addAction(QIcon(":/icons/application-exit.svg"), tr("&Quit"), qApp, SLOT(closeAllWindows()));
     act->setShortcut(Qt::CTRL + Qt::Key_Q);
 
     QWidget *w = new QWidget(this);
@@ -101,11 +100,11 @@ PdfViewer::PdfViewer(const QString &file)
 
     setCentralWidget(w);
 
-    m_tocDock = new TocDock(this);
-    addDockWidget(Qt::LeftDockWidgetArea, m_tocDock);
-    m_observers.append(m_tocDock);
+    TocDock *tocDock = new TocDock(this);
+    addDockWidget(Qt::LeftDockWidgetArea, tocDock);
+    m_observers.append(tocDock);
 
-    NavigationToolBar *navbar = new NavigationToolBar(m_tocDock->toggleViewAction(), m_menu, this);
+    NavigationToolBar *navbar = new NavigationToolBar(tocDock->toggleViewAction(), menu, this);
     addToolBar(navbar);
     m_observers.append(navbar);
 
@@ -119,7 +118,7 @@ PdfViewer::PdfViewer(const QString &file)
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
     connect(navbar, SIGNAL(toggleFacingPages(bool)), SLOT(slotToggleFacingPages(bool)));
 
-    connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
+    connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
     /**
      * auto-reload
@@ -212,7 +211,6 @@ void PdfViewer::closeDocument()
     foreach (DocumentObserver *obs, m_observers)
         obs->documentClosed();
 
-    m_currentPage = 0;
     delete m_doc;
     m_doc = 0;
 
