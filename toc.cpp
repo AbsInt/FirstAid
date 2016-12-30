@@ -55,6 +55,9 @@ TocDock::TocDock(QWidget *parent)
 {
     setWindowTitle(tr("Table of contents"));
 
+    // for state saving
+    setObjectName("toc_info_dock");
+
     m_tree = new QTreeWidget(this);
     m_tree->setAlternatingRowColors(true);
     m_tree->header()->hide();

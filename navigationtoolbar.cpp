@@ -37,6 +37,9 @@
 NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent)
     : QToolBar("Navigation", parent)
 {
+    // for state saving
+    setObjectName("navigation_toolbar");
+
     setFloatable(false);
     setMovable(false);
 
