@@ -70,7 +70,7 @@ PdfViewer::PdfViewer(const QString &file)
     // setup the menu action
     QMenu *menu = new QMenu(this);
 
-    QAction *fileOpen = menu->addAction(QIcon(":/icons/document-open.svg"), tr("&Open"), this, SLOT(slotOpenFile()));
+    QAction *fileOpen = menu->addAction(QIcon(":/icons/document-open.svg"), tr("&Open..."), this, SLOT(slotOpenFile()));
     fileOpen->setShortcut(QKeySequence::Open);
 
     m_fileReloadAct = menu->addAction(QIcon(":/icons/view-refresh.svg"), tr("&Reload"), this, SLOT(slotReload()));
