@@ -100,6 +100,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     addWidget(spacer);
 
     m_zoomCombo = new QComboBox(this);
+    m_zoomCombo->setFocusPolicy(Qt::ClickFocus);
     m_zoomCombo->addItem(tr("Fit width"));
     m_zoomCombo->addItem(tr("Fit page"));
     m_zoomCombo->addItem(tr("10%"));
@@ -122,6 +123,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 
     // add menu replacement action to right side
     QToolButton *menuButton = new QToolButton();
+    menuButton->setFocusPolicy(Qt::ClickFocus);
     menuButton->setIcon(QIcon(":/icons/application-menu.svg"));
     menuButton->setMenu(menu);
     menuButton->setPopupMode(QToolButton::InstantPopup);
