@@ -31,7 +31,7 @@ DocumentObserver::~DocumentObserver()
 
 Poppler::Document *DocumentObserver::document() const
 {
-    return m_viewer->m_doc;
+    return m_viewer ? m_viewer->m_doc : nullptr;
 }
 
 void DocumentObserver::setPage(int page)
