@@ -239,6 +239,7 @@ void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
 
 void ContinousPageView::keyPressEvent(QKeyEvent *event)
 {
+    #if 0
     QScrollBar *vsb = verticalScrollBar();
 
     if (m_document && event->key() == Qt::Key_PageDown && (!vsb->isVisible() || vsb->value() == vsb->maximum())) {
@@ -254,6 +255,23 @@ void ContinousPageView::keyPressEvent(QKeyEvent *event)
             gotoPage(currentPage() - 1);
             verticalScrollBar()->setValue(verticalScrollBar()->maximum());
             return;
+        }
+    }
+    #endif
+
+    if (m_document) {
+        if (event->key() == Qt::Key_PageDown) {
+            if (m_currentPage < m_document->numPages() - 1) {
+                gotoPage(m_currentPage + 1);
+                return;
+            }
+        }
+
+        if (event->key() == Qt::Key_PageUp) {
+            if (m_currentPage > 0) {
+                gotoPage(currentPage() - 1);
+                return;
+            }
         }
     }
 
