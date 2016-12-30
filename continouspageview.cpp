@@ -44,8 +44,7 @@
 
 #include <QDebug>
 
-#define PAGEDISTANCE        20
-#define DOUBLEPAGEDISTANCE  5
+#define PAGEFRAME        5
 
 /*
  * constructors / destructor
@@ -108,10 +107,10 @@ void ContinousPageView::scrolled()
 
     // compute page
     int value = verticalScrollBar()->value();
-    int page = value / pageSize;
+    int page = value / (pageSize + 2*PAGEFRAME);
 
     // set page
-    value -= (page * pageSize);
+    value -= (page * (pageSize + 2*PAGEFRAME));
     // scroll(page,value);
     m_offset = QPoint(horizontalScrollBar()->value(),value);
     if (page < m_document->numPages())
@@ -151,7 +150,6 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
 
     int currentPage = m_currentPage;
 
-    updateScrollBars();
 
     QSize vs = viewport()->size();
 
@@ -163,9 +161,9 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
     QRectF matchRect;
     se->currentMatch(matchPage, matchRect);
 
-    QPoint pageStart = -m_offset;
+    QPoint pageStart = -m_offset + QPoint(PAGEFRAME,PAGEFRAME);
 
-    while (pageStart.y() < 0 || vs.height() > (pageStart.y() + PAGEDISTANCE)) {
+    while (pageStart.y() < 0 || vs.height() > (pageStart.y() + 2*PAGEFRAME)) {
         // draw another page
         image = nullptr;
 
@@ -184,7 +182,7 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         if (!image || image->isNull())
             break;
 
-        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 -m_offset.x());
+        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 -m_offset.x()+PAGEFRAME);
 
         // match further matches on page
         double sx = resX() / 72.0;
@@ -215,9 +213,12 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         // set next page
         ++currentPage;
 
-        pageStart.setY(pageStart.y() + image->height() + PAGEDISTANCE);
+        pageStart.setY(pageStart.y() + image->height() + 2*PAGEFRAME);
     }
     p.end();
+
+    updateScrollBars();
+
 }
 
 void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
@@ -353,9 +354,9 @@ void ContinousPageView::updateScrollBars()
     QScrollBar *vbar = verticalScrollBar();
     const int pageCount = m_document->numPages();
     int pageSize = pageHeight();
-    vbar->setRange(0, qMax(0,pageCount * pageSize - viewport()->height()));
+    vbar->setRange(0, (pageCount*2) * PAGEFRAME + qMax(0,pageCount * pageSize - viewport()->height()));
     vbar->blockSignals(true);
-    vbar->setValue(currentPage() * pageSize + m_offset.y());
+    vbar->setValue(currentPage() * (pageSize+2*PAGEFRAME) + m_offset.y());
     vbar->blockSignals(false);
 
     QScrollBar *hbar = horizontalScrollBar();
@@ -363,9 +364,9 @@ void ContinousPageView::updateScrollBars()
     if (m_doubleSideMode)
     {
         pageSize *=2;
-        pageSize += DOUBLEPAGEDISTANCE;
+        pageSize += PAGEFRAME;
     }
-    hbar->setRange(0, qMax(0,pageSize - viewport()->width()));
+    hbar->setRange(0, qMax(0,pageSize - viewport()->width()+ 2*PAGEFRAME) );
     hbar->blockSignals(true);
     hbar->setValue(m_offset.x());
     hbar->blockSignals(false);
