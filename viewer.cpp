@@ -54,7 +54,6 @@ PdfViewer::PdfViewer(const QString &file)
     : QMainWindow()
     , m_doc(0)
 {
-    setWindowTitle(tr("FirstAid"));
     setWindowIcon(QIcon(":/firstaid.svg"));
 
     setStyleSheet(
@@ -183,6 +182,9 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     m_filePath = file;
     m_fileWatcher.addPath(m_filePath);
 
+    // update action state & co.
+    updateOnDocumentChange();
+
     QSettings settings;
     settings.beginGroup("Files");
     setPage(settings.value(m_filePath, 0).toInt());
@@ -192,9 +194,6 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
         obs->documentLoaded();
         obs->pageChanged(page());
     }
-
-    // update action state & co.
-    updateOnDocumentChange();
 }
 
 void PdfViewer::closeDocument()
