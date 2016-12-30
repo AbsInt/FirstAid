@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "stdinreaderthread.h"
 #include "viewer.h"
 
 #include <QApplication>
@@ -71,6 +72,7 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument("file", QCoreApplication::translate("main", "PDF file to open"));
+    parser.addOption(QCommandLineOption("stdin",QCoreApplication::translate("main", "Read commands from stdin.")));
     parser.process(app);
 
     /**
@@ -87,7 +89,34 @@ int main(int argc, char *argv[])
         viewer.loadDocument(args.at(0));
 
     /**
+     * should we handle commands from stdin?
+     */
+    StdinReaderThread *stdinThread = nullptr;
+    if (parser.isSet("stdin")) {
+        stdinThread = new StdinReaderThread(&viewer);
+        stdinThread->start();
+    }
+
+    /**
      * => start event loop
      */
-    return app.exec();
+    const int returnValue = app.exec();
+
+    /**
+     * we might need to end our stdin thread!
+     */
+    if (stdinThread) {
+        /**
+         * terminate / wait for done + delete
+         * this is not nice, should be improved!
+         */
+        stdinThread->terminate();
+        stdinThread->wait();
+        delete stdinThread;
+    }
+
+    /**
+     * be done
+     */
+    return returnValue;
 }

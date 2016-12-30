@@ -22,13 +22,12 @@
 
 #include "viewer.h"
 
-#include "stdinreaderthread.h"
-
 #include "findbar.h"
 #include "navigationtoolbar.h"
 #include "continouspageview.h"
 #include "singlepageview.h"
 #include "searchengine.h"
+#include "stdinreaderthread.h"
 #include "toc.h"
 
 #include <poppler-qt5.h>
@@ -65,11 +64,6 @@ PdfViewer::PdfViewer()
                 "padding-bottom: 0px }"
                 "QToolButton::menu-indicator { image: url(empty.png) }"
                 "QMenu { padding: 1px }"));
-
-    // menuBar()->hide();
-
-    m_thread = new StdinReaderThread(this);
-    m_thread->start();
 
     // setup the menu action
     m_menu = new QMenu(this);
@@ -140,9 +134,6 @@ PdfViewer::PdfViewer()
 PdfViewer::~PdfViewer()
 {
     closeDocument();
-
-    m_thread->terminate();
-    m_thread->wait();
 }
 
 QSize PdfViewer::sizeHint() const
@@ -231,24 +222,16 @@ void PdfViewer::closeDocument()
     setWindowTitle(tr("FirstAid"));
 }
 
-bool PdfViewer::event(QEvent *e)
+void PdfViewer::processCommand(const QString &command)
 {
-    if (QEvent::User == e->type()) {
-        StdinReadEvent *sre = static_cast<StdinReadEvent *>(e);
-        QString command = sre->text().trimmed();
+    if (command.startsWith("open "))
+        loadDocument(command.mid(5));
 
-        if (command.startsWith("open "))
-            loadDocument(command.mid(5));
+    else if (command.startsWith("goto "))
+        slotGotoDestination(command.mid(5));
 
-        else if (command.startsWith("goto "))
-            slotGotoDestination(command.mid(5));
-
-        else if (command.startsWith("close"))
-            qApp->quit();
-
-        return true;
-    } else
-        return QMainWindow::event(e);
+    else if (command.startsWith("close"))
+        qApp->quit();
 }
 
 void PdfViewer::closeEvent(QCloseEvent *event)

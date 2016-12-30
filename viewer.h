@@ -20,7 +20,8 @@
 #ifndef PDFVIEWER_H
 #define PDFVIEWER_H
 
-#include <QtWidgets/QMainWindow>
+#include <QMainWindow>
+
 #include "pageview.h"
 
 class DocumentObserver;
@@ -29,7 +30,6 @@ class QAction;
 class QActionGroup;
 class QLabel;
 class QStackedWidget;
-class QThread;
 namespace Poppler
 {
 class Document;
@@ -50,8 +50,10 @@ public:
     void loadDocument(const QString &file, bool forceReload = false);
     void closeDocument();
 
-    bool event(QEvent *e) override;
     void closeEvent(QCloseEvent *e) override;
+
+public Q_SLOTS:
+    void processCommand(const QString &command);
 
 private Q_SLOTS:
     void slotOpenFileExternal();
@@ -77,7 +79,6 @@ private:
 
     Poppler::Document *m_doc;
     QString m_filePath;
-    QThread *m_thread;
 
     QStackedWidget *m_viewStack;
     TocDock *m_tocDock;

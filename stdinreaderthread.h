@@ -19,46 +19,43 @@
 #ifndef STDINREADERTHREAD_H
 #define STDINREADERTHREAD_H
 
-#include <QCoreApplication>
-#include <QEvent>
+#include <QMetaObject>
 #include <QThread>
-#include <stdio.h>
-
-class StdinReadEvent : public QEvent
-{
-public:
-    StdinReadEvent(const QString &text)
-        : QEvent(QEvent::User)
-        , m_text(text)
-    {
-    }
-
-    QString text() const
-    {
-        return m_text;
-    }
-
-private:
-    QString m_text;
-};
+#include <iostream>
 
 class StdinReaderThread : public QThread
 {
 public:
     StdinReaderThread(QObject *parent)
-        : QThread(parent)
+        : QThread()
+        , m_receiver(parent)
     {
     }
 
     void run()
     {
-        char buffer[256];
-
-        while (!feof(stdin)) {
-            if (buffer == fgets(buffer, 256, stdin))
-                QCoreApplication::postEvent(parent(), new StdinReadEvent(QString::fromLocal8Bit(buffer)), Qt::NormalEventPriority);
+        /**
+         * read until first error or closed stdin
+         */
+        while (std::cin) {
+            /**
+             * read line => queue it to main thread as command
+             */
+            std::string line;
+            std::getline (std::cin, line);
+            if (!line.empty())
+                QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, QString::fromLocal8Bit(line.c_str()).trimmed()));
         }
+
+        /**
+         * if we leave this, force close in any case
+         * if we already are closing down, nothing will happen
+         */
+        QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, QString("close")));
     }
+
+private:
+    QObject * const m_receiver;
 };
 
 #endif // #ifndef STDINREADERTHREAD_H
