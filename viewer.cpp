@@ -154,7 +154,7 @@ QSize PdfViewer::sizeHint() const
     return QSize(500, 600);
 }
 
-void PdfViewer::loadDocument(const QString &file, bool forceReload)
+void PdfViewer::loadDocument(QString file, bool forceReload)
 {
     if (file == m_filePath && !forceReload) {
         raise();
