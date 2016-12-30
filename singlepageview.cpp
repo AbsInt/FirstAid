@@ -115,17 +115,20 @@ void ImageLabel::mousePressEvent(QMouseEvent *event)
         }
     }
 
-    m_rubberBandOrigin = event->pos();
-    m_rubberBand->setGeometry(QRect(m_rubberBandOrigin, QSize()));
-    m_rubberBand->show();
+    if (event->modifiers().testFlag(Qt::ShiftModifier)) {
+        m_rubberBandOrigin = event->pos();
+        m_rubberBand->setGeometry(QRect(m_rubberBandOrigin, QSize()));
+        m_rubberBand->show();
+    }
 }
 
 void ImageLabel::mouseReleaseEvent(QMouseEvent *)
 {
-    m_rubberBandOrigin = QPoint(0, 0);
-    m_rubberBand->hide();
-
-    emit copyRequested(m_rubberBand->geometry().intersected(m_displayRect).translated(-m_displayRect.topLeft()));
+    if (!m_rubberBandOrigin.isNull()) {
+        m_rubberBandOrigin=QPoint(0, 0);
+        m_rubberBand->hide();
+        emit copyRequested(m_rubberBand->geometry().intersected(m_displayRect).translated(-m_displayRect.topLeft()));
+    }
 }
 
 /*
