@@ -92,8 +92,6 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     addWidget(spacer);
 
     m_zoomCombo = new QComboBox(this);
-    m_zoomCombo->setInsertPolicy(QComboBox::NoInsert);
-    m_zoomCombo->setEditable(true);
     m_zoomCombo->addItem(tr("Fit width"));
     m_zoomCombo->addItem(tr("Fit page"));
     m_zoomCombo->addItem(tr("10%"));
@@ -110,10 +108,9 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomCombo->addItem(tr("400%"));
 
     QSettings s;
-    m_zoomCombo->setCurrentText(s.value("MainWindow/zoom", "100%").toString());
+    m_zoomCombo->setCurrentIndex(s.value("MainWindow/zoom", 8).toInt());
 
     connect(m_zoomCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotZoomComboChanged()));
-    connect(m_zoomCombo->lineEdit(), SIGNAL(returnPressed()), this, SLOT(slotZoomComboChanged()));
     addWidget(m_zoomCombo);
 
     // add menu replacement action to right side
@@ -136,7 +133,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 NavigationToolBar::~NavigationToolBar()
 {
     QSettings s;
-    s.setValue("MainWindow/zoom", m_zoomCombo->currentText());
+    s.setValue("MainWindow/zoom", m_zoomCombo->currentIndex());
 }
 
 void NavigationToolBar::documentLoaded()
