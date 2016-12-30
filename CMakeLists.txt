@@ -19,6 +19,12 @@ if(ABSINT)
     else()
         add_definitions (-DAI_LINK_QT_STATIC_LINUX)
     endif()
+
+    # prefer local poppler
+    include_directories(${CMAKE_INSTALL_PREFIX}/include/poppler/qt5)
+else()
+    # prefer system poppler
+    include_directories(/usr/include/poppler/qt5)
 endif()
 
 # Find includes in corresponding build directories
@@ -33,9 +39,6 @@ find_package(Qt5Core)
 find_package(Qt5Widgets)
 find_package(Qt5PrintSupport)
 find_package(Qt5Xml)
-
-# prefer local poppler
-include_directories(${CMAKE_INSTALL_PREFIX}/include/poppler/qt5)
 
 set(firstaid_SRCS
   abstractinfodock.cpp
@@ -77,7 +80,7 @@ install(TARGETS firstaid DESTINATION bin)
 if(ABSINT)
     # sign result binary for AbsInt internal compilation
     ur_install_win_executable (firstaid)
-    
+
     #
     # generate "make reformat" target for given 'file-list bash expression'
     # here: all *.cpp + *.h files
