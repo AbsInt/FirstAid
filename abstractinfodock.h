@@ -16,8 +16,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef ABSTRACTINFODOCK_H
-#define ABSTRACTINFODOCK_H
+#pragma once
 
 #include <QDockWidget>
 
@@ -44,5 +43,3 @@ private Q_SLOTS:
 private:
     bool m_filled;
 };
-
-#endif

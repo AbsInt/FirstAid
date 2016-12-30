@@ -4,6 +4,7 @@
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
+ * Copyright (C) 2016, Christoph Cullmann <cullmann@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

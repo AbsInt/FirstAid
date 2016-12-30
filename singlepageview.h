@@ -18,8 +18,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef SINGLEPAGEVIEW_H
-#define SINGLEPAGEVIEW_H
+#pragma once
 
 #include <QMenu>
 #include <QLabel>
@@ -91,5 +90,3 @@ private slots:
 private:
     ImageLabel *m_imageLabel;
 };
-
-#endif // #ifndef SINGLEPAGEVIEW_H
