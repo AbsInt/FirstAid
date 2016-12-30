@@ -55,7 +55,7 @@ PdfViewer::PdfViewer(const QString &file)
     , m_doc(0)
 {
     setWindowTitle(tr("FirstAid"));
-    setWindowIcon(QIcon(":/firstaid.png"));
+    setWindowIcon(QIcon(":/firstaid.svg"));
 
     setStyleSheet(
         QString("QToolButton { border-width: 1px; border-radius: 6px; border-style: none; padding: 2px }"

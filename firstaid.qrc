@@ -1,6 +1,6 @@
 <RCC>
     <qresource>
-        <file>firstaid.png</file>
+        <file>firstaid.svg</file>
         <file>icons/acrobat.svg</file>
         <file>icons/application-menu.svg</file>
         <file>icons/application-exit.svg</file>
