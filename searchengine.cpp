@@ -31,7 +31,6 @@
  * defines
  */
 
-#define SearchInterval 10
 #define PagePileSize 20
 
 /*
@@ -47,12 +46,6 @@ SearchEngine *SearchEngine::s_globalInstance = nullptr;
 SearchEngine::SearchEngine()
     : DocumentObserver()
 {
-    m_timer = new QTimer(this);
-    m_timer->setInterval(SearchInterval);
-    m_timer->setSingleShot(true);
-
-    connect(m_timer, SIGNAL(timeout()), SLOT(find()));
-
     reset();
 }
 
@@ -122,8 +115,6 @@ QList<QRectF> SearchEngine::matchesFor(int page) const
 
 void SearchEngine::reset()
 {
-    m_timer->stop();
-
     m_matchesForPage.clear();
     m_currentMatchPage = 0;
     m_currentMatchIndex = 0;
@@ -133,8 +124,6 @@ void SearchEngine::reset()
 
 void SearchEngine::find(const QString &text)
 {
-    m_timer->stop();
-
     if (text == m_findText) {
         if (QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
             previousMatch();
@@ -161,7 +150,7 @@ void SearchEngine::find(const QString &text)
     if (m_findStopAfterPage < 0)
         m_findStopAfterPage = document()->numPages() - 1;
 
-    m_timer->start();
+    find();
 }
 
 void SearchEngine::nextMatch()
@@ -271,7 +260,7 @@ void SearchEngine::find()
             m_findCurrentPage = 0;
     }
 
-    m_timer->start();
+    QTimer::singleShot(0, this, SLOT(find()));
 }
 
 /*

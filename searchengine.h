@@ -25,8 +25,6 @@
 #include <QList>
 #include <QObject>
 
-class QTimer;
-
 class SearchEngine : public QObject, public DocumentObserver
 {
     Q_OBJECT
@@ -69,7 +67,6 @@ private:
     QString m_findText;
     int m_findCurrentPage;
     int m_findStopAfterPage;
-    QTimer *m_timer;
 
     // members for navigating in find results
     QHash<int, QList<QRectF>> m_matchesForPage;
