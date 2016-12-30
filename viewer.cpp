@@ -121,14 +121,12 @@ PdfViewer::PdfViewer()
 
     connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
-    // restore old geometry
-    QRect r = QApplication::desktop()->availableGeometry(this);
+    /**
+     * restore old geometry & dock widget state, will handle "bad geometries", see http://doc.qt.io/qt-5.7/qmainwindow.html#restoreState
+     */
     QSettings settings;
-    settings.beginGroup("MainWindow");
-    resize(settings.value("size", 3 * r.size() / 4).toSize());
-    move(settings.value("pos", QPoint(r.width() / 8, r.height() / 8)).toPoint());
-    m_tocDock->setVisible(settings.value("tocVisible", false).toBool());
-    settings.endGroup();
+    restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+    restoreState(settings.value("MainWindow/windowState").toByteArray());
 
     /**
      * auto-reload
@@ -233,14 +231,12 @@ void PdfViewer::processCommand(const QString &command)
 
 void PdfViewer::closeEvent(QCloseEvent *event)
 {
-    // save geometry
+    /**
+     * save geometry & dock widgets state, like show in http://doc.qt.io/qt-5.7/qmainwindow.html#saveState
+     */
     QSettings settings;
-    settings.beginGroup("MainWindow");
-    settings.setValue("size", size());
-    settings.setValue("pos", pos());
-    settings.setValue("tocVisible", m_tocDock->isVisible());
-    settings.endGroup();
-
+    settings.setValue("MainWindow/geometry", saveGeometry());
+    settings.setValue("MainWindow/windowState", saveState());
     QMainWindow::closeEvent(event);
 }
 
