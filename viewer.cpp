@@ -39,7 +39,6 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QFileDialog>
-#include <QInputDialog>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -159,20 +158,10 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
     }
 
     Poppler::Document *newdoc = Poppler::Document::load(file);
-    if (!newdoc) {
+    if (!newdoc || newdoc->isLocked()) {
         QMessageBox msgbox(QMessageBox::Critical, tr("Open Error"), tr("Cannot open:\n") + file, QMessageBox::Ok, this);
         msgbox.exec();
         return;
-    }
-
-    while (newdoc->isLocked()) {
-        bool ok = true;
-        QString password = QInputDialog::getText(this, tr("Document Password"), tr("Please insert the password of the document:"), QLineEdit::Password, QString(), &ok);
-        if (!ok) {
-            delete newdoc;
-            return;
-        }
-        newdoc->unlock(password.toLatin1(), password.toLatin1());
     }
 
     closeDocument();
