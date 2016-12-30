@@ -256,6 +256,8 @@ void ContinousPageView::keyPressEvent(QKeyEvent *event)
             return;
         }
     }
+
+    QAbstractScrollArea::keyPressEvent(event);
 }
 
 /*
