@@ -24,6 +24,7 @@
 
 #include "pageview.h"
 
+class ContinousPageView;
 class DocumentObserver;
 class TocDock;
 class QAction;
@@ -63,9 +64,7 @@ private Q_SLOTS:
     void slotSetZoom(qreal zoom);
     void slotSetZoomMode(PageView::ZoomMode mode);
     void slotGotoDestination(const QString &destination);
-    void slotToggleContinous(bool on);
     void slotToggleFacingPages(bool on);
-    void slotSetFocus();
 
     void slotCurrentPageChanged(int page);
 
@@ -78,12 +77,12 @@ private:
     QAction *m_fileOpenExternalAct;
     QAction *m_filePrintAct;
 
+    ContinousPageView *m_view;
     QList<DocumentObserver *> m_observers;
 
     Poppler::Document *m_doc;
     QString m_filePath;
 
-    QStackedWidget *m_viewStack;
     TocDock *m_tocDock;
 
     QMenu *m_menu;

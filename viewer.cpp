@@ -90,23 +90,16 @@ PdfViewer::PdfViewer()
     QVBoxLayout *vbl = new QVBoxLayout(w);
     vbl->setContentsMargins(0, 0, 0, 0);
 
-    m_viewStack = new QStackedWidget(w);
-    vbl->addWidget(m_viewStack);
-    setFocusProxy(m_viewStack);
+    m_view = new ContinousPageView(this);
+    vbl->addWidget(m_view);
+    connect(m_view, SIGNAL(currentPageChanged(int)), SLOT(slotCurrentPageChanged(int)));
+    setFocusProxy(m_view);
 
     FindBar *fb = new FindBar(w);
     m_observers.append(fb);
     vbl->addWidget(fb);
 
     setCentralWidget(w);
-
-    SinglePageView *spv = new SinglePageView(this);
-    m_viewStack->addWidget(spv);
-    connect(spv, SIGNAL(currentPageChanged(int)), SLOT(slotCurrentPageChanged(int)));
-
-    ContinousPageView *cpv = new ContinousPageView(this);
-    m_viewStack->addWidget(cpv);
-    connect(cpv, SIGNAL(currentPageChanged(int)), SLOT(slotCurrentPageChanged(int)));
 
     m_tocDock = new TocDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, m_tocDock);
@@ -124,7 +117,6 @@ PdfViewer::PdfViewer()
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
-    connect(navbar, SIGNAL(toggleContinous(bool)), SLOT(slotToggleContinous(bool)));
     connect(navbar, SIGNAL(toggleFacingPages(bool)), SLOT(slotToggleFacingPages(bool)));
 
     connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
@@ -182,8 +174,7 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
     m_doc->setRenderHint(Poppler::Document::Antialiasing, true);
     m_doc->setRenderBackend(Poppler::Document::SplashBackend);
 
-    for (int i = 0; i < m_viewStack->count(); ++i)
-        dynamic_cast<PageView *>(m_viewStack->widget(i))->setDocument(m_doc);
+    m_view->setDocument(m_doc);
 
     m_fileOpenExternalAct->setEnabled(true);
     m_filePrintAct->setEnabled(true);
@@ -215,8 +206,7 @@ void PdfViewer::closeDocument()
     settings.setValue(m_filePath, page());
     settings.endGroup();
 
-    for (int i = 0; i < m_viewStack->count(); ++i)
-        dynamic_cast<PageView *>(m_viewStack->widget(i))->setDocument(nullptr);
+    m_view->setDocument(nullptr);
 
     foreach (DocumentObserver *obs, m_observers)
         obs->documentClosed();
@@ -325,42 +315,28 @@ void PdfViewer::slotAbout()
 
 void PdfViewer::slotSetZoom(qreal zoom)
 {
-    for (int i = 0; i < m_viewStack->count(); ++i)
-        dynamic_cast<PageView *>(m_viewStack->widget(i))->setZoom(zoom);
+    m_view->setZoom(zoom);
 }
 
 void PdfViewer::slotSetZoomMode(PageView::ZoomMode mode)
 {
-    for (int i = 0; i < m_viewStack->count(); ++i)
-        dynamic_cast<PageView *>(m_viewStack->widget(i))->setZoomMode(mode);
+    m_view->setZoomMode(mode);
 }
 
 void PdfViewer::slotGotoDestination(const QString &destination)
 {
-    for (int i = 0; i < m_viewStack->count(); ++i)
-        dynamic_cast<PageView *>(m_viewStack->widget(i))->gotoDestination(destination);
-}
-
-void PdfViewer::slotToggleContinous(bool on)
-{
-    m_viewStack->setCurrentIndex(on);
+    m_view->gotoDestination(destination);
 }
 
 void PdfViewer::slotToggleFacingPages(bool on)
 {
-    for (int i = 0; i < m_viewStack->count(); ++i)
-        dynamic_cast<PageView *>(m_viewStack->widget(i))->setDoubleSideMode(on ? PageView::DoubleSidedNotFirst : PageView::None);
+    m_view->setDoubleSideMode(on ? PageView::DoubleSidedNotFirst : PageView::None);
 }
 
 void PdfViewer::slotCurrentPageChanged(int page)
 {
     foreach (DocumentObserver *obs, m_observers)
         obs->pageChanged(page);
-}
-
-void PdfViewer::slotSetFocus()
-{
-    m_viewStack->currentWidget()->setFocus();
 }
 
 void PdfViewer::setPage(int page)
@@ -371,11 +347,10 @@ void PdfViewer::setPage(int page)
     if (page == this->page())
         return;
 
-    for (int i = 0; i < m_viewStack->count(); ++i)
-        dynamic_cast<PageView *>(m_viewStack->widget(i))->gotoPage(page);
+    m_view->gotoPage(page);
 }
 
 int PdfViewer::page() const
 {
-    return dynamic_cast<PageView *>(m_viewStack->currentWidget())->currentPage();
+    return m_view->currentPage();
 }

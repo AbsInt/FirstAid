@@ -55,11 +55,6 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QShortcut *tocShortcut = new QShortcut(Qt::Key_F7, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
 
-    m_toggleContinousAct = addAction(QIcon(":/icons/zoom-select-y.svg"), tr("Toggle continous mode"));
-    m_toggleContinousAct->setCheckable(true);
-    m_toggleContinousAct->setChecked(s.value("MainWindow/continous", true).toBool());
-    connect(m_toggleContinousAct, SIGNAL(toggled(bool)), SLOT(slotToggleContinous()));
-
     m_toggleFacingPagesAct = addAction(QIcon(":/icons/facing-pages.svg"), tr("Facing pages"));
     m_toggleFacingPagesAct->setCheckable(true);
     m_toggleFacingPagesAct->setChecked(s.value("MainWindow/facingPages", true).toBool());
@@ -139,7 +134,6 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_prevAct->setEnabled(false);
     m_nextAct->setEnabled(false);
 
-    QTimer::singleShot(0, this, SLOT(slotToggleContinous()));
     QTimer::singleShot(0, this, SLOT(slotToggleFacingPages()));
     QTimer::singleShot(0, this, SLOT(slotZoomComboChanged()));
 }
@@ -148,7 +142,6 @@ NavigationToolBar::~NavigationToolBar()
 {
     QSettings s;
     s.setValue("MainWindow/zoom", m_zoomCombo->currentIndex());
-    s.setValue("MainWindow/continous", m_toggleContinousAct->isChecked());
     s.setValue("MainWindow/facingPages", m_toggleFacingPagesAct->isChecked());
 }
 
@@ -255,11 +248,6 @@ void NavigationToolBar::slotZoomComboChanged()
         if (ok && value >= 10 && value <= 400)
             emit zoomChanged(qreal(value) / 100);
     }
-}
-
-void NavigationToolBar::slotToggleContinous()
-{
-    emit toggleContinous(m_toggleContinousAct->isChecked());
 }
 
 void NavigationToolBar::slotToggleFacingPages()
