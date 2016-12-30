@@ -27,18 +27,18 @@
 
 #include <poppler-qt5.h>
 
-#include <QtGui/QClipboard>
-#include <QtGui/QCursor>
-#include <QtGui/QDesktopServices>
-#include <QtGui/QImage>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QPainter>
-#include <QtGui/QPixmap>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QDesktopWidget>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QRubberBand>
-#include <QtWidgets/QScrollBar>
+#include <QClipboard>
+#include <QCursor>
+#include <QDesktopServices>
+#include <QImage>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPixmap>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QLabel>
+#include <QRubberBand>
+#include <QScrollBar>
 
 #include <QDebug>
 

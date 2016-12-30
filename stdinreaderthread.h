@@ -42,7 +42,7 @@ public:
              * read line => queue it to main thread as command
              */
             std::string line;
-            std::getline (std::cin, line);
+            std::getline(std::cin, line);
             if (!line.empty())
                 QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, QString::fromLocal8Bit(line.c_str()).trimmed()));
         }
@@ -55,7 +55,7 @@ public:
     }
 
 private:
-    QObject * const m_receiver;
+    QObject *const m_receiver;
 };
 
 #endif // #ifndef STDINREADERTHREAD_H

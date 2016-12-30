@@ -19,7 +19,7 @@
 #ifndef ABSTRACTINFODOCK_H
 #define ABSTRACTINFODOCK_H
 
-#include <QtWidgets/QDockWidget>
+#include <QDockWidget>
 
 #include "documentobserver.h"
 

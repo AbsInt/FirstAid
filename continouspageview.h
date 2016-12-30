@@ -19,8 +19,8 @@
 #ifndef SCROLLVIEW_H
 #define SCROLLVIEW_H
 
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QAbstractScrollArea>
+#include <QLabel>
+#include <QAbstractScrollArea>
 
 #include "documentobserver.h"
 #include "pageview.h"

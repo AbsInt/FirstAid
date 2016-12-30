@@ -21,9 +21,9 @@
 #ifndef SINGLEPAGEVIEW_H
 #define SINGLEPAGEVIEW_H
 
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QScrollArea>
+#include <QMenu>
+#include <QLabel>
+#include <QScrollArea>
 
 #include "documentobserver.h"
 #include "pageview.h"
