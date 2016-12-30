@@ -208,8 +208,6 @@ void NavigationToolBar::slotHideGoto()
     m_pageFullLabelAct->setVisible(true);
     m_pageEditAct->setVisible(false);
     m_pageLabelAct->setVisible(false);
-
-    emit lostFocus();
 }
 
 void NavigationToolBar::slotZoomComboChanged()

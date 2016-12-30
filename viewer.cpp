@@ -117,7 +117,6 @@ PdfViewer::PdfViewer()
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
     connect(navbar, SIGNAL(toggleContinous(bool)), SLOT(slotToggleContinous(bool)));
-    connect(navbar, SIGNAL(lostFocus()), SLOT(slotSetFocus()));
 
     connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
