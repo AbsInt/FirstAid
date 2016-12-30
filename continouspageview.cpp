@@ -42,7 +42,8 @@
 
 #include <QDebug>
 
-#define PAGEDISTANCE 20
+#define PAGEDISTANCE        20
+#define DOUBLEPAGEDISTANCE  5
 
 /*
  * constructors / destructor
@@ -70,8 +71,8 @@ ContinousPageView::ContinousPageView(QWidget *parent)
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(scrolled()));
     connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(scrolled()));
 
-    horizontalScrollBar()->setSingleStep(1);
-    verticalScrollBar()->setSingleStep(1);
+    horizontalScrollBar()->setSingleStep(10);
+    verticalScrollBar()->setSingleStep(10);
 
     reset();
 }
@@ -117,24 +118,10 @@ void ContinousPageView::scrolled()
     // set page
     value -= (page * pageSize);
     // scroll(page,value);
-    m_offset = value;
+    m_offset = QPoint(horizontalScrollBar()->value(),value);
     if (page < m_document->numPages())
         m_currentPage = page;
     paint();
-}
-
-int ContinousPageView::pageHeight()
-{
-    if (!m_document)
-        return 0;
-
-    int pageSize = 0;
-    if (Poppler::Page *popplerPage = m_document->page(currentPage()))
-    {
-        pageSize = popplerPage->pageSize().height();
-        delete popplerPage;
-    }
-    return (pageSize * resY()) / 72.0;;
 }
 
 /*
@@ -169,13 +156,7 @@ void ContinousPageView::paint()
 
     int currentPage = m_currentPage;
 
-    QScrollBar *vbar = verticalScrollBar();
-    const int pageCount = m_document->numPages();
-    int pageSize = pageHeight();
-    vbar->setRange(0, pageCount * pageSize - viewport()->height());
-    vbar->blockSignals(true);
-    vbar->setValue(currentPage * pageSize + m_offset);
-    vbar->blockSignals(false);
+    updateScrollBars();
 
     QSize vs = viewport()->size();
 
@@ -188,7 +169,7 @@ void ContinousPageView::paint()
     QRectF matchRect;
     se->currentMatch(matchPage, matchRect);
 
-    QPoint pageStart = QPoint(0, -m_offset);
+    QPoint pageStart = -m_offset;
 
     while (pageStart.y() < 0 || vs.height() > (pageStart.y() + PAGEDISTANCE)) {
         // draw another page
@@ -209,7 +190,7 @@ void ContinousPageView::paint()
         if (!image || image->isNull())
             break;
 
-        pageStart.setX(qMax(0, vs.width() - image->width()) / 2);
+        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 + pageStart.x());
 
         // match further matches on page
         double sx = resX() / 72.0;
@@ -255,12 +236,6 @@ void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
 {
     m_imageCache.clear();
     setSize(viewport()->size() - QSize(1, 1));
-    if (m_document) {
-        QScrollBar *vbar = verticalScrollBar();
-        const int pageCount = m_document->numPages();
-
-        vbar->setRange(0, pageCount * pageHeight() - viewport()->height());
-    }
     paint();
 }
 
@@ -330,4 +305,60 @@ void ContinousPageView::slotMatchesFound(int page, const QList<QRectF> &)
 {
     if (page == m_currentPage)
         paint();
+}
+
+
+/*
+ * private methods
+ */
+
+int ContinousPageView::pageHeight()
+{
+    if (!m_document)
+        return 0;
+
+    int pageSize = 0;
+    if (Poppler::Page *popplerPage = m_document->page(currentPage()))
+    {
+        pageSize = popplerPage->pageSize().height();
+        delete popplerPage;
+    }
+    return (pageSize * resY()) / 72.0;
+}
+
+int ContinousPageView::pageWidth()
+{
+    if (!m_document)
+        return 0;
+
+    int pageSize = 0;
+    if (Poppler::Page *popplerPage = m_document->page(currentPage()))
+    {
+        pageSize = popplerPage->pageSize().width();
+        delete popplerPage;
+    }
+    return (pageSize * resX()) / 72.0;;
+}
+
+void ContinousPageView::updateScrollBars()
+{
+    QScrollBar *vbar = verticalScrollBar();
+    const int pageCount = m_document->numPages();
+    int pageSize = pageHeight();
+    vbar->setRange(0, qMax(0,pageCount * pageSize - viewport()->height()));
+    vbar->blockSignals(true);
+    vbar->setValue(currentPage() * pageSize + m_offset.y());
+    vbar->blockSignals(false);
+
+    QScrollBar *hbar = horizontalScrollBar();
+    pageSize = pageWidth();
+    if (m_doubleSideMode)
+    {
+        pageSize *=2;
+        pageSize += DOUBLEPAGEDISTANCE;
+    }
+    hbar->setRange(0, qMax(0,pageSize - viewport()->width()));
+    hbar->blockSignals(true);
+    hbar->setValue(m_offset.x());
+    hbar->blockSignals(false);
 }
