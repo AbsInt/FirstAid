@@ -62,6 +62,7 @@ public Q_SLOTS:
     void processCommand(const QString &command);
 
 private Q_SLOTS:
+    void slotOpenFile();
     void slotOpenFileExternal();
     void slotReload();
     void slotPrint();

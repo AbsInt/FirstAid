@@ -46,6 +46,7 @@
 #include <QPainter>
 #include <QPrintDialog>
 #include <QPrinter>
+#include <QProcess>
 #include <QProgressDialog>
 #include <QStackedWidget>
 #include <QVBoxLayout>
@@ -68,12 +69,16 @@ PdfViewer::PdfViewer(const QString &file)
 
     // setup the menu action
     QMenu *menu = new QMenu(this);
-    m_fileOpenExternalAct = menu->addAction(QIcon(":/icons/acrobat.svg"), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
-    m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
+
+    QAction *fileOpen = menu->addAction(QIcon(":/icons/document-open.svg"), tr("&Open"), this, SLOT(slotOpenFile()));
+    fileOpen->setShortcut(QKeySequence::Open);
 
     m_fileReloadAct = menu->addAction(QIcon(":/icons/view-refresh.svg"), tr("&Reload"), this, SLOT(slotReload()));
     m_fileReloadAct->setShortcut(QKeySequence::Refresh);
     menu->addSeparator();
+
+    m_fileOpenExternalAct = menu->addAction(QIcon(":/icons/acrobat.svg"), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
+    m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
 
     m_filePrintAct = menu->addAction(QIcon(":/icons/document-print.svg"), tr("&Print..."), this, SLOT(slotPrint()));
     m_filePrintAct->setShortcut(QKeySequence::Print);
@@ -243,6 +248,30 @@ void PdfViewer::closeEvent(QCloseEvent *event)
     settings.setValue("MainWindow/geometry", saveGeometry());
     settings.setValue("MainWindow/windowState", saveState());
     QMainWindow::closeEvent(event);
+}
+
+void PdfViewer::slotOpenFile()
+{
+    /**
+     * get file to open, if any
+     */
+    const QString fileName = QFileDialog::getOpenFileName(this, tr("Open PDF"), m_filePath, tr("PDFs (*.pdf)"));
+    if (fileName.isEmpty())
+        return;
+
+    /**
+     * only allow to open in THIS instance, if no file opened ATM
+     * else we might open a different document in the online help mode => that would confuse the main application
+     */
+    if (!m_doc) {
+        loadDocument(fileName);
+        return;
+    }
+
+    /**
+     * else: spawn new instance of FirstAid
+     */
+    QProcess::startDetached(QCoreApplication::applicationFilePath(), QStringList() << fileName);
 }
 
 void PdfViewer::slotOpenFileExternal()
