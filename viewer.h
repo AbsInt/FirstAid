@@ -58,6 +58,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void slotOpenFileExternal();
+    void slotReload();
     void slotPrint();
     void slotAbout();
 
@@ -72,9 +73,15 @@ private:
     void setPage(int page);
     int page() const;
 
+    /**
+     * Update e.g. actions on document change
+     */
+    void updateOnDocumentChange();
+
     int m_currentPage;
 
     QAction *m_fileOpenExternalAct;
+    QAction *m_fileReloadAct;
     QAction *m_filePrintAct;
 
     ContinousPageView *m_view;

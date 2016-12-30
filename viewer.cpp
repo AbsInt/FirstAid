@@ -72,11 +72,13 @@ PdfViewer::PdfViewer()
     m_menu = new QMenu(this);
     m_fileOpenExternalAct = m_menu->addAction(QIcon(":/icons/acrobat.svg"), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
     m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
-    m_fileOpenExternalAct->setEnabled(false);
+
+    m_fileReloadAct = m_menu->addAction(QIcon(":/icons/view-refresh.svg"), tr("&Reload..."), this, SLOT(slotReload()));
+    m_fileReloadAct->setShortcut(QKeySequence::Refresh);
+    m_menu->addSeparator();
 
     m_filePrintAct = m_menu->addAction(QIcon(":/icons/document-print.svg"), tr("&Print..."), this, SLOT(slotPrint()));
     m_filePrintAct->setShortcut(QKeySequence::Print);
-    m_filePrintAct->setEnabled(false);
     m_menu->addSeparator();
 
     QAction *act = m_menu->addAction(QIcon(":/icons/help-about.svg"), tr("&About"), this, SLOT(slotAbout()));
@@ -128,6 +130,9 @@ PdfViewer::PdfViewer()
     move(settings.value("pos", QPoint(r.width() / 8, r.height() / 8)).toPoint());
     m_tocDock->setVisible(settings.value("tocVisible", false).toBool());
     settings.endGroup();
+
+    // update action state & co
+    updateOnDocumentChange();
 }
 
 PdfViewer::~PdfViewer()
@@ -175,14 +180,7 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
 
     m_view->setDocument(m_doc);
 
-    m_fileOpenExternalAct->setEnabled(true);
-    m_filePrintAct->setEnabled(true);
     m_filePath = file;
-
-    if (m_doc->title().isEmpty())
-        setWindowTitle(QFileInfo(m_filePath).fileName());
-    else
-        setWindowTitle(m_doc->title());
 
     QSettings settings;
     settings.beginGroup("Files");
@@ -193,6 +191,9 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
         obs->documentLoaded();
         obs->pageChanged(page());
     }
+
+    // update action state & co.
+    updateOnDocumentChange();
 }
 
 void PdfViewer::closeDocument()
@@ -213,12 +214,10 @@ void PdfViewer::closeDocument()
     m_currentPage = 0;
     delete m_doc;
     m_doc = 0;
-
-    m_fileOpenExternalAct->setEnabled(false);
-    m_filePrintAct->setEnabled(false);
     m_filePath.clear();
 
-    setWindowTitle(tr("FirstAid"));
+    // update action state & co.
+    updateOnDocumentChange();
 }
 
 void PdfViewer::processCommand(const QString &command)
@@ -250,6 +249,12 @@ void PdfViewer::slotOpenFileExternal()
 {
     if (!QDesktopServices::openUrl(QUrl::fromLocalFile(m_filePath)))
         QMessageBox::warning(this, "Error", "Failed to open file in external PDF viewer.");
+}
+
+void PdfViewer::slotReload()
+{
+    if (!m_filePath.isEmpty())
+        loadDocument(m_filePath, true /* force reload */);
 }
 
 void PdfViewer::slotPrint()
@@ -352,4 +357,26 @@ void PdfViewer::setPage(int page)
 int PdfViewer::page() const
 {
     return m_view->currentPage();
+}
+
+void PdfViewer::updateOnDocumentChange()
+{
+    /**
+     * action states
+     */
+    m_fileOpenExternalAct->setEnabled(m_doc);
+    m_fileReloadAct->setEnabled(m_doc);
+    m_filePrintAct->setEnabled(m_doc);
+
+    /**
+     * Window title update
+     */
+    if (m_doc) {
+        if (m_doc->title().isEmpty())
+            setWindowTitle(QFileInfo(m_filePath).fileName());
+        else
+            setWindowTitle(m_doc->title());
+    } else {
+        setWindowTitle(tr("FirstAid"));
+    }
 }
