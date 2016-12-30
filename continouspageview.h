@@ -42,6 +42,9 @@ public:
 
     void gotoPage(int page) override;
     void setDocument(Poppler::Document *document) override;
+    void setDoubleSideMode(DoubleSideMode mode) override;
+    void setZoomMode(ZoomMode mode) override;
+    void setZoom(qreal zoom) override;
 signals:
     void currentPageChanged(int page);
 
