@@ -23,6 +23,7 @@
 
 #include "viewer.h"
 
+#include "config.h"
 #include "findbar.h"
 #include "navigationtoolbar.h"
 #include "continouspageview.h"
@@ -343,12 +344,19 @@ void PdfViewer::slotPrint()
 
 void PdfViewer::slotAbout()
 {
+    /**
+     * construct release info, if defined to something != ""
+     */
+    QString releaseInfo;
+    if (!QString(FIRSTAID_RELEASE_STRING).isEmpty())
+        releaseInfo = tr("<p><b>Version %1 Build %2<br>Tag %3</b></p>").arg(FIRSTAID_RELEASE_STRING).arg(FIRSTAID_BUILD_STRING).arg(FIRSTAID_TAG_STRING);
+
     QMessageBox::about(this, tr("About FirstAid"),
-        tr("<h1>FirstAid - PDF Help Viewer</h1>"
-    "Based on the <a href=\"https://poppler.freedesktop.org/\">Poppler PDF rendering library</a>.<br>"
+        tr("<h1>FirstAid - PDF Help Viewer</h1>%1"
+    "<p>Based on the <a href=\"https://poppler.freedesktop.org/\">Poppler PDF rendering library</a>.<br>"
     "License: <a href=\"https://github.com/AbsInt/FirstAid/blob/master/COPYING\">GPLv2+</a><br>"
-    "Sources: <a href=\"https://github.com/AbsInt/FirstAid\">https://github.com/AbsInt/FirstAid</a><br>"
-    ));
+    "Sources: <a href=\"https://github.com/AbsInt/FirstAid\">https://github.com/AbsInt/FirstAid</a></p>"
+    ).arg(releaseInfo));
 }
 
 void PdfViewer::slotSetZoom(qreal zoom)

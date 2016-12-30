@@ -1,6 +1,7 @@
 moc_*
 *.depends
 qrc_*
+config.h
 env.sh
 CMakeCache.txt
 CMakeFiles

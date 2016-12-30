@@ -22,10 +22,23 @@ if(ABSINT)
 
     # prefer local poppler
     include_directories(${CMAKE_INSTALL_PREFIX}/include/poppler/qt5)
+
+    # setup AbsInt release info
+    set (FIRSTAID_BUILD ${UR_BUILD})
+    set (FIRSTAID_TAG ${UR_TAG})
+    set (FIRSTAID_RELEASE ${UR_RELEASE})
 else()
     # prefer system poppler
     include_directories(/usr/include/poppler/qt5)
+
+    # setup public release info, fill in values if you like to have this in About
+    set (FIRSTAID_BUILD "")
+    set (FIRSTAID_TAG "")
+    set (FIRSTAID_RELEASE "")
 endif()
+
+# config.h, e.g. for version
+configure_file (config.h.cmake config.h)
 
 # Find includes in corresponding build directories
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
