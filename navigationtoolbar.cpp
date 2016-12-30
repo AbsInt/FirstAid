@@ -37,12 +37,17 @@
 NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent)
     : QToolBar("Navigation", parent)
 {
+<<<<<<< HEAD
     // for state saving
     setObjectName("navigation_toolbar");
 
+=======
+    // we stay in place
+>>>>>>> fa24fe860de0cd173537f3d9e35fcd748510c4aa
     setFloatable(false);
     setMovable(false);
 
+    // prepare access to settings
     QSettings s;
 
     // some shortcuts for first/last page
@@ -58,19 +63,23 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QShortcut *tocShortcut = new QShortcut(Qt::Key_F7, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
 
+    // left side also holds the toggle button for facing pages mode
     m_toggleFacingPagesAct = addAction(QIcon(":/icons/facing-pages.svg"), tr("Facing pages"));
     m_toggleFacingPagesAct->setCheckable(true);
     m_toggleFacingPagesAct->setChecked(s.value("MainWindow/facingPages", true).toBool());
     connect(m_toggleFacingPagesAct, SIGNAL(toggled(bool)), SLOT(slotToggleFacingPages()));
 
+    // add some space so next widget group is centered
     QWidget *spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(spacer);
 
-    m_prevAct = addAction(QIcon(":/icons/go-previous.svg"), tr("Previous"), this, SLOT(slotGoPrev()));
+    // previous page action
+    m_prevAct = addAction(QIcon(":/icons/go-previous.svg"), tr("Previous page"), this, SLOT(slotGoPrev()));
     QShortcut *previousShortcut = new QShortcut(Qt::Key_Backspace, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
+    // combined line edit for goto action and status label
     m_pageEdit = new QLineEdit(this);
     m_pageEdit->setMaxLength(6);
     m_pageEdit->setFixedWidth(50);
@@ -81,22 +90,26 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_intValidator = new QIntValidator(this);
     m_pageEdit->setValidator(m_intValidator);
 
-    QShortcut *gotoShortCut = new QShortcut(Qt::ControlModifier + Qt::Key_G, this);
-    connect(gotoShortCut, SIGNAL(activated()), SLOT(slotGoto()));
-
     m_pageLabel = new QLabel(this);
     m_pageLabel->setAlignment(Qt::AlignCenter);
     m_pageLabel->installEventFilter(this);
     m_pageLabelAct = addWidget(m_pageLabel);
 
-    m_nextAct = addAction(QIcon(":/icons/go-next.svg"), tr("Next"), this, SLOT(slotGoNext()));
+    // got is accessible by ctrl+g
+    QShortcut *gotoShortCut = new QShortcut(Qt::ControlModifier + Qt::Key_G, this);
+    connect(gotoShortCut, SIGNAL(activated()), SLOT(slotGoto()));
+
+    // next page action
+    m_nextAct = addAction(QIcon(":/icons/go-next.svg"), tr("Next page"), this, SLOT(slotGoNext()));
     QShortcut *nextShortcut = new QShortcut(Qt::Key_Space, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
+    // more space for centering
     spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(spacer);
 
+    // add combo box for zooming
     m_zoomCombo = new QComboBox(this);
     m_zoomCombo->setFocusPolicy(Qt::ClickFocus);
     m_zoomCombo->addItem(tr("Fit width"));
@@ -137,12 +150,14 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_prevAct->setEnabled(false);
     m_nextAct->setEnabled(false);
 
+    // triggere these slots so view gets repainted with stored settings
     QTimer::singleShot(0, this, SLOT(slotToggleFacingPages()));
     QTimer::singleShot(0, this, SLOT(slotZoomComboChanged()));
 }
 
 NavigationToolBar::~NavigationToolBar()
 {
+    // store settings
     QSettings s;
     s.setValue("MainWindow/zoom", m_zoomCombo->currentIndex());
     s.setValue("MainWindow/facingPages", m_toggleFacingPagesAct->isChecked());
@@ -180,6 +195,7 @@ void NavigationToolBar::pageChanged(int page)
 
 bool NavigationToolBar::eventFilter(QObject *object, QEvent *event)
 {
+    // clicking on the status label displaying the current page number will trigger goto action
     if (object==m_pageLabel && QEvent::MouseButtonPress==event->type())
         QTimer::singleShot(0, this, SLOT(slotGoto()));
 
