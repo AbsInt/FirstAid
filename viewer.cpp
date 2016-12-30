@@ -125,6 +125,7 @@ PdfViewer::PdfViewer()
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
     connect(navbar, SIGNAL(toggleContinous(bool)), SLOT(slotToggleContinous(bool)));
+    connect(navbar, SIGNAL(toggleFacingPages(bool)), SLOT(slotToggleFacingPages(bool)));
 
     connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
@@ -343,6 +344,12 @@ void PdfViewer::slotGotoDestination(const QString &destination)
 void PdfViewer::slotToggleContinous(bool on)
 {
     m_viewStack->setCurrentIndex(on);
+}
+
+void PdfViewer::slotToggleFacingPages(bool on)
+{
+    for (int i = 0; i < m_viewStack->count(); ++i)
+        dynamic_cast<PageView *>(m_viewStack->widget(i))->setDoubleSideMode(on ? PageView::DoubleSidedNotFirst : PageView::None);
 }
 
 void PdfViewer::slotCurrentPageChanged(int page)

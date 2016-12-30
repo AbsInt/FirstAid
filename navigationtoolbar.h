@@ -51,6 +51,7 @@ signals:
     void zoomChanged(qreal value);
     void zoomModeChanged(PageView::ZoomMode mode);
     void toggleContinous(bool on);
+    void toggleFacingPages(bool on);
 
 private slots:
     void slotGoFirst();
@@ -62,6 +63,7 @@ private slots:
     void slotGoto();
     void slotHideGoto();
     void slotToggleContinous();
+    void slotToggleFacingPages();
 
 private:
     QAction *m_prevAct;
@@ -73,6 +75,7 @@ private:
     QComboBox *m_zoomCombo;
     QIntValidator *m_intValidator;
     QAction *m_toggleContinousAct;
+    QAction *m_toggleFacingPagesAct;
 };
 
 #endif

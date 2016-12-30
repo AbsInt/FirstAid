@@ -64,6 +64,7 @@ private Q_SLOTS:
     void slotSetZoomMode(PageView::ZoomMode mode);
     void slotGotoDestination(const QString &destination);
     void slotToggleContinous(bool on);
+    void slotToggleFacingPages(bool on);
     void slotSetFocus();
 
     void slotCurrentPageChanged(int page);
