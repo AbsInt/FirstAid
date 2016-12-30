@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
+ * Copyright (C) 2016, Christoph Cullmann <cullmann@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +18,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef PDFVIEWER_H
-#define PDFVIEWER_H
+#pragma once
 
 #include <QMainWindow>
 #include <QFileSystemWatcher>
@@ -98,5 +98,3 @@ private:
      */
     QFileSystemWatcher m_fileWatcher;
 };
-
-#endif

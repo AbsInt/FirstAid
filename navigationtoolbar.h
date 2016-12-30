@@ -18,8 +18,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef NAVIGATIONTOOLBAR_H
-#define NAVIGATIONTOOLBAR_H
+#pragma once
 
 #include <QToolBar>
 
@@ -74,5 +73,3 @@ private:
     QIntValidator *m_intValidator;
     QAction *m_toggleFacingPagesAct;
 };
-
-#endif

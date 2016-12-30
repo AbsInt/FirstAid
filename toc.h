@@ -17,8 +17,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef TOC_H
-#define TOC_H
+#pragma once
 
 #include "abstractinfodock.h"
 
@@ -47,5 +46,3 @@ protected slots:
 private:
     QTreeWidget *m_tree;
 };
-
-#endif

@@ -16,8 +16,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef FINDBAR_H
-#define FINDBAR_H
+#pragma once
 
 #include <QWidget>
 
@@ -53,5 +52,3 @@ private:
     QToolButton *m_prevMatch;
     QToolButton *m_nextMatch;
 };
-
-#endif // #ifndef FINDBAR_H

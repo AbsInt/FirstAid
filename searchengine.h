@@ -16,8 +16,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef SEARCHENGINE_H
-#define SEARCHENGINE_H
+#pragma once
 
 #include "documentobserver.h"
 
@@ -73,5 +72,3 @@ private:
     int m_currentMatchPage;
     int m_currentMatchIndex;
 };
-
-#endif // #ifndef SEARCHENGINE_H

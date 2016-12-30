@@ -16,8 +16,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef DOCUMENTOBSERVER_H
-#define DOCUMENTOBSERVER_H
+#pragma once
 
 class PdfViewer;
 namespace Poppler
@@ -47,5 +46,3 @@ protected:
 private:
     PdfViewer *m_viewer;
 };
-
-#endif
