@@ -90,24 +90,33 @@ void ContinousPageView::setDocument(Poppler::Document *document)
 
 void ContinousPageView::scrolled()
 {
-    Poppler::Page *popplerPage = m_document->page(currentPage());
-    if (!popplerPage)
-        return;
-
-    int pageHeight = popplerPage->pageSize().height();
-    pageHeight = (pageHeight * resY()) / 72.0;
+    int pageSize = pageHeight();
 
     // compute page
     int value = verticalScrollBar()->value();
-    int page = value / pageHeight;
+    int page = value / pageSize;
 
     // set page
-    value -= (page * pageHeight);
+    value -= (page * pageSize);
     // scroll(page,value);
     m_offset = value;
     if (page < m_document->numPages())
         m_currentPage = page;
     paint();
+}
+
+int ContinousPageView::pageHeight()
+{
+    if (!m_document)
+        return 0;
+
+    int pageSize = 0;
+    if (Poppler::Page *popplerPage = m_document->page(currentPage()))
+    {
+        pageSize = popplerPage->pageSize().height();
+        delete popplerPage;
+    }
+    return (pageSize * resY()) / 72.0;;
 }
 
 /*
@@ -121,9 +130,8 @@ void ContinousPageView::gotoPage(int page)
 
     m_currentPage = page;
     QScrollBar *vbar = verticalScrollBar();
-    int pageSize = m_document->page(0)->pageSize().height();
-    pageSize = (pageSize * resY()) / 72.0;
-    vbar->setValue(page * pageSize);
+
+    vbar->setValue(page * pageHeight());
     paint();
 
     emit currentPageChanged(m_currentPage);
@@ -145,8 +153,7 @@ void ContinousPageView::paint()
 
     QScrollBar *vbar = verticalScrollBar();
     const int pageCount = m_document->numPages();
-    int pageSize = m_document->page(currentPage)->pageSize().height();
-    pageSize = (pageSize * resY()) / 72.0;
+    int pageSize = pageHeight();
     vbar->setRange(0, pageCount * pageSize - viewport()->height());
     vbar->blockSignals(true);
     vbar->setValue(currentPage * pageSize + m_offset);
@@ -232,9 +239,8 @@ void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
     if (m_document) {
         QScrollBar *vbar = verticalScrollBar();
         const int pageCount = m_document->numPages();
-        int pageSize = m_document->page(currentPage())->pageSize().height();
-        pageSize = (pageSize * resY()) / 72.0;
-        vbar->setRange(0, pageCount * pageSize - viewport()->height());
+
+        vbar->setRange(0, pageCount * pageHeight() - viewport()->height());
     }
     paint();
 }
