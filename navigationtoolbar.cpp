@@ -23,9 +23,10 @@
 
 #include <poppler-qt5.h>
 
-#include <QIntValidator>
 #include <QAction>
 #include <QComboBox>
+#include <QEvent>
+#include <QIntValidator>
 #include <QLabel>
 #include <QLineEdit>
 #include <QSettings>
@@ -64,9 +65,6 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QShortcut *previousShortcut = new QShortcut(Qt::Key_Backspace, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
-    m_pageFullLabel = new QLabel(this);
-    m_pageFullLabelAct = addWidget(m_pageFullLabel);
-
     m_pageEdit = new QLineEdit(this);
     m_pageEdit->setMaxLength(6);
     m_pageEdit->setFixedWidth(50);
@@ -81,6 +79,8 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     connect(gotoShortCut, SIGNAL(activated()), SLOT(slotGoto()));
 
     m_pageLabel = new QLabel(this);
+    m_pageLabel->setAlignment(Qt::AlignCenter);
+    m_pageLabel->installEventFilter(this);
     m_pageLabelAct = addWidget(m_pageLabel);
 
     m_nextAct = addAction(QIcon(":/icons/go-next.svg"), tr("Next"), this, SLOT(slotGoNext()));
@@ -125,7 +125,10 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     closeGoto->setContext(Qt::WidgetWithChildrenShortcut);
     connect(closeGoto, SIGNAL(activated()), SLOT(slotHideGoto()));
 
-    documentClosed();
+    // init widgets' state
+    m_pageEditAct->setVisible(false);
+    m_prevAct->setEnabled(false);
+    m_nextAct->setEnabled(false);
 
     QTimer::singleShot(0, this, SLOT(slotZoomComboChanged()));
 }
@@ -139,9 +142,6 @@ NavigationToolBar::~NavigationToolBar()
 void NavigationToolBar::documentLoaded()
 {
     const int pageCount = document()->numPages();
-
-    m_pageFullLabel->setText(QString("%1 / %2").arg(page()).arg(pageCount));
-    m_pageLabel->setText(QString(" / %1").arg(pageCount));
 
     m_pageEdit->setText("1");
     m_pageEdit->setEnabled(true);
@@ -162,11 +162,19 @@ void NavigationToolBar::documentClosed()
 
 void NavigationToolBar::pageChanged(int page)
 {
+    slotHideGoto();
+
     const int pageCount = document()->numPages();
     m_prevAct->setEnabled(page > 0);
     m_nextAct->setEnabled(page < (pageCount - 1));
-    m_pageEdit->setText(QString::number(page + 1));
-    m_pageEdit->selectAll();
+}
+
+bool NavigationToolBar::eventFilter(QObject *object, QEvent *event)
+{
+    if (object==m_pageLabel && QEvent::MouseButtonPress==event->type())
+        QTimer::singleShot(0, this, SLOT(slotGoto()));
+
+    return QToolBar::eventFilter(object, event);
 }
 
 void NavigationToolBar::slotGoFirst()
@@ -196,18 +204,26 @@ void NavigationToolBar::slotPageSet()
 
 void NavigationToolBar::slotGoto()
 {
-    m_pageFullLabelAct->setVisible(false);
+    if (!document())
+        return;
+
+    m_pageLabel->setText(QString(" / %2").arg(document()->numPages()));
+
     m_pageEditAct->setVisible(true);
+
+    m_pageEdit->setText(QString::number(1+page()));
     m_pageEdit->selectAll();
     m_pageEdit->setFocus();
-    m_pageLabelAct->setVisible(true);
 }
 
 void NavigationToolBar::slotHideGoto()
 {
-    m_pageFullLabelAct->setVisible(true);
+    if (document())
+        m_pageLabel->setText(QString("%1 / %2").arg(1+page()).arg(document()->numPages()));
+    else
+        m_pageLabel->setText("n/a");
+
     m_pageEditAct->setVisible(false);
-    m_pageLabelAct->setVisible(false);
 }
 
 void NavigationToolBar::slotZoomComboChanged()

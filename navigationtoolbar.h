@@ -40,9 +40,11 @@ public:
     NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent = nullptr);
     ~NavigationToolBar();
 
-    void documentLoaded();
-    void documentClosed();
-    void pageChanged(int page);
+    void documentLoaded() override;
+    void documentClosed() override;
+    void pageChanged(int page) override;
+
+    bool eventFilter(QObject *object, QEvent *e) override;
 
 signals:
     void showToc(bool on);
@@ -62,8 +64,6 @@ private slots:
 
 private:
     QAction *m_prevAct;
-    QLabel *m_pageFullLabel;
-    QAction *m_pageFullLabelAct;
     QLineEdit *m_pageEdit;
     QAction *m_pageEditAct;
     QLabel *m_pageLabel;
