@@ -131,6 +131,11 @@ PdfViewer::PdfViewer()
     m_tocDock->setVisible(settings.value("tocVisible", false).toBool());
     settings.endGroup();
 
+    /**
+     * auto-reload
+     */
+    connect(&m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &PdfViewer::slotReload);
+
     // update action state & co
     updateOnDocumentChange();
 }
@@ -180,7 +185,9 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
 
     m_view->setDocument(m_doc);
 
+    // set file + watch
     m_filePath = file;
+    m_fileWatcher.addPath(m_filePath);
 
     QSettings settings;
     settings.beginGroup("Files");
@@ -214,6 +221,9 @@ void PdfViewer::closeDocument()
     m_currentPage = 0;
     delete m_doc;
     m_doc = 0;
+
+    // remove path
+    m_fileWatcher.removePath(m_filePath);
     m_filePath.clear();
 
     // update action state & co.

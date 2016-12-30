@@ -21,6 +21,7 @@
 #define PDFVIEWER_H
 
 #include <QMainWindow>
+#include <QFileSystemWatcher>
 
 #include "pageview.h"
 
@@ -93,6 +94,11 @@ private:
     TocDock *m_tocDock;
 
     QMenu *m_menu;
+
+    /**
+     * watcher to auto-reload
+     */
+    QFileSystemWatcher m_fileWatcher;
 };
 
 #endif
