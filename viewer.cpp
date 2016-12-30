@@ -278,8 +278,10 @@ void PdfViewer::slotPrint()
     QProgressDialog pd("Printing...", "Abort", fromPage, toPage, this);
     pd.setWindowModality(Qt::WindowModal);
 
+    // gather some information
+    QRectF printerPageRect=printer.pageRect(QPrinter::DevicePixel);
+
     // print given range
-    int res=printer.resolution();
     QPainter painter;
     painter.begin(&printer);
     for (int pageNumber=fromPage; pageNumber<=toPage; pageNumber++) {
@@ -287,13 +289,23 @@ void PdfViewer::slotPrint()
         if (pd.wasCanceled())
             break;
 
-        // render page to image
+        // get page
         Poppler::Page *page=m_doc->page(pageNumber-1);
+
+        // compute resolution so that page fits within the printable area
+        QSizeF pageSize=page->pageSizeF();
+        qreal scaleX=qMin(1.0, printerPageRect.width()/(72*pageSize.width()/printer.resolution()));
+        qreal scaleY=qMin(1.0, printerPageRect.height()/(72*pageSize.height()/printer.resolution()));
+        qreal res=printer.resolution()*qMin(scaleX, scaleY);
+
+        // render page to image
         QImage image=page->renderToImage(res, res);
+
+        // free page
         delete page;
 
         // print image
-        painter.drawImage(QPoint(0, 0), image);
+        painter.drawImage(printerPageRect.topLeft(), image);
 
         // advance page
         if (pageNumber != printer.toPage())
