@@ -265,7 +265,7 @@ void PdfViewer::slotOpenFileExternal()
 void PdfViewer::slotPrint()
 {
     // let the user select the printer to use
-    QPrinter printer;
+    QPrinter printer(QPrinter::HighResolution);
     QPrintDialog printDialog(&printer, this);
     if (!printDialog.exec())
         return;
@@ -274,15 +274,12 @@ void PdfViewer::slotPrint()
     int fromPage=qMax(printer.fromPage(), 1);
     int toPage=qMin(printer.toPage(), m_doc->numPages());
 
-    // switch to Arthur backend for rendering
-    m_doc->setRenderBackend(Poppler::Document::ArthurBackend);
-
     // provide some feedback
     QProgressDialog pd("Printing...", "Abort", fromPage, toPage, this);
     pd.setWindowModality(Qt::WindowModal);
 
     // print given range
-    double res=printer.resolution();
+    int res=printer.resolution();
     QPainter painter;
     painter.begin(&printer);
     for (int pageNumber=fromPage; pageNumber<=toPage; pageNumber++) {
@@ -290,10 +287,13 @@ void PdfViewer::slotPrint()
         if (pd.wasCanceled())
             break;
 
-        // render page to printer
+        // render page to image
         Poppler::Page *page=m_doc->page(pageNumber-1);
-        page->renderToPainter(&painter, res, res);
+        QImage image=page->renderToImage(res, res);
         delete page;
+
+        // print image
+        painter.drawImage(QPoint(0, 0), image);
 
         // advance page
         if (pageNumber != printer.toPage())
@@ -302,9 +302,6 @@ void PdfViewer::slotPrint()
 
     // flush
     painter.end();
-
-    // return to Splash backend
-    m_doc->setRenderBackend(Poppler::Document::SplashBackend);
 }
 
 void PdfViewer::slotAbout()
