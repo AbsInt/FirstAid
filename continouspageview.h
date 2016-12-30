@@ -65,13 +65,15 @@ private slots:
 
 private:
     int pageHeight();
+    int pageWidth();
+    void updateScrollBars();
 
 private:
     QImage m_image;
 
     QCache<int,QImage> m_imageCache;
 
-    int m_offset = 0;
+    QPoint m_offset;
 };
 
 #endif // SCROLLVIEW_H
