@@ -73,7 +73,7 @@ PdfViewer::PdfViewer()
     m_fileOpenExternalAct = m_menu->addAction(QIcon(":/icons/acrobat.svg"), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
     m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
 
-    m_fileReloadAct = m_menu->addAction(QIcon(":/icons/view-refresh.svg"), tr("&Reload..."), this, SLOT(slotReload()));
+    m_fileReloadAct = m_menu->addAction(QIcon(":/icons/view-refresh.svg"), tr("&Reload"), this, SLOT(slotReload()));
     m_fileReloadAct->setShortcut(QKeySequence::Refresh);
     m_menu->addSeparator();
 
