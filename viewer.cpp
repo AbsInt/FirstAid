@@ -247,8 +247,9 @@ void PdfViewer::closeEvent(QCloseEvent *event)
 
 void PdfViewer::slotOpenFileExternal()
 {
-    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(m_filePath)))
-        QMessageBox::warning(this, "Error", "Failed to open file in external PDF viewer.");
+    if (!m_filePath.isEmpty())
+        if (!QDesktopServices::openUrl(QUrl::fromLocalFile(m_filePath)))
+            QMessageBox::warning(this, "Error", "Failed to open file in external PDF viewer.");
 }
 
 void PdfViewer::slotReload()
