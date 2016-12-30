@@ -44,6 +44,10 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QPainter>
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QProgressDialog>
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
@@ -70,6 +74,10 @@ PdfViewer::PdfViewer()
     m_fileOpenExternalAct = m_menu->addAction(QIcon(":/icons/acrobat.svg"), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
     m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
     m_fileOpenExternalAct->setEnabled(false);
+
+    m_filePrintAct = m_menu->addAction(QIcon(":/icons/document-print.svg"), tr("&Print..."), this, SLOT(slotPrint()));
+    m_filePrintAct->setShortcut(QKeySequence::Print);
+    m_filePrintAct->setEnabled(false);
     m_menu->addSeparator();
 
     QAction *act = m_menu->addAction(QIcon(":/icons/help-about.svg"), tr("&About"), this, SLOT(slotAbout()));
@@ -177,6 +185,7 @@ void PdfViewer::loadDocument(const QString &file, bool forceReload)
         dynamic_cast<PageView *>(m_viewStack->widget(i))->setDocument(m_doc);
 
     m_fileOpenExternalAct->setEnabled(true);
+    m_filePrintAct->setEnabled(true);
     m_filePath = file;
 
     if (m_doc->title().isEmpty())
@@ -216,6 +225,7 @@ void PdfViewer::closeDocument()
     m_doc = 0;
 
     m_fileOpenExternalAct->setEnabled(false);
+    m_filePrintAct->setEnabled(false);
     m_filePath.clear();
 
     setWindowTitle(tr("FirstAid"));
@@ -250,6 +260,48 @@ void PdfViewer::slotOpenFileExternal()
 {
     if (!QDesktopServices::openUrl(QUrl::fromLocalFile(m_filePath)))
         QMessageBox::warning(this, "Error", "Failed to open file in external PDF viewer.");
+}
+
+void PdfViewer::slotPrint()
+{
+    // let the user select the printer to use
+    QPrinter printer(QPrinter::HighResolution);
+    QPrintDialog printDialog(&printer, this);
+    if (!printDialog.exec())
+        return;
+
+    // determine range
+    int fromPage=qMax(printer.fromPage(), 1);
+    int toPage=qMin(printer.toPage(), m_doc->numPages());
+
+    // provide some feedback
+    QProgressDialog pd("Printing...", "Abort", fromPage, toPage, this);
+    pd.setWindowModality(Qt::WindowModal);
+
+    // print given range
+    int res=printer.resolution();
+    QPainter painter;
+    painter.begin(&printer);
+    for (int pageNumber=fromPage; pageNumber<=toPage; pageNumber++) {
+        pd.setValue(pageNumber);
+        if (pd.wasCanceled())
+            break;
+
+        // render page to image
+        Poppler::Page *page=m_doc->page(pageNumber-1);
+        QImage image=page->renderToImage(res, res);
+        delete page;
+
+        // print image
+        painter.drawImage(QPoint(0, 0), image);
+
+        // advance page
+        if (pageNumber != printer.toPage())
+            printer.newPage();
+    }
+
+    // flush
+    painter.end();
 }
 
 void PdfViewer::slotAbout()

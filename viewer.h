@@ -57,6 +57,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void slotOpenFileExternal();
+    void slotPrint();
     void slotAbout();
 
     void slotSetZoom(qreal zoom);
@@ -74,6 +75,7 @@ private:
     int m_currentPage;
 
     QAction *m_fileOpenExternalAct;
+    QAction *m_filePrintAct;
 
     QList<DocumentObserver *> m_observers;
 
