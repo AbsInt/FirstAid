@@ -19,8 +19,9 @@
 #ifndef SCROLLVIEW_H
 #define SCROLLVIEW_H
 
-#include <QLabel>
 #include <QAbstractScrollArea>
+#include <QLabel>
+#include <QCache>
 
 #include "documentobserver.h"
 #include "pageview.h"
@@ -60,6 +61,8 @@ private slots:
 
 private:
     ImageLabel *m_imageLabel;
+
+    QCache<int,QImage> m_imageCache;
 
     int m_offset = 0;
 };

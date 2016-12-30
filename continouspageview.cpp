@@ -54,6 +54,8 @@ ContinousPageView::ContinousPageView(QWidget *parent)
 {
     setMouseTracking(true);
 
+    m_imageCache.setMaxCost(7);
+
     m_imageLabel = new ImageLabel(this);
     m_imageLabel->resize(0, 0);
 
@@ -133,7 +135,7 @@ void ContinousPageView::gotoPage(int page)
 
 void ContinousPageView::paint()
 {
-    QImage image;
+    QImage* image = nullptr;
     QList<Poppler::Annotation *> annotations;
 
     if (!m_document)
@@ -152,7 +154,7 @@ void ContinousPageView::paint()
 
     QSize vs = viewport()->size();
 
-    QImage centeredImage(image.size().expandedTo(viewport()->size()), QImage::Format_ARGB32_Premultiplied);
+    QImage centeredImage(viewport()->size(), QImage::Format_ARGB32_Premultiplied);
     centeredImage.fill(Qt::gray);
     QPainter p(&centeredImage);
 
@@ -161,28 +163,34 @@ void ContinousPageView::paint()
     QRectF matchRect;
     se->currentMatch(matchPage, matchRect);
 
-    QPoint pageStart = QPoint(qMax(0, vs.width() - image.width()) / 2, -m_offset);
+    QPoint pageStart = QPoint(0, -m_offset);
 
     while (pageStart.y() < 0 || vs.height() > (pageStart.y() + PAGEDISTANCE)) {
         // draw another page
-        image = QImage();
+        image = nullptr;
 
         if (Poppler::Page *page = m_document->page(currentPage)) {
-            image = page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0);
+            image = m_imageCache.take(currentPage);
+            if (!image)
+            {
+                image = new QImage();
+                *image = page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0);
+            }
+
             annotations += page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
             delete page;
         }
 
-        if (image.isNull())
+        if (!image || image->isNull())
             break;
 
-        pageStart.setX(qMax(0, vs.width() - image.width()) / 2);
+        pageStart.setX(qMax(0, vs.width() - image->width()) / 2);
 
         // match further matches on page
         double sx = resX() / 72.0;
         double sy = resY() / 72.0;
 
-        QPainter sp(&image);
+        QPainter sp(image);
         sp.setPen(Qt::NoPen);
 
         foreach (QRectF rect, se->matchesFor(currentPage)) {
@@ -196,15 +204,18 @@ void ContinousPageView::paint()
         }
         sp.end();
 
-        p.drawImage(pageStart, image);
+        p.drawImage(pageStart, *image);
 
         p.setPen(Qt::darkGray);
-        p.drawRect(QRect(pageStart, image.size()).adjusted(-1, -1, 1, 1));
+        p.drawRect(QRect(pageStart, image->size()).adjusted(-1, -1, 1, 1));
 
-        // set next image
+        //insert image into cache
+        m_imageCache.insert(currentPage,image);
+
+        // set next page
         ++currentPage;
 
-        pageStart.setY(pageStart.y() + image.height() + PAGEDISTANCE);
+        pageStart.setY(pageStart.y() + image->height() + PAGEDISTANCE);
     }
 
     p.end();
