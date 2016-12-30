@@ -53,6 +53,18 @@ int main(int argc, char *argv[])
 #endif
 
     /**
+     * Use high dpi pixmaps
+     */
+    QCoreApplication::setAttribute (Qt::AA_UseHighDpiPixmaps, true);
+
+    /**
+     * Enables high-DPI scaling in Qt on supported platforms (see also High DPI Displays).
+     * Supported platforms are X11, Windows and Android.
+     * new in Qt 5.6
+     */
+    QCoreApplication::setAttribute (Qt::AA_EnableHighDpiScaling, true);
+
+    /**
      * Application with widgets
      */
     QApplication app(argc, argv);
