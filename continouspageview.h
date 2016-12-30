@@ -60,6 +60,9 @@ private slots:
     void scrolled();
 
 private:
+    int pageHeight();
+
+private:
     ImageLabel *m_imageLabel;
 
     QCache<int,QImage> m_imageCache;
