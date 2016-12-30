@@ -343,8 +343,12 @@ void PdfViewer::slotPrint()
 
 void PdfViewer::slotAbout()
 {
-    const QString text("FirstAid is a simple PDF viewer based on libpoppler.");
-    QMessageBox::about(this, QString::fromLatin1("About FirstAid"), text);
+    QMessageBox::about(this, tr("About FirstAid"),
+        tr("<h1>FirstAid - PDF Help Viewer</h1>"
+    "Based on the <a href=\"https://poppler.freedesktop.org/\">Poppler PDF rendering library</a>.<br>"
+    "License: <a href=\"https://github.com/AbsInt/FirstAid/blob/master/COPYING\">GPLv2+</a><br>"
+    "Sources: <a href=\"https://github.com/AbsInt/FirstAid\">https://github.com/AbsInt/FirstAid</a><br>"
+    ));
 }
 
 void PdfViewer::slotSetZoom(qreal zoom)
