@@ -376,3 +376,8 @@ void PdfViewer::updateOnDocumentChange()
         setWindowTitle(tr("FirstAid"));
     }
 }
+
+QMenu *PdfViewer::createPopupMenu()
+{
+    return new QMenu();
+}

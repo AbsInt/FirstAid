@@ -54,6 +54,11 @@ public:
 
     void closeEvent(QCloseEvent *e) override;
 
+    /**
+     * we want own menu, not default one
+     */
+    QMenu *createPopupMenu() override;
+
 public Q_SLOTS:
     void processCommand(const QString &command);
 
