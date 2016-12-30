@@ -55,7 +55,7 @@ ContinousPageView::ContinousPageView(QWidget *parent)
 {
     setMouseTracking(true);
 
-    m_imageCache.setMaxCost(7);
+    m_imageCache.setMaxCost(8);
 
     SearchEngine *se = SearchEngine::globalInstance();
     connect(se, SIGNAL(started()), SLOT(slotFindStarted()));
