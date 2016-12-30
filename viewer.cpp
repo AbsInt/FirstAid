@@ -33,20 +33,20 @@
 
 #include <poppler-qt5.h>
 
-#include <QtCore/QDir>
-#include <QtCore/QSettings>
-#include <QtCore/QUrl>
-#include <QtGui/QDesktopServices>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QDesktopWidget>
-#include <QtWidgets/QFileDialog>
-#include <QtWidgets/QInputDialog>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMenuBar>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QStackedWidget>
-#include <QtWidgets/QVBoxLayout>
+#include <QDir>
+#include <QSettings>
+#include <QUrl>
+#include <QDesktopServices>
+#include <QAction>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QStackedWidget>
+#include <QVBoxLayout>
 
 PdfViewer::PdfViewer()
     : QMainWindow()

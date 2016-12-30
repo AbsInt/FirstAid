@@ -19,13 +19,14 @@
 #include "viewer.h"
 
 #include <QApplication>
+#include <QCommandLineParser>
 #include <QtPlugin>
 
 int main(int argc, char *argv[])
 {
-/**
- * if you want static binaries, init plugins
- */
+    /**
+     * if you want static binaries, init plugins
+     */
 #ifdef AI_LINK_QT_STATIC_WINDOWS
     Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
     Q_IMPORT_PLUGIN(QSvgIconPlugin)
@@ -50,18 +51,43 @@ int main(int argc, char *argv[])
     Q_IMPORT_PLUGIN(QCupsPrinterSupportPlugin)
 #endif
 
+    /**
+     * Application with widgets
+     */
+    QApplication app(argc, argv);
+
+    /**
+     * Basic info about the program
+     */
     QCoreApplication::setOrganizationName("AbsInt");
     QCoreApplication::setOrganizationDomain("absint.com");
     QCoreApplication::setApplicationName("FirstAid");
 
-    QApplication app(argc, argv);
-    const QStringList args = QCoreApplication::arguments();
+    /**
+     * define & parse our command line
+     */
+    QCommandLineParser parser;
+    parser.setApplicationDescription("FirstAid - PDF Help Viewer");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("file", QCoreApplication::translate("main", "PDF file to open"));
+    parser.process(app);
 
+    /**
+     * Construct our main window
+     */
     PdfViewer viewer;
     viewer.show();
 
-    if (args.count() > 1)
-        viewer.loadDocument(args.at(1));
+    /**
+     * open file if any given
+     */
+    const QStringList args = parser.positionalArguments();
+    if (!args.empty())
+        viewer.loadDocument(args.at(0));
 
+    /**
+     * => start event loop
+     */
     return app.exec();
 }
