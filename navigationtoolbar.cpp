@@ -37,13 +37,10 @@
 NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent)
     : QToolBar("Navigation", parent)
 {
-<<<<<<< HEAD
     // for state saving
     setObjectName("navigation_toolbar");
 
-=======
     // we stay in place
->>>>>>> fa24fe860de0cd173537f3d9e35fcd748510c4aa
     setFloatable(false);
     setMovable(false);
 
