@@ -150,6 +150,9 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     // triggere these slots so view gets repainted with stored settings
     QTimer::singleShot(0, this, SLOT(slotToggleFacingPages()));
     QTimer::singleShot(0, this, SLOT(slotZoomComboChanged()));
+
+    // init page label
+    slotHideGoto();
 }
 
 NavigationToolBar::~NavigationToolBar()
