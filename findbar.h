@@ -24,6 +24,7 @@
 #include "documentobserver.h"
 
 class QLineEdit;
+class QToolButton;
 
 class FindBar : public QWidget, public DocumentObserver
 {
@@ -49,6 +50,8 @@ private slots:
 
 private:
     QLineEdit *m_findEdit;
+    QToolButton *m_prevMatch;
+    QToolButton *m_nextMatch;
 };
 
 #endif // #ifndef FINDBAR_H

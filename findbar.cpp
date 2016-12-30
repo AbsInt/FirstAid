@@ -35,7 +35,7 @@ FindBar::FindBar(QWidget *parent)
 
     QToolButton *tb = new QToolButton(this);
     tb->setIcon(QIcon(":/icons/window-close.svg"));
-    connect(tb, SIGNAL(clicked()), this, SLOT(slotHide()));
+    connect(tb, SIGNAL(clicked()), SLOT(slotHide()));
     hbl->addWidget(tb);
 
     m_findEdit = new QLineEdit(this);
@@ -43,6 +43,16 @@ FindBar::FindBar(QWidget *parent)
     m_findEdit->setClearButtonEnabled(true);
     connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotFind()));
     hbl->addWidget(m_findEdit);
+
+    m_prevMatch=new QToolButton(this);
+    m_prevMatch->setIcon(QIcon(":/icons/go-previous.svg"));
+    m_prevMatch->setToolTip("Previous match");
+    hbl->addWidget(m_prevMatch);
+
+    m_nextMatch=new QToolButton(this);
+    m_nextMatch->setIcon(QIcon(":/icons/go-next.svg"));
+    m_nextMatch->setToolTip("Next match");
+    hbl->addWidget(m_nextMatch);
 
     QAction *findAction = new QAction(parent);
     findAction->setShortcutContext(Qt::ApplicationShortcut);
@@ -59,7 +69,10 @@ FindBar::FindBar(QWidget *parent)
     addAction(closeAction);
     connect(closeAction, SIGNAL(triggered()), SLOT(slotHide()));
 
-    connect(SearchEngine::globalInstance(), SIGNAL(finished()), SLOT(slotFindDone()));
+    SearchEngine *se=SearchEngine::globalInstance();
+    connect(se, SIGNAL(finished()), SLOT(slotFindDone()));
+    connect(m_prevMatch, SIGNAL(clicked()), se, SLOT(previousMatch()));
+    connect(m_nextMatch, SIGNAL(clicked()), se, SLOT(nextMatch()));
 
     documentClosed();
 }
@@ -71,6 +84,8 @@ FindBar::~FindBar()
 void FindBar::documentLoaded()
 {
     m_findEdit->setEnabled(true);
+    m_nextMatch->setEnabled(true);
+    m_prevMatch->setEnabled(true);
 }
 
 void FindBar::documentClosed()
@@ -78,6 +93,8 @@ void FindBar::documentClosed()
     slotHide();
     m_findEdit->clear();
     m_findEdit->setEnabled(false);
+    m_nextMatch->setEnabled(false);
+    m_prevMatch->setEnabled(false);
 }
 
 void FindBar::pageChanged(int)
@@ -99,7 +116,7 @@ void FindBar::slotFindDone()
 {
     if (SearchEngine::globalInstance()->matches().isEmpty()) {
         m_findEdit->setStyleSheet("background-color: #f08080");
-        QTimer::singleShot(1000, this, SLOT(slotResetStyle()));
+        QTimer::singleShot(5000, this, SLOT(slotResetStyle()));
     }
 }
 
