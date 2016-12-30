@@ -25,7 +25,6 @@
 #include "findbar.h"
 #include "navigationtoolbar.h"
 #include "continouspageview.h"
-#include "singlepageview.h"
 #include "searchengine.h"
 #include "stdinreaderthread.h"
 #include "toc.h"

@@ -56,12 +56,6 @@ ContinousPageView::ContinousPageView(QWidget *parent)
 
     m_imageCache.setMaxCost(7);
 
-    m_imageLabel = new ImageLabel(this);
-    m_imageLabel->resize(0, 0);
-
-    connect(m_imageLabel, SIGNAL(gotoRequested(QString)), SLOT(slotGotoRequested(QString)));
-    connect(m_imageLabel, SIGNAL(copyRequested(QRectF)), SLOT(slotCopyRequested(QRectF)));
-
     SearchEngine *se = SearchEngine::globalInstance();
     connect(se, SIGNAL(started()), SLOT(slotFindStarted()));
     connect(se, SIGNAL(highlightMatch(int, QRectF)), SLOT(slotHighlightMatch(int, QRectF)));
@@ -245,10 +239,14 @@ void ContinousPageView::paint()
 
     p.end();
 
-    m_imageLabel->resize(centeredImage.size());
-    m_imageLabel->setPixmap(QPixmap::fromImage(centeredImage));
+    m_image=centeredImage;
+}
 
-    m_imageLabel->setAnnotations(annotations);
+void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
+{
+    QPainter p(viewport());
+    p.drawImage(QPoint(0, 0), m_image);
+    p.end();
 }
 
 void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)

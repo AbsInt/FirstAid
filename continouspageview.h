@@ -20,7 +20,7 @@
 #define SCROLLVIEW_H
 
 #include <QAbstractScrollArea>
-#include <QLabel>
+#include <QImage>
 #include <QCache>
 
 #include "documentobserver.h"
@@ -50,6 +50,7 @@ signals:
 
 protected:
     void paint() override;
+    void paintEvent(QPaintEvent *) override;
     void resizeEvent(QResizeEvent *) override;
     void keyPressEvent(QKeyEvent *event) override;
 
@@ -66,7 +67,7 @@ private:
     int pageHeight();
 
 private:
-    ImageLabel *m_imageLabel;
+    QImage m_image;
 
     QCache<int,QImage> m_imageCache;
 
