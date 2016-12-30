@@ -46,12 +46,12 @@ public:
     QRectF toPoints(const QRectF &rect) const;
 
 public:
-    virtual void setDocument(Poppler::Document *document);
-    void setZoomMode(ZoomMode mode);
-    void setZoom(qreal zoom);
-    void setDoubleSideMode(DoubleSideMode mode);
     void setSize(const QSize &size);
 
+    virtual void setDocument(Poppler::Document *document);
+    virtual void setDoubleSideMode(DoubleSideMode mode);
+    virtual void setZoomMode(ZoomMode mode);
+    virtual void setZoom(qreal zoom);
     virtual void reset();
     virtual int currentPage() const;
     virtual void gotoPage(int page) = 0;

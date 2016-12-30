@@ -88,6 +88,24 @@ void ContinousPageView::setDocument(Poppler::Document *document)
     resizeEvent(nullptr);
 }
 
+void ContinousPageView::setDoubleSideMode(PageView::DoubleSideMode mode)
+{
+    m_imageCache.clear();
+    PageView::setDoubleSideMode(mode);
+}
+
+void ContinousPageView::setZoomMode(PageView::ZoomMode mode)
+{
+    m_imageCache.clear();
+    PageView::setZoomMode(mode);
+}
+
+void ContinousPageView::setZoom(qreal zoom)
+{
+    m_imageCache.clear();
+    PageView::setZoom(zoom);
+}
+
 void ContinousPageView::scrolled()
 {
     int pageSize = pageHeight();
@@ -235,6 +253,7 @@ void ContinousPageView::paint()
 
 void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
 {
+    m_imageCache.clear();
     setSize(viewport()->size() - QSize(1, 1));
     if (m_document) {
         QScrollBar *vbar = verticalScrollBar();
