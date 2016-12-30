@@ -23,6 +23,8 @@
 #include <QRectF>
 #include <QWidget>
 
+#define PAGEFRAME        5
+
 namespace Poppler
 {
 class Document;

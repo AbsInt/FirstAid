@@ -44,8 +44,6 @@
 
 #include <QDebug>
 
-#define PAGEFRAME        5
-
 /*
  * constructors / destructor
  */
@@ -161,7 +159,7 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
     QRectF matchRect;
     se->currentMatch(matchPage, matchRect);
 
-    QPoint pageStart = -m_offset + QPoint(PAGEFRAME,PAGEFRAME);
+    QPoint pageStart = -m_offset + QPoint(0,PAGEFRAME);
 
     while (pageStart.y() < 0 || vs.height() > (pageStart.y() + 2*PAGEFRAME)) {
         // draw another page
@@ -182,7 +180,7 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         if (!image || image->isNull())
             break;
 
-        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 -m_offset.x()+PAGEFRAME);
+        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 -m_offset.x()+ ((m_zoomMode==Absolute)?PAGEFRAME:0));
 
         // match further matches on page
         double sx = resX() / 72.0;
