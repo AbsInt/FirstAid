@@ -21,7 +21,7 @@
 #ifndef NAVIGATIONTOOLBAR_H
 #define NAVIGATIONTOOLBAR_H
 
-#include <QtWidgets/QToolBar>
+#include <QToolBar>
 
 #include "documentobserver.h"
 #include "pageview.h"

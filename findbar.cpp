@@ -21,11 +21,11 @@
 
 #include <poppler-qt5.h>
 
-#include <QtCore/QTimer>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QToolButton>
+#include <QTimer>
+#include <QAction>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QToolButton>
 
 FindBar::FindBar(QWidget *parent)
     : QWidget(parent)

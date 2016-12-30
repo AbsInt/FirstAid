@@ -21,8 +21,8 @@
 
 #include <poppler-qt5.h>
 
-#include <QtWidgets/QHeaderView>
-#include <QtWidgets/QTreeWidget>
+#include <QHeaderView>
+#include <QTreeWidget>
 
 static void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
 {

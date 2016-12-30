@@ -19,7 +19,7 @@
 #ifndef FINDBAR_H
 #define FINDBAR_H
 
-#include <QtWidgets/QWidget>
+#include <QWidget>
 
 #include "documentobserver.h"
 
