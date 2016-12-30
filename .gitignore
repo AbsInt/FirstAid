@@ -12,3 +12,4 @@ firstaid
 firstaid_automoc.cpp
 install_manifest.txt
 .clang-format
+*.plist
