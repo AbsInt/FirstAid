@@ -88,17 +88,10 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     /**
-     * Construct our main window
-     */
-    PdfViewer viewer;
-    viewer.show();
-
-    /**
-     * open file if any given
+     * Construct our main window, perhaps open document passed on command line
      */
     const QStringList args = parser.positionalArguments();
-    if (!args.empty())
-        viewer.loadDocument(args.at(0));
+    PdfViewer viewer(args.empty() ? QString() : args.at(0));
 
     /**
      * should we handle commands from stdin?
@@ -110,8 +103,9 @@ int main(int argc, char *argv[])
     }
 
     /**
-     * => start event loop
+     * => show widget + start event loop
      */
+    viewer.show();
     const int returnValue = app.exec();
 
     /**

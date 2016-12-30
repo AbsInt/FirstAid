@@ -49,7 +49,7 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
-PdfViewer::PdfViewer()
+PdfViewer::PdfViewer(const QString &file)
     : QMainWindow()
     , m_currentPage(0)
     , m_doc(0)
@@ -122,19 +122,26 @@ PdfViewer::PdfViewer()
     connect(m_tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
     /**
-     * restore old geometry & dock widget state, will handle "bad geometries", see http://doc.qt.io/qt-5.7/qmainwindow.html#restoreState
-     */
-    QSettings settings;
-    restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
-    restoreState(settings.value("MainWindow/windowState").toByteArray());
-
-    /**
      * auto-reload
      */
     connect(&m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &PdfViewer::slotReload);
 
     // update action state & co
     updateOnDocumentChange();
+
+    /**
+     * load document if one is passed
+     * useful to have initial geometry based on content
+     */
+    if (!file.isEmpty())
+        loadDocument(file);
+
+    /**
+     * restore old geometry & dock widget state, will handle "bad geometries", see http://doc.qt.io/qt-5.7/qmainwindow.html#restoreState
+     */
+    QSettings settings;
+    restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+    restoreState(settings.value("MainWindow/windowState").toByteArray());
 }
 
 PdfViewer::~PdfViewer()
