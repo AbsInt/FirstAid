@@ -40,6 +40,8 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     setFloatable(false);
     setMovable(false);
 
+    QSettings s;
+
     // some shortcuts for first/last page
     QShortcut *firstShortcut = new QShortcut(Qt::Key_Home, this);
     connect(firstShortcut, SIGNAL(activated()), this, SLOT(slotGoFirst()));
@@ -53,9 +55,10 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QShortcut *tocShortcut = new QShortcut(Qt::Key_F7, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
 
-    QAction *toggleContinous = addAction(QIcon(":/icons/zoom-select-y.svg"), tr("Toggle continous mode"));
-    toggleContinous->setCheckable(true);
-    connect(toggleContinous, SIGNAL(toggled(bool)), SIGNAL(toggleContinous(bool)));
+    m_toggleContinousAct = addAction(QIcon(":/icons/zoom-select-y.svg"), tr("Toggle continous mode"));
+    m_toggleContinousAct->setCheckable(true);
+    m_toggleContinousAct->setChecked(s.value("MainWindow/continous", true).toBool());
+    connect(m_toggleContinousAct, SIGNAL(toggled(bool)), SLOT(slotToggleContinous()));
 
     QWidget *spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -107,7 +110,6 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomCombo->addItem(tr("300%"));
     m_zoomCombo->addItem(tr("400%"));
 
-    QSettings s;
     m_zoomCombo->setCurrentIndex(s.value("MainWindow/zoom", 8).toInt());
 
     connect(m_zoomCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotZoomComboChanged()));
@@ -130,6 +132,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_prevAct->setEnabled(false);
     m_nextAct->setEnabled(false);
 
+    QTimer::singleShot(0, this, SLOT(slotToggleContinous()));
     QTimer::singleShot(0, this, SLOT(slotZoomComboChanged()));
 }
 
@@ -137,6 +140,7 @@ NavigationToolBar::~NavigationToolBar()
 {
     QSettings s;
     s.setValue("MainWindow/zoom", m_zoomCombo->currentIndex());
+    s.setValue("MainWindow/continous", m_toggleContinousAct->isChecked());
 }
 
 void NavigationToolBar::documentLoaded()
@@ -242,4 +246,9 @@ void NavigationToolBar::slotZoomComboChanged()
         if (ok && value >= 10 && value <= 400)
             emit zoomChanged(qreal(value) / 100);
     }
+}
+
+void NavigationToolBar::slotToggleContinous()
+{
+    emit toggleContinous(m_toggleContinousAct->isChecked());
 }

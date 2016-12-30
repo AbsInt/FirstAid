@@ -61,6 +61,7 @@ private slots:
     void slotZoomComboChanged();
     void slotGoto();
     void slotHideGoto();
+    void slotToggleContinous();
 
 private:
     QAction *m_prevAct;
@@ -71,6 +72,7 @@ private:
     QAction *m_nextAct;
     QComboBox *m_zoomCombo;
     QIntValidator *m_intValidator;
+    QAction *m_toggleContinousAct;
 };
 
 #endif

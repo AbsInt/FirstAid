@@ -195,7 +195,11 @@ void ContinousPageView::paint()
             sp.fillRect(r, matchColor);
         }
         sp.end();
+
         p.drawImage(pageStart, image);
+
+        p.setPen(Qt::darkGray);
+        p.drawRect(QRect(pageStart, image.size()).adjusted(-1, -1, 1, 1));
 
         // set next image
         ++currentPage;
