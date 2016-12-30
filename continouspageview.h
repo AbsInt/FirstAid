@@ -19,20 +19,18 @@
 
 #pragma once
 
-#include <QAbstractScrollArea>
 #include <QImage>
 #include <QCache>
 
 #include "documentobserver.h"
 #include "pageview.h"
-#include "singlepageview.h"
 
 namespace Poppler
 {
 class Annotation;
 }
 
-class ContinousPageView : public QAbstractScrollArea, public PageView
+class ContinousPageView: public PageView
 {
     Q_OBJECT
 
@@ -49,10 +47,11 @@ signals:
     void currentPageChanged(int page);
 
 protected:
-    void paint() override;
     void paintEvent(QPaintEvent *) override;
     void resizeEvent(QResizeEvent *) override;
     void keyPressEvent(QKeyEvent *event) override;
+
+public slots:
 
 private slots:
     void slotGotoRequested(const QString &destination);
@@ -69,7 +68,6 @@ private:
     void updateScrollBars();
 
 private:
-    QImage m_image;
 
     QCache<int,QImage> m_imageCache;
 

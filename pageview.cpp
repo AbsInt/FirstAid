@@ -23,7 +23,6 @@
 #include "pageview.h"
 
 #include <poppler-qt5.h>
-
 #include <QApplication>
 #include <QDesktopWidget>
 
@@ -45,8 +44,9 @@ QColor PageView::highlightColor()
  * constructors / destructor
  */
 
-PageView::PageView()
-    : m_document(nullptr)
+PageView::PageView(QWidget* parent)
+    : QAbstractScrollArea(parent)
+    , m_document(nullptr)
     , m_currentPage(0)
     , m_zoom(1.0)
     , m_doubleSideMode(None)
@@ -104,7 +104,7 @@ void PageView::setDocument(Poppler::Document *document)
 {
     m_document = document;
     m_currentPage = 0;
-    paint();
+    viewport()->update();
 }
 
 void PageView::setZoomMode(ZoomMode mode)
@@ -121,7 +121,7 @@ void PageView::setZoom(qreal zoom)
 
     if (zoom != m_zoom) {
         m_zoom = zoom;
-        paint();
+        viewport()->update();
     }
 }
 
@@ -130,7 +130,7 @@ void PageView::setDoubleSideMode(DoubleSideMode mode)
     if (mode != m_doubleSideMode) {
         m_doubleSideMode = mode;
         setSize(m_size);
-        paint();
+        viewport()->update();
     }
 }
 
@@ -154,7 +154,7 @@ void PageView::setSize(const QSize &size)
         }
 
         m_zoom = m_size.width() / (m_dpiX * pageSize.width() / 72.0);
-        paint();
+        viewport()->update();
     } else if (FitPage == m_zoomMode) {
         Poppler::Page *page = m_document->page(m_currentPage);
         QSizeF pageSize = page->pageSize();
@@ -171,7 +171,7 @@ void PageView::setSize(const QSize &size)
         qreal zy = m_size.height() / (m_dpiY * pageSize.height() / 72.0);
 
         m_zoom = qMin(zx, zy);
-        paint();
+        viewport()->update();
     }
 }
 

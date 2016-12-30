@@ -30,7 +30,9 @@
 #include <QClipboard>
 #include <QCursor>
 #include <QDesktopServices>
+#include <QIcon>
 #include <QImage>
+#include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
@@ -50,8 +52,7 @@
  */
 
 ContinousPageView::ContinousPageView(QWidget *parent)
-    : QAbstractScrollArea(parent)
-    , PageView()
+    : PageView(parent)
 {
     setMouseTracking(true);
 
@@ -115,7 +116,7 @@ void ContinousPageView::scrolled()
     m_offset = QPoint(horizontalScrollBar()->value(),value);
     if (page < m_document->numPages())
         m_currentPage = page;
-    paint();
+    repaint();
 }
 
 /*
@@ -131,7 +132,7 @@ void ContinousPageView::gotoPage(int page)
     QScrollBar *vbar = verticalScrollBar();
 
     vbar->setValue(page * pageHeight());
-    paint();
+    repaint();
 
     emit currentPageChanged(m_currentPage);
 }
@@ -140,7 +141,7 @@ void ContinousPageView::gotoPage(int page)
  * protected methods
  */
 
-void ContinousPageView::paint()
+void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
 {
     QImage* image = nullptr;
     QList<Poppler::Annotation *> annotations;
@@ -154,9 +155,8 @@ void ContinousPageView::paint()
 
     QSize vs = viewport()->size();
 
-    QImage centeredImage(viewport()->size(), QImage::Format_ARGB32_Premultiplied);
-    centeredImage.fill(Qt::gray);
-    QPainter p(&centeredImage);
+    QPainter p(viewport());
+    p.fillRect(0,0,vs.width(),vs.height(),Qt::gray);
 
     SearchEngine *se = SearchEngine::globalInstance();
     int matchPage;
@@ -184,7 +184,7 @@ void ContinousPageView::paint()
         if (!image || image->isNull())
             break;
 
-        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 + pageStart.x());
+        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 -m_offset.x());
 
         // match further matches on page
         double sx = resX() / 72.0;
@@ -217,16 +217,6 @@ void ContinousPageView::paint()
 
         pageStart.setY(pageStart.y() + image->height() + PAGEDISTANCE);
     }
-
-    p.end();
-
-    m_image=centeredImage;
-}
-
-void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
-{
-    QPainter p(viewport());
-    p.drawImage(QPoint(0, 0), m_image);
     p.end();
 }
 
@@ -234,7 +224,7 @@ void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
 {
     m_imageCache.clear();
     setSize(viewport()->size() - QSize(1, 1));
-    paint();
+    repaint();
 }
 
 void ContinousPageView::keyPressEvent(QKeyEvent *event)
@@ -311,7 +301,7 @@ void ContinousPageView::slotCopyRequested(const QRectF &rect)
 
 void ContinousPageView::slotFindStarted()
 {
-    paint();
+    repaint();
 }
 
 void ContinousPageView::slotHighlightMatch(int page, const QRectF &)
@@ -322,7 +312,7 @@ void ContinousPageView::slotHighlightMatch(int page, const QRectF &)
 void ContinousPageView::slotMatchesFound(int page, const QList<QRectF> &)
 {
     if (page == m_currentPage)
-        paint();
+        repaint();
 }
 
 

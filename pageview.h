@@ -18,15 +18,17 @@
 
 #pragma once
 
+#include <QAbstractScrollArea>
 #include <QColor>
 #include <QRectF>
+#include <QWidget>
 
 namespace Poppler
 {
 class Document;
 }
 
-class PageView
+class PageView : public QAbstractScrollArea
 {
 public:
     enum ZoomMode { FitWidth, FitPage, Absolute };
@@ -35,7 +37,7 @@ public:
     static QColor matchColor();
     static QColor highlightColor();
 
-    PageView();
+    PageView(QWidget *parent);
     virtual ~PageView();
 
     qreal resX() const;
@@ -56,8 +58,6 @@ public:
     virtual void gotoPage(int page) = 0;
     virtual void gotoDestination(const QString &destination);
 
-protected:
-    virtual void paint() = 0;
 
 protected:
     Poppler::Document *m_document;
