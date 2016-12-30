@@ -353,9 +353,9 @@ void PdfViewer::slotAbout()
 
     QMessageBox::about(this, tr("About FirstAid"),
         tr("<h1>FirstAid - PDF Help Viewer</h1>%1"
-    "<p>Based on the <a href=\"https://poppler.freedesktop.org/\">Poppler PDF rendering library</a>.<br>"
-    "License: <a href=\"https://github.com/AbsInt/FirstAid/blob/master/COPYING\">GPLv2+</a><br>"
-    "Sources: <a href=\"https://github.com/AbsInt/FirstAid\">https://github.com/AbsInt/FirstAid</a></p>"
+    "<p>Based on the <a href=\"https://poppler.freedesktop.org/\">Poppler PDF rendering library</a>.</p>"
+    "<p>Licensed under the <a href=\"https://github.com/AbsInt/FirstAid/blob/master/COPYING\">GPLv2+</a>.</p>"
+    "<p>Sources available on <a href=\"https://github.com/AbsInt/FirstAid\">https://github.com/AbsInt/FirstAid</a>.</p>"
     ).arg(releaseInfo));
 }
 
