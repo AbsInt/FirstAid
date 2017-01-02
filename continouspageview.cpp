@@ -126,6 +126,7 @@ void ContinousPageView::gotoPage(int page)
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
+    m_offset = QPoint(m_offset.x(),0);
     m_currentPage = page;
     updateScrollBars();
     viewport()->repaint();
