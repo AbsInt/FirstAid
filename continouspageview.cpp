@@ -114,10 +114,15 @@ void ContinousPageView::scrolled()
     m_offset = QPoint(horizontalScrollBar()->value(),value);
 
     if (m_doubleSideMode)
-        page *= 2;
+        page = page * 2 - 1;
+    if(page<0)
+        page=0;
 
     if (page < m_document->numPages())
+    {
         m_currentPage = page;
+        emit currentPageChanged(m_currentPage);
+    }
     viewport()->repaint();
 }
 

@@ -143,6 +143,8 @@ void PageView::setSize(const QSize &size)
 
     if (FitWidth == m_zoomMode) {
         Poppler::Page *page = m_document->page(m_currentPage);
+        if (!page)
+            return;
         QSizeF pageSize = page->pageSize();
         pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
         delete page;
@@ -158,6 +160,8 @@ void PageView::setSize(const QSize &size)
         viewport()->update();
     } else if (FitPage == m_zoomMode) {
         Poppler::Page *page = m_document->page(m_currentPage);
+        if (!page)
+            return;
         QSizeF pageSize = page->pageSize();
         pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
         pageSize.setHeight(2 * PAGEFRAME + pageSize.height());
