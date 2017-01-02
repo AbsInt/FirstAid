@@ -339,7 +339,7 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void ContinousPageView::mouseReleaseEvent(QMouseEvent *event)
+void ContinousPageView::mouseReleaseEvent(QMouseEvent *)
 {
     if (!m_document)
         return;
