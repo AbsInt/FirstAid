@@ -112,6 +112,10 @@ void ContinousPageView::scrolled()
     value -= (page * (pageSize + 2*PAGEFRAME));
     // scroll(page,value);
     m_offset = QPoint(horizontalScrollBar()->value(),value);
+
+    if (m_doubleSideMode)
+        page *= 2;
+
     if (page < m_document->numPages())
         m_currentPage = page;
     viewport()->repaint();
@@ -147,6 +151,10 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
     m_pageHeight = 0;
     int currentPage = m_currentPage;
 
+    //show previous page in doubleside mode
+    if (m_doubleSideMode && (currentPage>1) && !(currentPage%2))
+        --currentPage;
+
     QSize vs = viewport()->size();
 
     QPainter p(viewport());
@@ -172,7 +180,15 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         if (!image || image->isNull())
             break;
 
-        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 -m_offset.x()+ ((m_zoomMode==Absolute)?PAGEFRAME:0));
+        int doubleSideOffset = 0;
+        if (m_doubleSideMode)
+        {
+            doubleSideOffset = image->width()/2;
+            if (currentPage%2)
+                doubleSideOffset *= -1;
+        }
+
+        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 -m_offset.x() + doubleSideOffset + ((m_zoomMode==Absolute)?PAGEFRAME:0));
 
         // match further matches on page
         double sx = resX() / 72.0;
@@ -205,7 +221,8 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         // set next page
         ++currentPage;
 
-        pageStart.setY(pageStart.y() + image->height() + 2*PAGEFRAME);
+        if (!m_doubleSideMode || (currentPage%2))
+            pageStart.setY(pageStart.y() + image->height() + 2*PAGEFRAME);
     }
     p.end();
 
@@ -463,11 +480,23 @@ int ContinousPageView::pageWidth()
 void ContinousPageView::updateScrollBars()
 {
     QScrollBar *vbar = verticalScrollBar();
-    const int pageCount = m_document->numPages();
+    int pageCount = m_document->numPages();
+    int current = currentPage();
+    if (m_doubleSideMode)
+    {
+        if (pageCount%2)
+            pageCount = pageCount/2+1;
+        else
+            pageCount /= 2;
+        if(current%2)
+            current = current/2 +1;
+        else
+            current /= 2;
+    }
     int pageSize = pageHeight();
     vbar->setRange(0, (pageCount*2) * PAGEFRAME + qMax(0,pageCount * pageSize - viewport()->height()));
     vbar->blockSignals(true);
-    vbar->setValue(currentPage() * (pageSize+2*PAGEFRAME) + m_offset.y());
+    vbar->setValue(current * (pageSize+2*PAGEFRAME) + m_offset.y());
     vbar->blockSignals(false);
 
     QScrollBar *hbar = horizontalScrollBar();
