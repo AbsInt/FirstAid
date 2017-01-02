@@ -114,7 +114,7 @@ void ContinousPageView::scrolled()
     m_offset = QPoint(horizontalScrollBar()->value(),value);
     if (page < m_document->numPages())
         m_currentPage = page;
-    repaint();
+    viewport()->repaint();
 }
 
 /*
@@ -127,10 +127,8 @@ void ContinousPageView::gotoPage(int page)
         return;
 
     m_currentPage = page;
-    QScrollBar *vbar = verticalScrollBar();
-
-    vbar->setValue(page * pageHeight());
-    repaint();
+    updateScrollBars();
+    viewport()->repaint();
 
     emit currentPageChanged(m_currentPage);
 }
@@ -216,7 +214,7 @@ void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
 {
     m_imageCache.clear();
     setSize(viewport()->size() - QSize(1, 1));
-    repaint();
+    viewport()->repaint();
 }
 
 void ContinousPageView::keyPressEvent(QKeyEvent *event)
@@ -405,7 +403,7 @@ void ContinousPageView::slotCopyRequested(const QRectF &rect)
 
 void ContinousPageView::slotFindStarted()
 {
-    repaint();
+    viewport()->repaint();
 }
 
 void ContinousPageView::slotHighlightMatch(int page, const QRectF &)
@@ -416,7 +414,7 @@ void ContinousPageView::slotHighlightMatch(int page, const QRectF &)
 void ContinousPageView::slotMatchesFound(int page, const QList<QRectF> &)
 {
     if (page == m_currentPage)
-        repaint();
+        viewport()->repaint();
 }
 
 
