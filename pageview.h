@@ -57,7 +57,7 @@ public:
     virtual void setZoom(qreal zoom);
     virtual void reset();
     virtual int currentPage() const;
-    virtual void gotoPage(int page) = 0;
+    virtual void gotoPage(int page, int offset = 0) = 0;
     virtual void gotoDestination(const QString &destination);
 
 
@@ -70,4 +70,5 @@ protected:
     qreal m_zoom;
     DoubleSideMode m_doubleSideMode;
     QSize m_size;
+    int m_pageHeight = 0;
 };

@@ -164,7 +164,7 @@ SinglePageView::~SinglePageView()
  * public methods
  */
 
-void SinglePageView::gotoPage(int page)
+void SinglePageView::gotoPage(int page, int /*offset*/)
 {
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;

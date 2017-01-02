@@ -180,14 +180,27 @@ void PageView::setSize(const QSize &size)
 
 void PageView::gotoDestination(const QString &destination)
 {
-    bool ok;
-    int pageNumber = destination.toInt(&ok);
+    bool ok = false;
+    int pageNumber = 0;
+    int offset = 0;
+    if (destination.contains("#"))
+    {
+        QList<QString> values = destination.split("#");
+        if (values.length() == 2)
+        {
+            pageNumber = values.at(0).toInt(&ok);
+            if (ok)
+                offset = values.at(1).toInt(&ok);
+        }
+    }
+    else
+        pageNumber = destination.toInt(&ok);
 
     if (ok)
-        gotoPage(pageNumber - 1);
+        gotoPage(pageNumber-1,offset);
     else if (m_document) {
         if (Poppler::LinkDestination *link = m_document->linkDestination(destination)) {
-            gotoPage(link->pageNumber() - 1);
+            gotoPage(link->pageNumber()-1,(link->isChangeTop() && m_pageHeight)? (m_pageHeight * link->top()):0);
             delete link;
         }
     }

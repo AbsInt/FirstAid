@@ -58,7 +58,7 @@ public:
     ContinousPageView(QWidget *parent = nullptr);
     ~ContinousPageView();
 
-    void gotoPage(int page) override;
+    void gotoPage(int page, int offset = 0) override;
     void setDocument(Poppler::Document *document) override;
     void setDoubleSideMode(DoubleSideMode mode) override;
     void setZoomMode(ZoomMode mode) override;

@@ -121,12 +121,12 @@ void ContinousPageView::scrolled()
  * public methods
  */
 
-void ContinousPageView::gotoPage(int page)
+void ContinousPageView::gotoPage(int page,int offset)
 {
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
-    m_offset = QPoint(m_offset.x(),0);
+    m_offset = QPoint(m_offset.x(),offset);
     m_currentPage = page;
     updateScrollBars();
     viewport()->repaint();
@@ -144,6 +144,7 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         return;
 
     m_pageRects.clear();
+    m_pageHeight = 0;
     int currentPage = m_currentPage;
 
     QSize vs = viewport()->size();
@@ -193,6 +194,7 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
 
         p.drawImage(pageStart, *image);
         m_pageRects.append(QPair<int,QRect>(currentPage,QRect(pageStart,image->size())));
+        m_pageHeight = image->height();
 
         p.setPen(Qt::darkGray);
         p.drawRect(QRect(pageStart, image->size()).adjusted(-1, -1, 1, 1));
@@ -313,15 +315,22 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
                 Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(a)->linkDestination();
                 switch (link->linkType()) {
                     case Poppler::Link::Goto:
-                        emit gotoRequested(QString::number(static_cast<Poppler::LinkGoto *>(link)->destination().pageNumber()));
-                        return;
+                    {
+                        Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
+                        int offset = gotoLink.isChangeTop()?gotoLink.top()* displayRect.height():0;
+                        emit gotoRequested(QString::number(gotoLink.pageNumber())+"#"+QString::number(offset));
+                        delete link;
+                    }
+                    return;
 
                     case Poppler::Link::Browse:
                         QDesktopServices::openUrl(QUrl(static_cast<Poppler::LinkBrowse *>(link)->url()));
+                        delete link;
                         return;
 
                     default:
                         qDebug("Not yet handled link type %d.", link->linkType());
+                        delete link;
                         return;
                 }
 

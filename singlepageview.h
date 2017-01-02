@@ -69,7 +69,7 @@ public:
     SinglePageView(QWidget *parent = nullptr);
     ~SinglePageView();
 
-    void gotoPage(int page) override;
+    void gotoPage(int page, int offset = 0) override;
 
 signals:
     void currentPageChanged(int page);
