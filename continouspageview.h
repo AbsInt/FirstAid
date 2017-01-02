@@ -21,14 +21,34 @@
 
 #include <QImage>
 #include <QCache>
+#include <QRubberBand>
 
 #include "documentobserver.h"
 #include "pageview.h"
+
+class QRubberBand;
 
 namespace Poppler
 {
 class Annotation;
 }
+
+class FirstAidPage
+{
+public:
+    FirstAidPage(QImage* image, const QList<Poppler::Annotation *> &annotations)
+        : m_image(image)
+        , m_annotations(annotations)
+    {}
+
+    ~FirstAidPage() {
+        delete m_image;
+        qDeleteAll(m_annotations);
+    }
+
+    QImage* m_image;
+    QList<Poppler::Annotation *> m_annotations;
+};
 
 class ContinousPageView: public PageView
 {
@@ -43,13 +63,19 @@ public:
     void setDoubleSideMode(DoubleSideMode mode) override;
     void setZoomMode(ZoomMode mode) override;
     void setZoom(qreal zoom) override;
+
 signals:
     void currentPageChanged(int page);
+    void gotoRequested(const QString &dest);
+    void copyRequested(const QRectF &area);
 
 protected:
     void paintEvent(QPaintEvent *) override;
     void resizeEvent(QResizeEvent *) override;
     void keyPressEvent(QKeyEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
 public slots:
 
@@ -67,9 +93,15 @@ private:
     int pageWidth();
     void updateScrollBars();
 
+    FirstAidPage* getPage(int page);
 private:
 
-    QCache<int,QImage> m_imageCache;
+    QCache<int,FirstAidPage> m_imageCache;
 
     QPoint m_offset;
+
+    QList<QPair<int,QRect>> m_pageRects;
+    QList<Poppler::Annotation *> m_annotations;
+    QPair<int,QPoint> m_rubberBandOrigin = QPair<int,QPoint>(-1,QPoint(0,0));
+    QRubberBand *m_rubberBand;
 };
