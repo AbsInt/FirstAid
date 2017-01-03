@@ -196,11 +196,18 @@ bool ContinousPageView::event(QEvent *event)
     if (event->type() == QEvent::Gesture) {
         QGestureEvent *ge=static_cast<QGestureEvent*>(event);
 
-        if (QGesture *swipe = ge->gesture(Qt::SwipeGesture)) {
-            return true;
+        if (QSwipeGesture *swipe = static_cast<QSwipeGesture *>(ge->gesture(Qt::SwipeGesture))) {
+            if (QSwipeGesture::Up == swipe->verticalDirection()) {
+                gotoNextPage();
+                return true;
+            }
+            if (QSwipeGesture::Down == swipe->verticalDirection()) {
+                gotoPreviousPage();
+                return true;
+            }
         }
 
-        if (QGesture *pinch = ge->gesture(Qt::PinchGesture)) {
+        if (QPinchGesture *pinch = static_cast<QPinchGesture *>(ge->gesture(Qt::PinchGesture))) {
             return true;
         }
     }
@@ -300,42 +307,19 @@ void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
 
 void ContinousPageView::keyPressEvent(QKeyEvent *event)
 {
-    #if 0
-    QScrollBar *vsb = verticalScrollBar();
-
-    if (m_document && event->key() == Qt::Key_PageDown && (!vsb->isVisible() || vsb->value() == vsb->maximum())) {
-        if (m_currentPage < m_document->numPages() - 1) {
-            gotoPage(m_currentPage + 1);
-            verticalScrollBar()->setValue(0);
-            return;
-        }
-    }
-
-    if (m_document && event->key() == Qt::Key_PageUp && (!vsb->isVisible() || vsb->value() == 0)) {
-        if (m_currentPage > 0) {
-            gotoPage(currentPage() - 1);
-            verticalScrollBar()->setValue(verticalScrollBar()->maximum());
-            return;
-        }
-    }
-    #endif
-
     if (m_document) {
         if (event->key() == Qt::Key_PageDown) {
-            int newPage=qMin(m_document->numPages() - 1,m_currentPage + (m_doubleSideMode?2:1));
-            if (newPage != m_currentPage) {
-                gotoPage(newPage);
-                return;
-            }
+            // TODO only go to next page if page is fully visible
+            gotoNextPage();
+            return;
         }
 
         if (event->key() == Qt::Key_PageUp) {
-            int newPage=qMax(0,m_currentPage - (m_doubleSideMode?2:1));
-            if (newPage != m_currentPage) {
-                gotoPage(newPage);
-                return;
-            }
+            // TODO only go to previous page if page is at top
+            gotoPreviousPage();
+            return;
         }
+
     }
 
     PageView::keyPressEvent(event);
@@ -449,6 +433,22 @@ void ContinousPageView::mouseReleaseEvent(QMouseEvent *)
     m_rubberBandOrigin= qMakePair(-1,QPoint(0,0));
     m_rubberBand->hide();
     emit copyRequested(m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
+}
+
+/*
+ * public slots
+ */
+
+void ContinousPageView::gotoPreviousPage()
+{
+    int newPage=qMin(m_document->numPages()-1, m_currentPage+(m_doubleSideMode ? 2 : 1));
+    gotoPage(newPage, 0);
+}
+
+void ContinousPageView::gotoNextPage()
+{
+    int newPage=qMax(0, m_currentPage-(m_doubleSideMode ? 2 : 1));
+    gotoPage(newPage, 0);
 }
 
 /*
