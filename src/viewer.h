@@ -83,18 +83,44 @@ private:
      */
     void updateOnDocumentChange();
 
-    QAction *m_fileOpenExternalAct;
-    QAction *m_fileReloadAct;
-    QAction *m_filePrintAct;
+private:
+    /**
+     * PDF view, renders the pages
+     */
+    PageView *m_view = nullptr;
 
-    PageView *m_view;
-    QList<DocumentObserver *> m_observers;
-
-    Poppler::Document *m_doc;
+    /**
+     * full path to current open document, else empty
+     */
     QString m_filePath;
 
     /**
-     * watcher to auto-reload
+     * watcher to auto-reload, does watch m_filePath
      */
     QFileSystemWatcher m_fileWatcher;
+
+    /**
+     * current open document, if any
+     */
+    Poppler::Document *m_doc = nullptr;
+
+    /**
+     * registered observers for the document
+     */
+    QList<DocumentObserver *> m_observers;
+
+    /**
+     * action: open file in external PDF viewer
+     */
+    QAction *m_fileOpenExternalAct = nullptr;
+
+    /**
+     * action: reload file
+     */
+    QAction *m_fileReloadAct = nullptr;
+
+    /**
+     * action: print file
+     */
+    QAction *m_filePrintAct = nullptr;
 };

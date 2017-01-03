@@ -55,7 +55,6 @@
 
 PdfViewer::PdfViewer(const QString &file)
     : QMainWindow()
-    , m_doc(0)
 {
     setWindowIcon(QIcon(":/firstaid.svg"));
 
