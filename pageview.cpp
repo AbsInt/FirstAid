@@ -180,7 +180,7 @@ void PageView::setSize(const QSize &size)
         pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
         delete page;
 
-        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode && m_currentPage > 0)) {
+        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode)) {
             if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
                 pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
                 delete page;
@@ -198,7 +198,7 @@ void PageView::setSize(const QSize &size)
         pageSize.setHeight(2 * PAGEFRAME + pageSize.height());
         delete page;
 
-        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode && m_currentPage > 0)) {
+        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode)) {
             if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
                 pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
                 delete page;
