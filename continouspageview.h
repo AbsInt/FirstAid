@@ -78,6 +78,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
 
 public slots:
+    void gotoPreviousPage();
+    void gotoNextPage();
 
 private slots:
     void slotGotoRequested(const QString &destination);
