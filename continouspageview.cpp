@@ -309,15 +309,17 @@ void ContinousPageView::keyPressEvent(QKeyEvent *event)
 
     if (m_document) {
         if (event->key() == Qt::Key_PageDown) {
-            if (m_currentPage < m_document->numPages() - 1) {
-                gotoPage(m_currentPage + 1);
+            int newPage=qMin(m_document->numPages() - 1,m_currentPage + (m_doubleSideMode?2:1));
+            if (newPage != m_currentPage) {
+                gotoPage(newPage);
                 return;
             }
         }
 
         if (event->key() == Qt::Key_PageUp) {
-            if (m_currentPage > 0) {
-                gotoPage(currentPage() - 1);
+            int newPage=qMax(0,m_currentPage - (m_doubleSideMode?2:1));
+            if (newPage != m_currentPage) {
+                gotoPage(newPage);
                 return;
             }
         }
