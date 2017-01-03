@@ -330,13 +330,13 @@ void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
 void ContinousPageView::keyPressEvent(QKeyEvent *event)
 {
     if (m_document) {
-        if (event->key() == Qt::Key_PageDown) {
+        if (event->key() == Qt::Key_PageUp) {
             // TODO only go to next page if page is fully visible
             gotoNextPage();
             return;
         }
 
-        if (event->key() == Qt::Key_PageUp) {
+        if (event->key() == Qt::Key_PageDown) {
             // TODO only go to previous page if page is at top
             gotoPreviousPage();
             return;
