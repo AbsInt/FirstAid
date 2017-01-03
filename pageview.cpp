@@ -45,7 +45,7 @@ QColor PageView::highlightColor()
  * constructors / destructor
  */
 
-PageView::PageView(QWidget* parent)
+PageView::PageView(QWidget *parent)
     : QAbstractScrollArea(parent)
     , m_document(nullptr)
     , m_currentPage(0)
@@ -128,28 +128,27 @@ void PageView::setZoom(qreal zoom)
 
 void PageView::wheelEvent(QWheelEvent *wheelEvent)
 {
-     if( wheelEvent->modifiers() & Qt::ControlModifier )
-     {
-         if (wheelEvent->delta()>0)
-             setZoom(m_zoom+0.1);
-         else
-             setZoom(m_zoom-0.1);
-         emit zoomChanged(m_zoom);
-         return;
-     }
+    if (wheelEvent->modifiers() & Qt::ControlModifier) {
+        if (wheelEvent->delta() > 0)
+            setZoom(m_zoom + 0.1);
+        else
+            setZoom(m_zoom - 0.1);
+        emit zoomChanged(m_zoom);
+        return;
+    }
 
-     QAbstractScrollArea::wheelEvent(wheelEvent);
+    QAbstractScrollArea::wheelEvent(wheelEvent);
 }
 
 void PageView::keyPressEvent(QKeyEvent *event)
 {
     if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Plus) {
-        setZoom(m_zoom+0.1);
+        setZoom(m_zoom + 0.1);
         emit zoomChanged(m_zoom);
         return;
     }
     if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Minus) {
-        setZoom(m_zoom-0.1);
+        setZoom(m_zoom - 0.1);
         emit zoomChanged(m_zoom);
         return;
     }
@@ -218,24 +217,21 @@ void PageView::gotoDestination(const QString &destination)
     bool ok = false;
     int pageNumber = 0;
     int offset = 0;
-    if (destination.contains("#"))
-    {
+    if (destination.contains("#")) {
         QList<QString> values = destination.split("#");
-        if (values.length() == 2)
-        {
+        if (values.length() == 2) {
             pageNumber = values.at(0).toInt(&ok);
             if (ok)
                 offset = values.at(1).toInt(&ok);
         }
-    }
-    else
+    } else
         pageNumber = destination.toInt(&ok);
 
     if (ok)
-        gotoPage(pageNumber-1,offset);
+        gotoPage(pageNumber - 1, offset);
     else if (m_document) {
         if (Poppler::LinkDestination *link = m_document->linkDestination(destination)) {
-            gotoPage(link->pageNumber()-1,(link->isChangeTop() && m_pageHeight)? (m_pageHeight * link->top()):0);
+            gotoPage(link->pageNumber() - 1, (link->isChangeTop() && m_pageHeight) ? (m_pageHeight * link->top()) : 0);
             delete link;
         }
     }

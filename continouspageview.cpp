@@ -57,16 +57,13 @@
 
 #include <QDebug>
 
-
-
 /*
  * Helper class
  */
 
-
-FirstAidPage::~FirstAidPage() {
+FirstAidPage::~FirstAidPage()
+{
 }
-
 
 /*
  * constructors / destructor
@@ -152,20 +149,19 @@ void ContinousPageView::scrolled()
 
     // compute page
     int value = verticalScrollBar()->value();
-    int page = value / (pageSize + 2*PAGEFRAME);
+    int page = value / (pageSize + 2 * PAGEFRAME);
 
     // set page
-    value -= (page * (pageSize + 2*PAGEFRAME));
+    value -= (page * (pageSize + 2 * PAGEFRAME));
     // scroll(page,value);
-    m_offset = QPoint(horizontalScrollBar()->value(),value);
+    m_offset = QPoint(horizontalScrollBar()->value(), value);
 
     if (m_doubleSideMode)
         page = page * 2 - 1;
-    if(page<0)
-        page=0;
+    if (page < 0)
+        page = 0;
 
-    if (page < m_document->numPages())
-    {
+    if (page < m_document->numPages()) {
         m_currentPage = page;
         emit currentPageChanged(m_currentPage);
     }
@@ -175,12 +171,12 @@ void ContinousPageView::scrolled()
  * public methods
  */
 
-void ContinousPageView::gotoPage(int page,int offset)
+void ContinousPageView::gotoPage(int page, int offset)
 {
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
-    m_offset = QPoint(m_offset.x(),offset);
+    m_offset = QPoint(m_offset.x(), offset);
     m_currentPage = page;
     updateScrollBars();
     viewport()->update();
@@ -195,7 +191,7 @@ void ContinousPageView::gotoPage(int page,int offset)
 bool ContinousPageView::event(QEvent *event)
 {
     if (event->type() == QEvent::Gesture) {
-        QGestureEvent *ge=static_cast<QGestureEvent*>(event);
+        QGestureEvent *ge = static_cast<QGestureEvent *>(event);
 
         if (QSwipeGesture *swipe = static_cast<QSwipeGesture *>(ge->gesture(Qt::SwipeGesture))) {
             if (QSwipeGesture::Up == swipe->verticalDirection()) {
@@ -214,9 +210,9 @@ bool ContinousPageView::event(QEvent *event)
             static qreal pinchStartZoom;
 
             if (Qt::GestureStarted == pinch->state())
-               pinchStartZoom=m_zoom;
+                pinchStartZoom = m_zoom;
 
-            setZoom(pinchStartZoom*pinch->totalScaleFactor());
+            setZoom(pinchStartZoom * pinch->totalScaleFactor());
             emit zoomChanged(m_zoom);
 
             return true;
@@ -226,10 +222,10 @@ bool ContinousPageView::event(QEvent *event)
             static QPoint panStartOffset;
 
             if (Qt::GestureStarted == pan->state())
-               panStartOffset=QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+                panStartOffset = QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
 
-            horizontalScrollBar()->setValue(panStartOffset.x()+pan->offset().x());
-            verticalScrollBar()->setValue(panStartOffset.y()+pan->offset().y());
+            horizontalScrollBar()->setValue(panStartOffset.x() + pan->offset().x());
+            verticalScrollBar()->setValue(panStartOffset.y() + pan->offset().y());
 
             return true;
         }
@@ -251,8 +247,8 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
     m_pageHeight = 0;
     int currentPage = m_currentPage;
 
-    //show previous page in doubleside mode
-    if (m_doubleSideMode && (currentPage>1) && !(currentPage%2))
+    // show previous page in doubleside mode
+    if (m_doubleSideMode && (currentPage > 1) && !(currentPage % 2))
         --currentPage;
 
     SearchEngine *se = SearchEngine::globalInstance();
@@ -260,28 +256,27 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
     QRectF matchRect;
     se->currentMatch(matchPage, matchRect);
 
-    QPoint pageStart = -m_offset + QPoint(0,PAGEFRAME);
+    QPoint pageStart = -m_offset + QPoint(0, PAGEFRAME);
 
-    while (pageStart.y() < 0 || vs.height() > (pageStart.y() + 2*PAGEFRAME)) {
+    while (pageStart.y() < 0 || vs.height() > (pageStart.y() + 2 * PAGEFRAME)) {
         // draw another page
 
-        FirstAidPage cachedPage =  getPage(currentPage);
+        FirstAidPage cachedPage = getPage(currentPage);
 
         if (cachedPage.m_image.isNull())
             break;
 
         int doubleSideOffset = 0;
-        if (m_doubleSideMode)
-        {
+        if (m_doubleSideMode) {
             // special handling for first page
             if (0 != currentPage) {
-                doubleSideOffset = cachedPage.m_image.width()/2;
-                if (currentPage%2)
+                doubleSideOffset = cachedPage.m_image.width() / 2;
+                if (currentPage % 2)
                     doubleSideOffset *= -1;
             }
         }
 
-        pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width()) / 2 -m_offset.x() + doubleSideOffset + ((m_zoomMode==Absolute)?PAGEFRAME:0));
+        pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width()) / 2 - m_offset.x() + doubleSideOffset + ((m_zoomMode == Absolute) ? PAGEFRAME : 0));
 
         // match further matches on page
         double sx = resX() / 72.0;
@@ -302,7 +297,7 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         sp.end();
 
         p.drawImage(pageStart, cachedPage.m_image);
-        m_pageRects.append(qMakePair(currentPage,QRect(pageStart,cachedPage.m_image.size())));
+        m_pageRects.append(qMakePair(currentPage, QRect(pageStart, cachedPage.m_image.size())));
         m_pageHeight = cachedPage.m_image.height();
 
         p.setPen(Qt::darkGray);
@@ -311,13 +306,12 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         // set next page
         ++currentPage;
 
-        if (!m_doubleSideMode || (currentPage%2))
-            pageStart.setY(pageStart.y() + cachedPage.m_image.height() + 2*PAGEFRAME);
+        if (!m_doubleSideMode || (currentPage % 2))
+            pageStart.setY(pageStart.y() + cachedPage.m_image.height() + 2 * PAGEFRAME);
     }
     p.end();
 
     updateScrollBars();
-
 }
 
 void ContinousPageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
@@ -341,7 +335,6 @@ void ContinousPageView::keyPressEvent(QKeyEvent *event)
             gotoPreviousPage();
             return;
         }
-
     }
 
     PageView::keyPressEvent(event);
@@ -352,9 +345,8 @@ void ContinousPageView::mouseMoveEvent(QMouseEvent *event)
     if (!m_document)
         return;
 
-    for (int i = 0; i < m_pageRects.length(); ++i)
-    {
-        QPair<int,QRect> currentPage = m_pageRects.at(i);
+    for (int i = 0; i < m_pageRects.length(); ++i) {
+        QPair<int, QRect> currentPage = m_pageRects.at(i);
         QRect displayRect = currentPage.second;
 
         qreal xPos = (event->x() - displayRect.x()) / (qreal)displayRect.width();
@@ -364,7 +356,6 @@ void ContinousPageView::mouseMoveEvent(QMouseEvent *event)
         FirstAidPage cachedPage = getPage(currentPage.first);
 
         for (auto &a : *cachedPage.m_annotations) {
-
             if (a->boundary().contains(p)) {
                 setCursor(Qt::PointingHandCursor);
                 return;
@@ -373,9 +364,8 @@ void ContinousPageView::mouseMoveEvent(QMouseEvent *event)
 
         setCursor(Qt::ArrowCursor);
 
-        if (m_rubberBandOrigin.first>=0)
+        if (m_rubberBandOrigin.first >= 0)
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, event->pos()).normalized());
-
     }
 }
 
@@ -384,9 +374,8 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
     if (!m_document)
         return;
 
-    for (int i = 0; i < m_pageRects.length(); ++i)
-    {
-        QPair<int,QRect> currentPage = m_pageRects.at(i);
+    for (int i = 0; i < m_pageRects.length(); ++i) {
+        QPair<int, QRect> currentPage = m_pageRects.at(i);
         QRect displayRect = currentPage.second;
         FirstAidPage cachedPage = getPage(currentPage.first);
 
@@ -398,13 +387,12 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
             if (a->boundary().contains(p)) {
                 Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(a.get())->linkDestination();
                 switch (link->linkType()) {
-                    case Poppler::Link::Goto:
-                    {
+                    case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
-                        int offset = gotoLink.isChangeTop()?gotoLink.top()* displayRect.height():0;
-                        emit gotoRequested(QString::number(gotoLink.pageNumber())+"#"+QString::number(offset));
+                        int offset = gotoLink.isChangeTop() ? gotoLink.top() * displayRect.height() : 0;
+                        emit gotoRequested(QString::number(gotoLink.pageNumber()) + "#" + QString::number(offset));
                     }
-                    return;
+                        return;
 
                     case Poppler::Link::Browse:
                         QDesktopServices::openUrl(QUrl(static_cast<Poppler::LinkBrowse *>(link)->url()));
@@ -420,7 +408,7 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
         }
 
         if (event->modifiers().testFlag(Qt::ShiftModifier)) {
-            m_rubberBandOrigin = qMakePair(currentPage.first,event->pos());
+            m_rubberBandOrigin = qMakePair(currentPage.first, event->pos());
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
             m_rubberBand->show();
         }
@@ -432,15 +420,13 @@ void ContinousPageView::mouseReleaseEvent(QMouseEvent *)
     if (!m_document)
         return;
 
-    if (m_rubberBandOrigin.first<0)
+    if (m_rubberBandOrigin.first < 0)
         return;
 
     QRect displayRect;
 
-    for (int i = 0; i < m_pageRects.length(); ++i)
-    {
-        if (m_pageRects.at(i).first == m_rubberBandOrigin.first)
-        {
+    for (int i = 0; i < m_pageRects.length(); ++i) {
+        if (m_pageRects.at(i).first == m_rubberBandOrigin.first) {
             displayRect = m_pageRects.at(i).second;
             break;
         }
@@ -449,7 +435,7 @@ void ContinousPageView::mouseReleaseEvent(QMouseEvent *)
     if (!displayRect.isValid())
         return;
 
-    m_rubberBandOrigin= qMakePair(-1,QPoint(0,0));
+    m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
     m_rubberBand->hide();
     emit copyRequested(m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
 }
@@ -460,13 +446,13 @@ void ContinousPageView::mouseReleaseEvent(QMouseEvent *)
 
 void ContinousPageView::gotoPreviousPage()
 {
-    int newPage=qMin(m_document->numPages()-1, m_currentPage+(m_doubleSideMode ? 2 : 1));
+    int newPage = qMin(m_document->numPages() - 1, m_currentPage + (m_doubleSideMode ? 2 : 1));
     gotoPage(newPage, 0);
 }
 
 void ContinousPageView::gotoNextPage()
 {
-    int newPage=qMax(0, m_currentPage-(m_doubleSideMode ? 2 : 1));
+    int newPage = qMax(0, m_currentPage - (m_doubleSideMode ? 2 : 1));
     gotoPage(newPage, 0);
 }
 
@@ -517,7 +503,6 @@ void ContinousPageView::slotMatchesFound(int page, const QList<QRectF> &)
         viewport()->update();
 }
 
-
 /*
  * private methods
  */
@@ -528,8 +513,7 @@ int ContinousPageView::pageHeight()
         return 0;
 
     int pageSize = 0;
-    if (Poppler::Page *popplerPage = m_document->page(currentPage()))
-    {
+    if (Poppler::Page *popplerPage = m_document->page(currentPage())) {
         pageSize = popplerPage->pageSize().height();
         delete popplerPage;
     }
@@ -542,12 +526,12 @@ int ContinousPageView::pageWidth()
         return 0;
 
     int pageSize = 0;
-    if (Poppler::Page *popplerPage = m_document->page(currentPage()))
-    {
+    if (Poppler::Page *popplerPage = m_document->page(currentPage())) {
         pageSize = popplerPage->pageSize().width();
         delete popplerPage;
     }
-    return (pageSize * resX()) / 72.0;;
+    return (pageSize * resX()) / 72.0;
+    ;
 }
 
 void ContinousPageView::updateScrollBars()
@@ -555,31 +539,29 @@ void ContinousPageView::updateScrollBars()
     QScrollBar *vbar = verticalScrollBar();
     int pageCount = m_document->numPages();
     int current = currentPage();
-    if (m_doubleSideMode)
-    {
-        if (pageCount%2)
-            pageCount = pageCount/2+1;
+    if (m_doubleSideMode) {
+        if (pageCount % 2)
+            pageCount = pageCount / 2 + 1;
         else
             pageCount /= 2;
-        if(current%2)
-            current = current/2 +1;
+        if (current % 2)
+            current = current / 2 + 1;
         else
             current /= 2;
     }
     int pageSize = pageHeight();
-    vbar->setRange(0, (pageCount*2) * PAGEFRAME + qMax(0,pageCount * pageSize - viewport()->height()));
+    vbar->setRange(0, (pageCount * 2) * PAGEFRAME + qMax(0, pageCount * pageSize - viewport()->height()));
     vbar->blockSignals(true);
-    vbar->setValue(current * (pageSize+2*PAGEFRAME) + m_offset.y());
+    vbar->setValue(current * (pageSize + 2 * PAGEFRAME) + m_offset.y());
     vbar->blockSignals(false);
 
     QScrollBar *hbar = horizontalScrollBar();
     pageSize = pageWidth();
-    if (m_doubleSideMode)
-    {
-        pageSize *=2;
+    if (m_doubleSideMode) {
+        pageSize *= 2;
         pageSize += PAGEFRAME;
     }
-    hbar->setRange(0, qMax(0,(pageSize+ 2*PAGEFRAME )- viewport()->width()) );
+    hbar->setRange(0, qMax(0, (pageSize + 2 * PAGEFRAME) - viewport()->width()));
     hbar->blockSignals(true);
     hbar->setValue(m_offset.x());
     hbar->blockSignals(false);
@@ -587,20 +569,19 @@ void ContinousPageView::updateScrollBars()
 
 FirstAidPage ContinousPageView::getPage(int pageNumber)
 {
-    FirstAidPage *cachedPage =  m_imageCache.object(pageNumber);
+    FirstAidPage *cachedPage = m_imageCache.object(pageNumber);
 
-    if (!cachedPage)
-    {
+    if (!cachedPage) {
         if (Poppler::Page *page = m_document->page(pageNumber)) {
-            QList<Poppler::Annotation*> annots = page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
+            QList<Poppler::Annotation *> annots = page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
             cachedPage = new FirstAidPage(page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0), annots);
 
-            m_imageCache.insert(pageNumber,cachedPage);
+            m_imageCache.insert(pageNumber, cachedPage);
             delete page;
             return *cachedPage;
         }
     } else
         return *cachedPage;
 
-    return FirstAidPage(QImage(), QList<Poppler::Annotation*>());
+    return FirstAidPage(QImage(), QList<Poppler::Annotation *>());
 }

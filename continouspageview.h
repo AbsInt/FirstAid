@@ -39,7 +39,7 @@ public:
         : m_image(image)
         , m_annotations(new std::vector<std::unique_ptr<Poppler::Annotation>>())
     {
-        foreach(auto *a, annotations)
+        foreach (auto *a, annotations)
             m_annotations->push_back(std::unique_ptr<Poppler::Annotation>(a));
     }
 
@@ -49,7 +49,7 @@ public:
     std::shared_ptr<std::vector<std::unique_ptr<Poppler::Annotation>>> m_annotations;
 };
 
-class ContinousPageView: public PageView
+class ContinousPageView : public PageView
 {
     Q_OBJECT
 
@@ -96,14 +96,14 @@ private:
     void updateScrollBars();
 
     FirstAidPage getPage(int page);
-private:
 
-    QCache<int,FirstAidPage> m_imageCache;
+private:
+    QCache<int, FirstAidPage> m_imageCache;
 
     QPoint m_offset;
 
-    QList<QPair<int,QRect>> m_pageRects;
+    QList<QPair<int, QRect>> m_pageRects;
     QList<Poppler::Annotation *> m_annotations;
-    QPair<int,QPoint> m_rubberBandOrigin = qMakePair(-1,QPoint(0,0));
+    QPair<int, QPoint> m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
     QRubberBand *m_rubberBand;
 };

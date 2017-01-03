@@ -108,15 +108,15 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     addWidget(spacer);
 
     // add label and combo box for zooming
-    m_zoomLabel=new QLabel(this);
+    m_zoomLabel = new QLabel(this);
     m_zoomLabel->setAlignment(Qt::AlignCenter);
-    m_zoomLabelAct=addWidget(m_zoomLabel);
+    m_zoomLabelAct = addWidget(m_zoomLabel);
     m_zoomLabel->installEventFilter(this);
 
     m_zoomButton = new QToolButton(this);
     m_zoomButton->setFocusPolicy(Qt::NoFocus);
     m_zoomButton->setToolTip(tr("Zoom"));
-    QMenu *zoomMenu=new QMenu(this);
+    QMenu *zoomMenu = new QMenu(this);
     zoomMenu->addAction(tr("Fit width"));
     zoomMenu->addAction(tr("Fit page"));
     zoomMenu->addAction(tr("10%"));
@@ -160,9 +160,9 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     // triggere these slots so view gets redrawn with stored settings
     QTimer::singleShot(0, this, SLOT(slotToggleFacingPages()));
 
-    int index=s.value("MainWindow/zoom", 8).toInt();
-    QList<QAction *> zoomActions=zoomMenu->actions();
-    if (index>=0 && index<zoomActions.count())
+    int index = s.value("MainWindow/zoom", 8).toInt();
+    QList<QAction *> zoomActions = zoomMenu->actions();
+    if (index >= 0 && index < zoomActions.count())
         QTimer::singleShot(0, zoomActions.at(index), SLOT(trigger()));
     else
         qDebug("%d/%d", index, zoomActions.count());
@@ -211,11 +211,11 @@ void NavigationToolBar::pageChanged(int page)
 bool NavigationToolBar::eventFilter(QObject *object, QEvent *event)
 {
     // clicking on the status label displaying the current page number will trigger goto action
-    if (object==m_pageLabel && QEvent::MouseButtonPress==event->type())
+    if (object == m_pageLabel && QEvent::MouseButtonPress == event->type())
         QTimer::singleShot(0, this, SLOT(slotGoto()));
 
     // clicking on the zoom label displaying the current scale factor will trigger zoom menu
-    else if (object==m_zoomLabel && QEvent::MouseButtonPress==event->type())
+    else if (object == m_zoomLabel && QEvent::MouseButtonPress == event->type())
         QTimer::singleShot(0, m_zoomButton, SLOT(showMenu()));
 
     return QToolBar::eventFilter(object, event);
@@ -228,12 +228,12 @@ void NavigationToolBar::slotGoFirst()
 
 void NavigationToolBar::slotGoPrev()
 {
-    setPage(qMax(0,page() - (m_toggleFacingPagesAct->isChecked()?2:1)));
+    setPage(qMax(0, page() - (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
 }
 
 void NavigationToolBar::slotGoNext()
 {
-    setPage(qMin(document()->numPages() - 1,page() + (m_toggleFacingPagesAct->isChecked()?2:1)));
+    setPage(qMin(document()->numPages() - 1, page() + (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
 }
 
 void NavigationToolBar::slotGoLast()
@@ -255,7 +255,7 @@ void NavigationToolBar::slotGoto()
 
     m_pageEditAct->setVisible(true);
 
-    m_pageEdit->setText(QString::number(1+page()));
+    m_pageEdit->setText(QString::number(1 + page()));
     m_pageEdit->selectAll();
     m_pageEdit->setFocus();
 }
@@ -263,7 +263,7 @@ void NavigationToolBar::slotGoto()
 void NavigationToolBar::slotHideGoto()
 {
     if (document())
-        m_pageLabel->setText(QString("%1 / %2").arg(1+page()).arg(document()->numPages()));
+        m_pageLabel->setText(QString("%1 / %2").arg(1 + page()).arg(document()->numPages()));
     else
         m_pageLabel->setText("n/a");
 
@@ -272,7 +272,7 @@ void NavigationToolBar::slotHideGoto()
 
 void NavigationToolBar::slotZoomChanged()
 {
-    QAction *a=qobject_cast<QAction *>(sender());
+    QAction *a = qobject_cast<QAction *>(sender());
     if (!a)
         return;
 
@@ -285,13 +285,11 @@ void NavigationToolBar::slotZoomChanged()
         m_zoomLabelAct->setVisible(false);
         m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-width.svg"));
         emit zoomModeChanged(PageView::FitWidth);
-    }
-    else if ("Fit page" == text) {
+    } else if ("Fit page" == text) {
         m_zoomLabelAct->setVisible(false);
         m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-best.svg"));
         emit zoomModeChanged(PageView::FitPage);
-    }
-    else {
+    } else {
         m_zoomLabelAct->setVisible(true);
         m_zoomLabel->setText(text);
         m_zoomButton->setIcon(QIcon(":/icons/zoom.svg"));
@@ -313,17 +311,17 @@ void NavigationToolBar::slotToggleFacingPages()
 void NavigationToolBar::slotChangeZoom(qreal currentZoom)
 {
     m_zoomLabelAct->setVisible(true);
-    m_zoomLabel->setText(QString("%1%").arg(qRound(currentZoom*100)));
+    m_zoomLabel->setText(QString("%1%").arg(qRound(currentZoom * 100)));
     m_zoomButton->setIcon(QIcon(":/icons/zoom.svg"));
 
     // save nearest zoom
-    QList<QAction *> actions=m_zoomButton->menu()->actions();
-    for (int c=2; c<actions.count(); c++) {
-        QString text=actions.at(c)->text();
+    QList<QAction *> actions = m_zoomButton->menu()->actions();
+    for (int c = 2; c < actions.count(); c++) {
+        QString text = actions.at(c)->text();
         text.remove("%");
         bool ok;
-        int value=text.toInt(&ok);
-        if (ok && currentZoom<value/100.0) {
+        int value = text.toInt(&ok);
+        if (ok && currentZoom < value / 100.0) {
             QSettings s;
             s.setValue("MainWindow/zoom", c);
             break;

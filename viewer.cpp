@@ -116,7 +116,7 @@ PdfViewer::PdfViewer(const QString &file)
     NavigationToolBar *navbar = new NavigationToolBar(tocDock->toggleViewAction(), menu, this);
     addToolBar(navbar);
     m_observers.append(navbar);
-    connect(m_view, SIGNAL(zoomChanged(qreal)), navbar,  SLOT(slotChangeZoom(qreal)));
+    connect(m_view, SIGNAL(zoomChanged(qreal)), navbar, SLOT(slotChangeZoom(qreal)));
 
     SearchEngine *se = SearchEngine::globalInstance();
     m_observers << se;
@@ -313,35 +313,35 @@ void PdfViewer::slotPrint()
         return;
 
     // determine range
-    int fromPage=qMax(printer.fromPage(), 1);
-    int toPage=qMin(printer.toPage(), m_doc->numPages());
+    int fromPage = qMax(printer.fromPage(), 1);
+    int toPage = qMin(printer.toPage(), m_doc->numPages());
 
     // provide some feedback
     QProgressDialog pd("Printing...", "Abort", fromPage, toPage, this);
     pd.setWindowModality(Qt::WindowModal);
 
     // gather some information
-    QRectF printerPageRect=printer.pageRect(QPrinter::DevicePixel);
+    QRectF printerPageRect = printer.pageRect(QPrinter::DevicePixel);
 
     // print given range
     QPainter painter;
     painter.begin(&printer);
-    for (int pageNumber=fromPage; pageNumber<=toPage; pageNumber++) {
+    for (int pageNumber = fromPage; pageNumber <= toPage; pageNumber++) {
         pd.setValue(pageNumber);
         if (pd.wasCanceled())
             break;
 
         // get page
-        Poppler::Page *page=m_doc->page(pageNumber-1);
+        Poppler::Page *page = m_doc->page(pageNumber - 1);
 
         // compute resolution so that page fits within the printable area
-        QSizeF pageSize=page->pageSizeF();
-        qreal scaleX=qMin(1.0, printerPageRect.width()/(72*pageSize.width()/printer.resolution()));
-        qreal scaleY=qMin(1.0, printerPageRect.height()/(72*pageSize.height()/printer.resolution()));
-        qreal res=printer.resolution()*qMin(scaleX, scaleY);
+        QSizeF pageSize = page->pageSizeF();
+        qreal scaleX = qMin(1.0, printerPageRect.width() / (72 * pageSize.width() / printer.resolution()));
+        qreal scaleY = qMin(1.0, printerPageRect.height() / (72 * pageSize.height() / printer.resolution()));
+        qreal res = printer.resolution() * qMin(scaleX, scaleY);
 
         // render page to image
-        QImage image=page->renderToImage(res, res);
+        QImage image = page->renderToImage(res, res);
 
         // free page
         delete page;
@@ -367,12 +367,13 @@ void PdfViewer::slotAbout()
     if (!QString(FIRSTAID_RELEASE_STRING).isEmpty())
         releaseInfo = tr("<p><b>Version %1 Build %2<br>Tag %3</b></p>").arg(FIRSTAID_RELEASE_STRING).arg(FIRSTAID_BUILD_STRING).arg(FIRSTAID_TAG_STRING);
 
-    QMessageBox::about(this, tr("About FirstAid"),
-        tr("<h1>FirstAid - PDF Help Viewer</h1>%1"
-    "<p>Based on the <a href=\"https://poppler.freedesktop.org/\">Poppler PDF rendering library</a>.</p>"
-    "<p>Licensed under the <a href=\"https://github.com/AbsInt/FirstAid/blob/master/COPYING\">GPLv2+</a>.</p>"
-    "<p>Sources available on <a href=\"https://github.com/AbsInt/FirstAid\">https://github.com/AbsInt/FirstAid</a>.</p>"
-    ).arg(releaseInfo));
+    QMessageBox::about(this,
+                       tr("About FirstAid"),
+                       tr("<h1>FirstAid - PDF Help Viewer</h1>%1"
+                          "<p>Based on the <a href=\"https://poppler.freedesktop.org/\">Poppler PDF rendering library</a>.</p>"
+                          "<p>Licensed under the <a href=\"https://github.com/AbsInt/FirstAid/blob/master/COPYING\">GPLv2+</a>.</p>"
+                          "<p>Sources available on <a href=\"https://github.com/AbsInt/FirstAid\">https://github.com/AbsInt/FirstAid</a>.</p>")
+                           .arg(releaseInfo));
 }
 
 void PdfViewer::slotSetZoom(qreal zoom)

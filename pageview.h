@@ -23,7 +23,7 @@
 #include <QRectF>
 #include <QWidget>
 
-#define PAGEFRAME        5
+#define PAGEFRAME 5
 
 namespace Poppler
 {
@@ -51,7 +51,7 @@ public:
     QRectF toPoints(const QRectF &rect) const;
 
 protected:
-    void wheelEvent( QWheelEvent *wheelEvent )override;
+    void wheelEvent(QWheelEvent *wheelEvent) override;
     void keyPressEvent(QKeyEvent *event) override;
 
 public:
@@ -68,7 +68,6 @@ public:
 
 signals:
     void zoomChanged(qreal CurrentZoom);
-
 
 protected:
     Poppler::Document *m_document;

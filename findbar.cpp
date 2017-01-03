@@ -44,12 +44,12 @@ FindBar::FindBar(QWidget *parent)
     connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotFind()));
     hbl->addWidget(m_findEdit);
 
-    m_prevMatch=new QToolButton(this);
+    m_prevMatch = new QToolButton(this);
     m_prevMatch->setIcon(QIcon(":/icons/go-previous.svg"));
     m_prevMatch->setToolTip("Previous match");
     hbl->addWidget(m_prevMatch);
 
-    m_nextMatch=new QToolButton(this);
+    m_nextMatch = new QToolButton(this);
     m_nextMatch->setIcon(QIcon(":/icons/go-next.svg"));
     m_nextMatch->setToolTip("Next match");
     hbl->addWidget(m_nextMatch);
@@ -69,7 +69,7 @@ FindBar::FindBar(QWidget *parent)
     addAction(closeAction);
     connect(closeAction, SIGNAL(triggered()), SLOT(slotHide()));
 
-    SearchEngine *se=SearchEngine::globalInstance();
+    SearchEngine *se = SearchEngine::globalInstance();
     connect(se, SIGNAL(finished()), SLOT(slotFindDone()));
     connect(m_prevMatch, SIGNAL(clicked()), se, SLOT(previousMatch()));
     connect(m_nextMatch, SIGNAL(clicked()), se, SLOT(nextMatch()));

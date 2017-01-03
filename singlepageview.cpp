@@ -125,7 +125,7 @@ void ImageLabel::mousePressEvent(QMouseEvent *event)
 void ImageLabel::mouseReleaseEvent(QMouseEvent *)
 {
     if (!m_rubberBandOrigin.isNull()) {
-        m_rubberBandOrigin=QPoint(0, 0);
+        m_rubberBandOrigin = QPoint(0, 0);
         m_rubberBand->hide();
         emit copyRequested(m_rubberBand->geometry().intersected(m_displayRect).translated(-m_displayRect.topLeft()));
     }
