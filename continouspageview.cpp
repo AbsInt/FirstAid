@@ -39,18 +39,19 @@
 #include "continouspageview.h"
 #include "searchengine.h"
 
+#include <QApplication>
 #include <QClipboard>
 #include <QCursor>
 #include <QDesktopServices>
+#include <QDesktopWidget>
+#include <QGestureEvent>
 #include <QIcon>
 #include <QImage>
+#include <QLabel>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
-#include <QApplication>
-#include <QDesktopWidget>
-#include <QLabel>
 #include <QRubberBand>
 #include <QScrollBar>
 
@@ -75,6 +76,10 @@ FirstAidPage::~FirstAidPage() {
 ContinousPageView::ContinousPageView(QWidget *parent)
     : PageView(parent)
 {
+    // ensure we recognize pinch and swipe guestures
+    grabGesture(Qt::PinchGesture);
+    grabGesture(Qt::SwipeGesture);
+
     m_rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
 
     m_imageCache.setMaxCost(8);
@@ -186,6 +191,23 @@ void ContinousPageView::gotoPage(int page,int offset)
 /*
  * protected methods
  */
+
+bool ContinousPageView::event(QEvent *event)
+{
+    if (event->type() == QEvent::Gesture) {
+        QGestureEvent *ge=static_cast<QGestureEvent*>(event);
+
+        if (QGesture *swipe = ge->gesture(Qt::SwipeGesture)) {
+            return true;
+        }
+
+        if (QGesture *pinch = ge->gesture(Qt::PinchGesture)) {
+            return true;
+        }
+    }
+
+    return QAbstractScrollArea::event(event);
+}
 
 void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
 {
