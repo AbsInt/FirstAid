@@ -23,28 +23,28 @@
 #include <QCache>
 #include <QRubberBand>
 
+#include <poppler-qt5.h>
+
 #include "documentobserver.h"
 #include "pageview.h"
 
 class QRubberBand;
-
-namespace Poppler
-{
-class Annotation;
-}
 
 class FirstAidPage
 {
 public:
     FirstAidPage(QImage* image, const QList<Poppler::Annotation *> &annotations)
         : m_image(image)
-        , m_annotations(annotations)
-    {}
+        , m_annotations(new std::vector<std::unique_ptr<Poppler::Annotation>>())
+    {
+        foreach(auto *a, annotations)
+            m_annotations->push_back(std::unique_ptr<Poppler::Annotation>(a));
+    }
 
     ~FirstAidPage();
 
     QImage* m_image;
-    QList<Poppler::Annotation *> m_annotations;
+    std::shared_ptr<std::vector<std::unique_ptr<Poppler::Annotation>>> m_annotations;
 };
 
 class ContinousPageView: public PageView

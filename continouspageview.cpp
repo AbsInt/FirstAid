@@ -39,8 +39,6 @@
 #include "continouspageview.h"
 #include "searchengine.h"
 
-#include <poppler-qt5.h>
-
 #include <QClipboard>
 #include <QCursor>
 #include <QDesktopServices>
@@ -67,7 +65,6 @@
 
 FirstAidPage::~FirstAidPage() {
     delete m_image;
-    qDeleteAll(m_annotations);
 }
 
 
@@ -342,7 +339,7 @@ void ContinousPageView::mouseMoveEvent(QMouseEvent *event)
 
         FirstAidPage * cachedPage = getPage(currentPage.first);
 
-        foreach (Poppler::Annotation *a, cachedPage->m_annotations) {
+        for (auto &a : *cachedPage->m_annotations) {
             if (a->boundary().contains(p)) {
                 setCursor(Qt::PointingHandCursor);
                 //insert image into cache
@@ -375,9 +372,9 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
         qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        foreach (Poppler::Annotation *a, cachedPage->m_annotations) {
+        for (auto &a : *cachedPage->m_annotations) {
             if (a->boundary().contains(p)) {
-                Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(a)->linkDestination();
+                Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(a.get())->linkDestination();
                 switch (link->linkType()) {
                     case Poppler::Link::Goto:
                     {
