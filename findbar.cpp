@@ -114,7 +114,7 @@ void FindBar::slotHide()
 
 void FindBar::slotFindDone()
 {
-    if (SearchEngine::globalInstance()->matches().isEmpty()) {
+    if (isVisible() && SearchEngine::globalInstance()->matches().isEmpty()) {
         m_findEdit->setStyleSheet("background-color: #f08080");
         QTimer::singleShot(5000, this, SLOT(slotResetStyle()));
     }
