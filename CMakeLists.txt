@@ -55,7 +55,6 @@ find_package(Qt5Xml)
 
 set(firstaid_SRCS
   abstractinfodock.cpp
-  continouspageview.cpp
   documentobserver.cpp
   findbar.cpp
   main.cpp

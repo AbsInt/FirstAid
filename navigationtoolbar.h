@@ -49,7 +49,7 @@ public:
 signals:
     void showToc(bool on);
     void zoomChanged(qreal value);
-    void zoomModeChanged(ContinousPageView::ZoomMode mode);
+    void zoomModeChanged(PageView::ZoomMode mode);
     void toggleFacingPages(bool on);
 
 private slots:

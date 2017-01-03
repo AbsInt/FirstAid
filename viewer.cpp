@@ -26,7 +26,7 @@
 #include "config.h"
 #include "findbar.h"
 #include "navigationtoolbar.h"
-#include "continouspageview.h"
+#include "pageview.h"
 #include "searchengine.h"
 #include "stdinreaderthread.h"
 #include "toc.h"
@@ -96,7 +96,7 @@ PdfViewer::PdfViewer(const QString &file)
     QVBoxLayout *vbl = new QVBoxLayout(w);
     vbl->setContentsMargins(0, 0, 0, 0);
 
-    m_view = new ContinousPageView(this);
+    m_view = new PageView(this);
     vbl->addWidget(m_view);
     connect(m_view, SIGNAL(currentPageChanged(int)), SLOT(slotCurrentPageChanged(int)));
     connect(m_view, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
@@ -125,7 +125,7 @@ PdfViewer::PdfViewer(const QString &file)
         obs->m_viewer = this;
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
-    connect(navbar, SIGNAL(zoomModeChanged(ContinousPageView::ZoomMode)), SLOT(slotSetZoomMode(ContinousPageView::ZoomMode)));
+    connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
     connect(navbar, SIGNAL(toggleFacingPages(bool)), SLOT(slotToggleFacingPages(bool)));
 
     connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
@@ -381,7 +381,7 @@ void PdfViewer::slotSetZoom(qreal zoom)
     m_view->setZoom(zoom);
 }
 
-void PdfViewer::slotSetZoomMode(ContinousPageView::ZoomMode mode)
+void PdfViewer::slotSetZoomMode(PageView::ZoomMode mode)
 {
     m_view->setZoomMode(mode);
 }
@@ -393,7 +393,7 @@ void PdfViewer::slotGotoDestination(const QString &destination)
 
 void PdfViewer::slotToggleFacingPages(bool on)
 {
-    m_view->setDoubleSideMode(on ? ContinousPageView::DoubleSidedNotFirst : ContinousPageView::None);
+    m_view->setDoubleSideMode(on ? PageView::DoubleSidedNotFirst : PageView::None);
 }
 
 void PdfViewer::slotCurrentPageChanged(int page)

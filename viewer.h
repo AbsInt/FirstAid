@@ -68,7 +68,7 @@ private Q_SLOTS:
     void slotAbout();
 
     void slotSetZoom(qreal zoom);
-    void slotSetZoomMode(ContinousPageView::ZoomMode mode);
+    void slotSetZoomMode(PageView::ZoomMode mode);
     void slotGotoDestination(const QString &destination);
     void slotToggleFacingPages(bool on);
 
@@ -87,7 +87,7 @@ private:
     QAction *m_fileReloadAct;
     QAction *m_filePrintAct;
 
-    ContinousPageView *m_view;
+    PageView *m_view;
     QList<DocumentObserver *> m_observers;
 
     Poppler::Document *m_doc;
