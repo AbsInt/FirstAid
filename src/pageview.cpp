@@ -316,11 +316,11 @@ bool PageView::event(QEvent *event)
     return QAbstractScrollArea::event(event);
 }
 
-void PageView::paintEvent(QPaintEvent * /*resizeEvent*/)
+void PageView::paintEvent(QPaintEvent *paintEvent)
 {
     QSize vs = viewport()->size();
     QPainter p(viewport());
-    p.fillRect(0, 0, vs.width(), vs.height(), Qt::gray);
+    p.fillRect(paintEvent->rect(), Qt::gray);
 
     if (!m_document)
         return;
