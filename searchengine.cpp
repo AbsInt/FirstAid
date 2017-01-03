@@ -229,6 +229,9 @@ void SearchEngine::previousMatch()
 
 void SearchEngine::find()
 {
+    if (m_findText.isEmpty())
+        return;
+
     for (int count = 0; count < PagePileSize; count++) {
         // find our text on the current search page
         Poppler::Page *p = document()->page(m_findCurrentPage);
