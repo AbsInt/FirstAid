@@ -211,15 +211,25 @@ bool ContinousPageView::event(QEvent *event)
         }
 
         if (QPinchGesture *pinch = static_cast<QPinchGesture *>(ge->gesture(Qt::PinchGesture))) {
+            static qreal pinchStartZoom;
+
+            if (Qt::GestureStarted == pinch->state())
+               pinchStartZoom=m_zoom;
+
+            setZoom(pinchStartZoom*pinch->totalScaleFactor());
+            emit zoomChanged(m_zoom);
+
             return true;
         }
 
         if (QPanGesture *pan = static_cast<QPanGesture *>(ge->gesture(Qt::PanGesture))) {
-            if (Qt::GestureStarted == pan->state())
-                m_panStartOffset=QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+            static QPoint panStartOffset;
 
-            horizontalScrollBar()->setValue(m_panStartOffset.x()+pan->offset().x());
-            verticalScrollBar()->setValue(m_panStartOffset.y()+pan->offset().y());
+            if (Qt::GestureStarted == pan->state())
+               panStartOffset=QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+
+            horizontalScrollBar()->setValue(panStartOffset.x()+pan->offset().x());
+            verticalScrollBar()->setValue(panStartOffset.y()+pan->offset().y());
 
             return true;
         }
