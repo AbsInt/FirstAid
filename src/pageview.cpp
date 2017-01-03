@@ -61,10 +61,6 @@
  * Helper class
  */
 
-FirstAidPage::~FirstAidPage()
-{
-}
-
 QColor PageView::matchColor()
 {
     return QColor(255, 255, 0, 64);
@@ -81,14 +77,10 @@ QColor PageView::highlightColor()
 
 PageView::PageView(QWidget *parent)
     : QAbstractScrollArea(parent)
-    , m_document(nullptr)
-    , m_currentPage(0)
-    , m_zoom(1.0)
-    , m_doubleSideMode(None)
+    , m_dpiX(QApplication::desktop()->physicalDpiX())
+    , m_dpiY(QApplication::desktop()->physicalDpiY())
+    , m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
 {
-    m_dpiX = QApplication::desktop()->physicalDpiX();
-    m_dpiY = QApplication::desktop()->physicalDpiY();
-
     // for now to have correct aspect ratio on windows
     m_dpiX = m_dpiY;
 
@@ -96,8 +88,6 @@ PageView::PageView(QWidget *parent)
     grabGesture(Qt::PinchGesture);
     grabGesture(Qt::SwipeGesture);
     grabGesture(Qt::PanGesture);
-
-    m_rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
 
     m_imageCache.setMaxCost(8);
 

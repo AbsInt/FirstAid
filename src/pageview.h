@@ -45,8 +45,6 @@ public:
             m_annotations->push_back(std::unique_ptr<Poppler::Annotation>(a));
     }
 
-    ~FirstAidPage();
-
     QImage m_image;
     std::shared_ptr<std::vector<std::unique_ptr<Poppler::Annotation>>> m_annotations;
 };
@@ -123,13 +121,13 @@ signals:
     void zoomChanged(qreal CurrentZoom);
 
 private:
-    Poppler::Document *m_document;
-    int m_dpiX;
-    int m_dpiY;
-    int m_currentPage;
-    ZoomMode m_zoomMode;
-    qreal m_zoom;
-    DoubleSideMode m_doubleSideMode;
+    Poppler::Document *m_document = nullptr;
+    int m_dpiX = 72;
+    int m_dpiY = 72;
+    int m_currentPage = 0;
+    ZoomMode m_zoomMode = Absolute;
+    qreal m_zoom = 1.0;
+    DoubleSideMode m_doubleSideMode = None;
     QSize m_size;
     int m_pageHeight = 0;
 
@@ -140,5 +138,5 @@ private:
     QList<QPair<int, QRect>> m_pageRects;
     QList<Poppler::Annotation *> m_annotations;
     QPair<int, QPoint> m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
-    QRubberBand *m_rubberBand;
+    QRubberBand *m_rubberBand = nullptr;
 };
