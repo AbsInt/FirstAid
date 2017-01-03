@@ -64,7 +64,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     // left side also holds the toggle button for facing pages mode
     m_toggleFacingPagesAct = addAction(QIcon(":/icons/facing-pages.svg"), tr("Facing pages"));
     m_toggleFacingPagesAct->setCheckable(true);
-    m_toggleFacingPagesAct->setChecked(s.value("MainWindow/facingPages", true).toBool());
+    m_toggleFacingPagesAct->setChecked(s.value("MainWindow/facingPages", false).toBool());
     connect(m_toggleFacingPagesAct, SIGNAL(toggled(bool)), SLOT(slotToggleFacingPages()));
 
     // add some space so next widget group is centered
@@ -227,12 +227,12 @@ void NavigationToolBar::slotGoFirst()
 
 void NavigationToolBar::slotGoPrev()
 {
-    setPage(page() - 1);
+    setPage(qMax(0,page() - (m_toggleFacingPagesAct->isChecked()?2:1)));
 }
 
 void NavigationToolBar::slotGoNext()
 {
-    setPage(page() + 1);
+    setPage(qMin(document()->numPages() - 1,page() + (m_toggleFacingPagesAct->isChecked()?2:1)));
 }
 
 void NavigationToolBar::slotGoLast()
