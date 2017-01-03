@@ -25,7 +25,6 @@
 
 #include "pageview.h"
 
-class ContinousPageView;
 class DocumentObserver;
 class QAction;
 class QActionGroup;
@@ -69,7 +68,7 @@ private Q_SLOTS:
     void slotAbout();
 
     void slotSetZoom(qreal zoom);
-    void slotSetZoomMode(PageView::ZoomMode mode);
+    void slotSetZoomMode(ContinousPageView::ZoomMode mode);
     void slotGotoDestination(const QString &destination);
     void slotToggleFacingPages(bool on);
 

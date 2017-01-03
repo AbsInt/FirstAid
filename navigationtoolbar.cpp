@@ -284,11 +284,11 @@ void NavigationToolBar::slotZoomChanged()
     if ("Fit width" == text) {
         m_zoomLabelAct->setVisible(false);
         m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-width.svg"));
-        emit zoomModeChanged(PageView::FitWidth);
+        emit zoomModeChanged(ContinousPageView::FitWidth);
     } else if ("Fit page" == text) {
         m_zoomLabelAct->setVisible(false);
         m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-best.svg"));
-        emit zoomModeChanged(PageView::FitPage);
+        emit zoomModeChanged(ContinousPageView::FitPage);
     } else {
         m_zoomLabelAct->setVisible(true);
         m_zoomLabel->setText(text);

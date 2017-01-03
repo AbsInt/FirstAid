@@ -65,13 +65,33 @@ FirstAidPage::~FirstAidPage()
 {
 }
 
+QColor ContinousPageView::matchColor()
+{
+    return QColor(255, 255, 0, 64);
+}
+
+QColor ContinousPageView::highlightColor()
+{
+    return QColor(255, 128, 0, 128);
+}
+
 /*
  * constructors / destructor
  */
 
 ContinousPageView::ContinousPageView(QWidget *parent)
-    : PageView(parent)
+    : QAbstractScrollArea(parent)
+    , m_document(nullptr)
+    , m_currentPage(0)
+    , m_zoom(1.0)
+    , m_doubleSideMode(None)
 {
+    m_dpiX = QApplication::desktop()->physicalDpiX();
+    m_dpiY = QApplication::desktop()->physicalDpiY();
+
+    // for now to have correct aspect ratio on windows
+    m_dpiX = m_dpiY;
+
     // ensure we recognize pinch and swipe guestures
     grabGesture(Qt::PinchGesture);
     grabGesture(Qt::SwipeGesture);
@@ -117,30 +137,142 @@ ContinousPageView::~ContinousPageView()
 {
 }
 
+/*
+ * public methods
+ */
+
+qreal ContinousPageView::resX() const
+{
+    return m_dpiX * m_zoom;
+}
+
+qreal ContinousPageView::resY() const
+{
+    return m_dpiY * m_zoom;
+}
+
+QRectF ContinousPageView::fromPoints(const QRectF &rect) const
+{
+    return QRectF(rect.left() / 72.0 * resX(), rect.top() / 72.0 * resY(), rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
+}
+
+QRectF ContinousPageView::toPoints(const QRectF &rect) const
+{
+    return QRectF(rect.left() * 72.0 / resX(), rect.top() * 72.0 / resY(), rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
+}
+
+void ContinousPageView::reset()
+{
+    m_currentPage = 0;
+}
+
+int ContinousPageView::currentPage() const
+{
+    return m_currentPage;
+}
+
+/*
+ * public slots
+ */
+
 void ContinousPageView::setDocument(Poppler::Document *document)
 {
-    // loaded
-
-    PageView::setDocument(document);
+    m_document = document;
+    m_currentPage = 0;
+    viewport()->update();
     resizeEvent(nullptr);
 }
 
-void ContinousPageView::setDoubleSideMode(PageView::DoubleSideMode mode)
+void ContinousPageView::setZoomMode(ZoomMode mode)
 {
-    m_imageCache.clear();
-    PageView::setDoubleSideMode(mode);
-}
-
-void ContinousPageView::setZoomMode(PageView::ZoomMode mode)
-{
-    m_imageCache.clear();
-    PageView::setZoomMode(mode);
+    if (mode != m_zoomMode) {
+        m_imageCache.clear();
+        m_zoomMode = mode;
+        setSize(m_size);
+    }
 }
 
 void ContinousPageView::setZoom(qreal zoom)
 {
-    m_imageCache.clear();
-    PageView::setZoom(zoom);
+    setZoomMode(Absolute);
+
+    if (zoom != m_zoom && zoom >= 0.1 && zoom <= 4.0) {
+        m_imageCache.clear();
+        m_zoom = zoom;
+        viewport()->update();
+    }
+}
+
+void ContinousPageView::wheelEvent(QWheelEvent *wheelEvent)
+{
+    if (wheelEvent->modifiers() & Qt::ControlModifier) {
+        if (wheelEvent->delta() > 0)
+            setZoom(m_zoom + 0.1);
+        else
+            setZoom(m_zoom - 0.1);
+        emit zoomChanged(m_zoom);
+        return;
+    }
+
+    QAbstractScrollArea::wheelEvent(wheelEvent);
+}
+
+void ContinousPageView::setDoubleSideMode(DoubleSideMode mode)
+{
+    if (mode != m_doubleSideMode) {
+        m_imageCache.clear();
+        m_doubleSideMode = mode;
+        setSize(m_size);
+        viewport()->update();
+    }
+}
+
+void ContinousPageView::setSize(const QSize &size)
+{
+    m_size = size;
+
+    if (!m_document)
+        return;
+
+    if (FitWidth == m_zoomMode) {
+        Poppler::Page *page = m_document->page(m_currentPage);
+        if (!page)
+            return;
+        QSizeF pageSize = page->pageSize();
+        pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
+        delete page;
+
+        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode)) {
+            if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
+                pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
+                delete page;
+            }
+        }
+
+        m_zoom = m_size.width() / (m_dpiX * pageSize.width() / 72.0);
+        viewport()->update();
+    } else if (FitPage == m_zoomMode) {
+        Poppler::Page *page = m_document->page(m_currentPage);
+        if (!page)
+            return;
+        QSizeF pageSize = page->pageSize();
+        pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
+        pageSize.setHeight(2 * PAGEFRAME + pageSize.height());
+        delete page;
+
+        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode)) {
+            if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
+                pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
+                delete page;
+            }
+        }
+
+        qreal zx = m_size.width() / (m_dpiX * pageSize.width() / 72.0);
+        qreal zy = m_size.height() / (m_dpiY * pageSize.height() / 72.0);
+
+        m_zoom = qMin(zx, zy);
+        viewport()->update();
+    }
 }
 
 void ContinousPageView::scrolled()
@@ -337,7 +469,19 @@ void ContinousPageView::keyPressEvent(QKeyEvent *event)
         }
     }
 
-    PageView::keyPressEvent(event);
+    if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Plus) {
+        setZoom(m_zoom + 0.1);
+        emit zoomChanged(m_zoom);
+        return;
+    }
+    
+    if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Minus) {
+        setZoom(m_zoom - 0.1);
+        emit zoomChanged(m_zoom);
+        return;
+    }
+    
+    QAbstractScrollArea::keyPressEvent(event);
 }
 
 void ContinousPageView::mouseMoveEvent(QMouseEvent *event)
@@ -460,9 +604,29 @@ void ContinousPageView::gotoNextPage()
  * protected slots
  */
 
-void ContinousPageView::slotGotoRequested(const QString &destination)
+void ContinousPageView::gotoDestination(const QString &destination)
 {
-    gotoDestination(destination);
+    bool ok = false;
+    int pageNumber = 0;
+    int offset = 0;
+    if (destination.contains("#")) {
+        QList<QString> values = destination.split("#");
+        if (values.length() == 2) {
+            pageNumber = values.at(0).toInt(&ok);
+            if (ok)
+                offset = values.at(1).toInt(&ok);
+        }
+    } else
+        pageNumber = destination.toInt(&ok);
+
+    if (ok)
+        gotoPage(pageNumber - 1, offset);
+    else if (m_document) {
+        if (Poppler::LinkDestination *link = m_document->linkDestination(destination)) {
+            gotoPage(link->pageNumber() - 1, (link->isChangeTop() && m_pageHeight) ? (m_pageHeight * link->top()) : 0);
+            delete link;
+        }
+    }
 }
 
 void ContinousPageView::slotCopyRequested(const QRectF &rect)

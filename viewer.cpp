@@ -125,7 +125,7 @@ PdfViewer::PdfViewer(const QString &file)
         obs->m_viewer = this;
 
     connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
-    connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
+    connect(navbar, SIGNAL(zoomModeChanged(ContinousPageView::ZoomMode)), SLOT(slotSetZoomMode(ContinousPageView::ZoomMode)));
     connect(navbar, SIGNAL(toggleFacingPages(bool)), SLOT(slotToggleFacingPages(bool)));
 
     connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
@@ -381,7 +381,7 @@ void PdfViewer::slotSetZoom(qreal zoom)
     m_view->setZoom(zoom);
 }
 
-void PdfViewer::slotSetZoomMode(PageView::ZoomMode mode)
+void PdfViewer::slotSetZoomMode(ContinousPageView::ZoomMode mode)
 {
     m_view->setZoomMode(mode);
 }
@@ -393,7 +393,7 @@ void PdfViewer::slotGotoDestination(const QString &destination)
 
 void PdfViewer::slotToggleFacingPages(bool on)
 {
-    m_view->setDoubleSideMode(on ? PageView::DoubleSidedNotFirst : PageView::None);
+    m_view->setDoubleSideMode(on ? ContinousPageView::DoubleSidedNotFirst : ContinousPageView::None);
 }
 
 void PdfViewer::slotCurrentPageChanged(int page)

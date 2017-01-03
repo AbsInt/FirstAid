@@ -24,11 +24,13 @@
 #include <QImage>
 #include <QCache>
 #include <QRubberBand>
+#include <QAbstractScrollArea>
 
 #include <poppler-qt5.h>
 
 #include "documentobserver.h"
-#include "pageview.h"
+
+#define PAGEFRAME 5
 
 class QRubberBand;
 
@@ -49,7 +51,7 @@ public:
     std::shared_ptr<std::vector<std::unique_ptr<Poppler::Annotation>>> m_annotations;
 };
 
-class ContinousPageView : public PageView
+class ContinousPageView : public QAbstractScrollArea
 {
     Q_OBJECT
 
@@ -57,11 +59,24 @@ public:
     ContinousPageView(QWidget *parent = nullptr);
     ~ContinousPageView();
 
-    void gotoPage(int page, int offset = 0) override;
-    void setDocument(Poppler::Document *document) override;
-    void setDoubleSideMode(DoubleSideMode mode) override;
-    void setZoomMode(ZoomMode mode) override;
-    void setZoom(qreal zoom) override;
+public:
+    enum ZoomMode { FitWidth, FitPage, Absolute };
+    enum DoubleSideMode { None, DoubleSided, DoubleSidedNotFirst };
+
+    static QColor matchColor();
+    static QColor highlightColor();
+
+    qreal resX() const;
+    qreal resY() const;
+
+    QRectF fromPoints(const QRectF &rect) const;
+    QRectF toPoints(const QRectF &rect) const;
+
+    void gotoPage(int page, int offset = 0);
+    void setDocument(Poppler::Document *document);
+    void setDoubleSideMode(DoubleSideMode mode);
+    void setZoomMode(ZoomMode mode);
+    void setZoom(qreal zoom);
 
 signals:
     void currentPageChanged(int page);
@@ -76,13 +91,14 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *wheelEvent) override;
 
 public slots:
     void gotoPreviousPage();
     void gotoNextPage();
 
-private slots:
-    void slotGotoRequested(const QString &destination);
+public slots:
+    void gotoDestination(const QString &destination);
     void slotCopyRequested(const QRectF &rect);
 
     void slotFindStarted();
@@ -97,7 +113,26 @@ private:
 
     FirstAidPage getPage(int page);
 
+public:
+    void setSize(const QSize &size);
+
+    void reset();
+    int currentPage() const;
+
+signals:
+    void zoomChanged(qreal CurrentZoom);
+
 private:
+    Poppler::Document *m_document;
+    int m_dpiX;
+    int m_dpiY;
+    int m_currentPage;
+    ZoomMode m_zoomMode;
+    qreal m_zoom;
+    DoubleSideMode m_doubleSideMode;
+    QSize m_size;
+    int m_pageHeight = 0;
+    
     QCache<int, FirstAidPage> m_imageCache;
 
     QPoint m_offset;
