@@ -214,6 +214,10 @@ void PageView::setDoubleSideMode(DoubleSideMode mode)
 {
     if (mode != m_doubleSideMode) {
         m_doubleSideMode = mode;
+        
+        // fake resize event to recompute sizes, e.g. for fit width/page
+        QResizeEvent e(size(), size());
+        resizeEvent(&e);
 
         // visual size of document might change now!
         updateViewSize();
