@@ -35,7 +35,7 @@ class QRubberBand;
 class FirstAidPage
 {
 public:
-    FirstAidPage(QImage* image, const QList<Poppler::Annotation *> &annotations)
+    FirstAidPage(QImage image, const QList<Poppler::Annotation *> &annotations)
         : m_image(image)
         , m_annotations(new std::vector<std::unique_ptr<Poppler::Annotation>>())
     {
@@ -45,7 +45,7 @@ public:
 
     ~FirstAidPage();
 
-    QImage* m_image;
+    QImage m_image;
     std::shared_ptr<std::vector<std::unique_ptr<Poppler::Annotation>>> m_annotations;
 };
 
@@ -93,7 +93,7 @@ private:
     int pageWidth();
     void updateScrollBars();
 
-    FirstAidPage* getPage(int page);
+    FirstAidPage getPage(int page);
 private:
 
     QCache<int,FirstAidPage> m_imageCache;

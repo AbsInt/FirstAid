@@ -65,7 +65,6 @@
 
 
 FirstAidPage::~FirstAidPage() {
-    delete m_image;
 }
 
 
@@ -237,14 +236,9 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
     while (pageStart.y() < 0 || vs.height() > (pageStart.y() + 2*PAGEFRAME)) {
         // draw another page
 
-        FirstAidPage* cachedPage =  getPage(currentPage);
+        FirstAidPage cachedPage =  getPage(currentPage);
 
-        if (!cachedPage)
-            break;
-
-        QImage* image = cachedPage->m_image;
-
-        if (!image || image->isNull())
+        if (cachedPage.m_image.isNull())
             break;
 
         int doubleSideOffset = 0;
@@ -252,19 +246,19 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         {
             // special handling for first page
             if (0 != currentPage) {
-                doubleSideOffset = image->width()/2;
+                doubleSideOffset = cachedPage.m_image.width()/2;
                 if (currentPage%2)
                     doubleSideOffset *= -1;
             }
         }
 
-        pageStart.setX(qMax(0, vs.width() - image->width()) / 2 -m_offset.x() + doubleSideOffset + ((m_zoomMode==Absolute)?PAGEFRAME:0));
+        pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width()) / 2 -m_offset.x() + doubleSideOffset + ((m_zoomMode==Absolute)?PAGEFRAME:0));
 
         // match further matches on page
         double sx = resX() / 72.0;
         double sy = resY() / 72.0;
 
-        QPainter sp(image);
+        QPainter sp(&cachedPage.m_image);
         sp.setPen(Qt::NoPen);
 
         foreach (QRectF rect, se->matchesFor(currentPage)) {
@@ -278,21 +272,18 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         }
         sp.end();
 
-        p.drawImage(pageStart, *image);
-        m_pageRects.append(qMakePair(currentPage,QRect(pageStart,image->size())));
-        m_pageHeight = image->height();
+        p.drawImage(pageStart, cachedPage.m_image);
+        m_pageRects.append(qMakePair(currentPage,QRect(pageStart,cachedPage.m_image.size())));
+        m_pageHeight = cachedPage.m_image.height();
 
         p.setPen(Qt::darkGray);
-        p.drawRect(QRect(pageStart, image->size()).adjusted(-1, -1, 1, 1));
-
-        //insert image into cache
-        m_imageCache.insert(currentPage,cachedPage);
+        p.drawRect(QRect(pageStart, cachedPage.m_image.size()).adjusted(-1, -1, 1, 1));
 
         // set next page
         ++currentPage;
 
         if (!m_doubleSideMode || (currentPage%2))
-            pageStart.setY(pageStart.y() + image->height() + 2*PAGEFRAME);
+            pageStart.setY(pageStart.y() + cachedPage.m_image.height() + 2*PAGEFRAME);
     }
     p.end();
 
@@ -364,13 +355,12 @@ void ContinousPageView::mouseMoveEvent(QMouseEvent *event)
         qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        FirstAidPage * cachedPage = getPage(currentPage.first);
+        FirstAidPage cachedPage = getPage(currentPage.first);
 
-        for (auto &a : *cachedPage->m_annotations) {
+        for (auto &a : *cachedPage.m_annotations) {
+
             if (a->boundary().contains(p)) {
                 setCursor(Qt::PointingHandCursor);
-                //insert image into cache
-                m_imageCache.insert(currentPage.first,cachedPage);
                 return;
             }
         }
@@ -380,7 +370,6 @@ void ContinousPageView::mouseMoveEvent(QMouseEvent *event)
         if (m_rubberBandOrigin.first>=0)
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, event->pos()).normalized());
 
-        m_imageCache.insert(currentPage.first,cachedPage);
     }
 }
 
@@ -393,13 +382,13 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
     {
         QPair<int,QRect> currentPage = m_pageRects.at(i);
         QRect displayRect = currentPage.second;
-        FirstAidPage * cachedPage = getPage(currentPage.first);
+        FirstAidPage cachedPage = getPage(currentPage.first);
 
         qreal xPos = (event->x() - displayRect.x()) / (qreal)displayRect.width();
         qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        for (auto &a : *cachedPage->m_annotations) {
+        for (auto &a : *cachedPage.m_annotations) {
             if (a->boundary().contains(p)) {
                 Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(a.get())->linkDestination();
                 switch (link->linkType()) {
@@ -432,9 +421,6 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
             m_rubberBand->show();
         }
-
-
-        m_imageCache.insert(currentPage.first,cachedPage);
     }
 }
 
@@ -445,8 +431,6 @@ void ContinousPageView::mouseReleaseEvent(QMouseEvent *)
 
     if (m_rubberBandOrigin.first<0)
         return;
-
-    FirstAidPage * cachedPage = getPage(m_rubberBandOrigin.first);
 
     QRect displayRect;
 
@@ -465,8 +449,6 @@ void ContinousPageView::mouseReleaseEvent(QMouseEvent *)
     m_rubberBandOrigin= qMakePair(-1,QPoint(0,0));
     m_rubberBand->hide();
     emit copyRequested(m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
-
-    m_imageCache.insert(m_rubberBandOrigin.first,cachedPage);
 }
 
 /*
@@ -584,22 +566,22 @@ void ContinousPageView::updateScrollBars()
     hbar->blockSignals(false);
 }
 
-FirstAidPage *ContinousPageView::getPage(int pageNumber)
+FirstAidPage ContinousPageView::getPage(int pageNumber)
 {
-    FirstAidPage* cachedPage =  m_imageCache.take(pageNumber);
+    FirstAidPage *cachedPage =  m_imageCache.object(pageNumber);
 
     if (!cachedPage)
     {
         if (Poppler::Page *page = m_document->page(pageNumber)) {
-            QImage* image = new QImage();
+            QList<Poppler::Annotation*> annots = page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
+            cachedPage = new FirstAidPage(page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0), annots);
 
-            cachedPage = new FirstAidPage(image, page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink));
-
-            *image = page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0);
-
+            m_imageCache.insert(pageNumber,cachedPage);
             delete page;
+            return *cachedPage;
         }
-    }
+    } else
+        return *cachedPage;
 
-    return cachedPage;
+    return FirstAidPage(QImage(), QList<Poppler::Annotation*>());
 }
