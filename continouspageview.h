@@ -106,4 +106,5 @@ private:
     QList<Poppler::Annotation *> m_annotations;
     QPair<int,QPoint> m_rubberBandOrigin = qMakePair(-1,QPoint(0,0));
     QRubberBand *m_rubberBand;
+    QPoint m_panStartOffset;
 };

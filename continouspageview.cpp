@@ -78,6 +78,7 @@ ContinousPageView::ContinousPageView(QWidget *parent)
     // ensure we recognize pinch and swipe guestures
     grabGesture(Qt::PinchGesture);
     grabGesture(Qt::SwipeGesture);
+    grabGesture(Qt::PanGesture);
 
     m_rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
 
@@ -198,16 +199,28 @@ bool ContinousPageView::event(QEvent *event)
 
         if (QSwipeGesture *swipe = static_cast<QSwipeGesture *>(ge->gesture(Qt::SwipeGesture))) {
             if (QSwipeGesture::Up == swipe->verticalDirection()) {
+                printf("Swipe up detected");
                 gotoNextPage();
                 return true;
             }
             if (QSwipeGesture::Down == swipe->verticalDirection()) {
+                printf("Swipe down detected");
                 gotoPreviousPage();
                 return true;
             }
         }
 
         if (QPinchGesture *pinch = static_cast<QPinchGesture *>(ge->gesture(Qt::PinchGesture))) {
+            return true;
+        }
+
+        if (QPanGesture *pan = static_cast<QPanGesture *>(ge->gesture(Qt::PanGesture))) {
+            if (Qt::GestureStarted == pan->state())
+                m_panStartOffset=QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+
+            horizontalScrollBar()->setValue(m_panStartOffset.x()+pan->offset().x());
+            verticalScrollBar()->setValue(m_panStartOffset.y()+pan->offset().y());
+
             return true;
         }
     }
