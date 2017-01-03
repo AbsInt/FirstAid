@@ -77,8 +77,12 @@ ContinousPageView::ContinousPageView(QWidget *parent)
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(scrolled()));
     connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(scrolled()));
 
-    horizontalScrollBar()->setSingleStep(10);
-    verticalScrollBar()->setSingleStep(10);
+    // we have static content that can be scrolled like an image
+    setAttribute(Qt::WA_StaticContents);
+
+    // behave like QScrollArea => 20
+    verticalScrollBar()->setSingleStep(20);
+    horizontalScrollBar()->setSingleStep(20);
 
     reset();
 }
@@ -136,7 +140,6 @@ void ContinousPageView::scrolled()
         m_currentPage = page;
         emit currentPageChanged(m_currentPage);
     }
-    viewport()->update();
 }
 
 /*
