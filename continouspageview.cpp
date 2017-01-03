@@ -227,7 +227,7 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         sp.end();
 
         p.drawImage(pageStart, *image);
-        m_pageRects.append(QPair<int,QRect>(currentPage,QRect(pageStart,image->size())));
+        m_pageRects.append(qMakePair(currentPage,QRect(pageStart,image->size())));
         m_pageHeight = image->height();
 
         p.setPen(Qt::darkGray);
@@ -374,7 +374,7 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
         }
 
         if (event->modifiers().testFlag(Qt::ShiftModifier)) {
-            m_rubberBandOrigin = QPair<int,QPoint>(currentPage.first,event->pos());
+            m_rubberBandOrigin = qMakePair(currentPage.first,event->pos());
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
             m_rubberBand->show();
         }
@@ -408,7 +408,7 @@ void ContinousPageView::mouseReleaseEvent(QMouseEvent *)
     if (!displayRect.isValid())
         return;
 
-    m_rubberBandOrigin= QPair<int,QPoint>(-1,QPoint(0,0));
+    m_rubberBandOrigin= qMakePair(-1,QPoint(0,0));
     m_rubberBand->hide();
     emit copyRequested(m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
 
