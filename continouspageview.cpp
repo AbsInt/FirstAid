@@ -2,6 +2,20 @@
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
+ * Copyright (C) 2016, Christoph Cullmann <cullmann@absint.com>
+ *
+ * With portions of code from okular/ui/pageview.cpp by:
+ *     Copyright (C) 2004-2005 by Enrico Ros <eros.kde@email.it>
+ *     Copyright (C) 2004-2006 by Albert Astals Cid <aacid@kde.org>
+ *
+ * With portions of code from kpdf/kpdf_pagewidget.cc by:
+ *     Copyright (C) 2002 by Wilco Greven <greven@kde.org>
+ *     Copyright (C) 2003 by Christophe Devriese
+ *                           <Christophe.Devriese@student.kuleuven.ac.be>
+ *     Copyright (C) 2003 by Laurent Montel <montel@kde.org>
+ *     Copyright (C) 2003 by Dirk Mueller <mueller@kde.org>
+ *     Copyright (C) 2004 by James Ots <kde@jamesots.com>
+ *     Copyright (C) 2011 by Jiri Baum - NICTA <jiri@baum.com.au>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +79,6 @@ ContinousPageView::ContinousPageView(QWidget *parent)
     : PageView(parent)
 {
     m_rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
-    setMouseTracking(true);
 
     m_imageCache.setMaxCost(8);
 
@@ -79,6 +92,20 @@ ContinousPageView::ContinousPageView(QWidget *parent)
 
     // we have static content that can be scrolled like an image
     setAttribute(Qt::WA_StaticContents);
+
+    /**
+     * track the mouse + viewport should have focus
+     */
+    viewport()->setFocusProxy(this);
+    viewport()->setFocusPolicy(Qt::StrongFocus);
+    viewport()->setMouseTracking(true);
+
+    /**
+     * we paint everything on our own
+     */
+    viewport()->setAutoFillBackground(false);
+    viewport()->setAttribute(Qt::WA_NoSystemBackground);
+    viewport()->setAttribute(Qt::WA_OpaquePaintEvent);
 
     // behave like QScrollArea => 20
     verticalScrollBar()->setSingleStep(20);
