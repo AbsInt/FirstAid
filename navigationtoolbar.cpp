@@ -314,4 +314,18 @@ void NavigationToolBar::slotChangeZoom(qreal currentZoom)
     m_zoomLabelAct->setVisible(true);
     m_zoomLabel->setText(QString("%1%").arg(qRound(currentZoom*100)));
     m_zoomButton->setIcon(QIcon(":/icons/zoom.svg"));
+
+    // save nearest zoom
+    QList<QAction *> actions=m_zoomButton->menu()->actions();
+    for (int c=2; c<actions.count(); c++) {
+        QString text=actions.at(c)->text();
+        text.remove("%");
+        bool ok;
+        int value=text.toInt(&ok);
+        if (ok && currentZoom<value/100.0) {
+            QSettings s;
+            s.setValue("MainWindow/zoom", c);
+            break;
+        }
+    }
 }
