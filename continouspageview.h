@@ -132,7 +132,7 @@ private:
     DoubleSideMode m_doubleSideMode;
     QSize m_size;
     int m_pageHeight = 0;
-    
+
     QCache<int, FirstAidPage> m_imageCache;
 
     QPoint m_offset;

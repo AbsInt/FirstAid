@@ -474,13 +474,13 @@ void ContinousPageView::keyPressEvent(QKeyEvent *event)
         emit zoomChanged(m_zoom);
         return;
     }
-    
+
     if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Minus) {
         setZoom(m_zoom - 0.1);
         emit zoomChanged(m_zoom);
         return;
     }
-    
+
     QAbstractScrollArea::keyPressEvent(event);
 }
 
