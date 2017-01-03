@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <QImage>
 #include <QCache>
 #include <QRubberBand>
