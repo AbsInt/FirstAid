@@ -69,9 +69,9 @@ set(firstaid_SRCS
 qt5_add_resources(firstaid_QRC_SRCS firstaid.qrc)
 
 # embedd icon on Windows
-#IF(WIN32)
-#    SET(firstaid_SRCS ${firstaid_SRCS} firstaid.rc)
-#ENDIF(WIN32)
+IF(WIN32)
+    SET(firstaid_SRCS ${firstaid_SRCS} firstaid.rc)
+ENDIF(WIN32)
 
 # build FirstAid binary
 add_executable(firstaid ${firstaid_SRCS} ${firstaid_UI_SRCS} ${firstaid_QRC_SRCS})
