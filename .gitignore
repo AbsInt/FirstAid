@@ -14,3 +14,6 @@ firstaid_automoc.cpp
 install_manifest.txt
 .clang-format
 *.plist
+Doxyfile
+Doxyfile.log
+doc/

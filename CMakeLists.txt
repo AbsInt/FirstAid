@@ -55,14 +55,22 @@ find_package(Qt5Xml)
 
 set(firstaid_SRCS
   src/abstractinfodock.cpp
+  src/abstractinfodock.h
   src/documentobserver.cpp
+  src/documentobserver.h
   src/findbar.cpp
+  src/findbar.h
   src/main.cpp
   src/navigationtoolbar.cpp
+  src/navigationtoolbar.h
   src/pageview.cpp
+  src/pageview.h
   src/searchengine.cpp
+  src/searchengine.h
   src/toc.cpp
+  src/toc.h
   src/viewer.cpp
+  src/viewer.h
 )
 
 qt5_add_resources(firstaid_QRC_SRCS firstaid.qrc)
@@ -97,4 +105,9 @@ if(ABSINT)
     # here: all *.cpp + *.h files
     #
     ur_reformat ("`git ls-files | grep -e \".*\\\\.cpp$\" -e \".*\\\\.h$\" | xargs`")
+
+    #
+    # generate documentation
+    #
+    ur_gendoc (firstaid Doxyfile doc ${firstaid_SRCS})
 endif()
