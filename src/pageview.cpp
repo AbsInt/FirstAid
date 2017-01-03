@@ -84,12 +84,15 @@ PageView::PageView(QWidget *parent)
     // for now to have correct aspect ratio on windows
     m_dpiX = m_dpiY;
 
+    /**
+     * allow 64 cached pages
+     */
+    m_imageCache.setMaxCost(64);
+
     // ensure we recognize pinch and swipe guestures
     grabGesture(Qt::PinchGesture);
     grabGesture(Qt::SwipeGesture);
     grabGesture(Qt::PanGesture);
-
-    m_imageCache.setMaxCost(8);
 
     SearchEngine *se = SearchEngine::globalInstance();
     connect(se, SIGNAL(started()), SLOT(slotFindStarted()));
@@ -162,16 +165,22 @@ void PageView::setDocument(Poppler::Document *document)
 {
     m_document = document;
     m_currentPage = 0;
-    viewport()->update();
-    resizeEvent(nullptr);
+
+    // visual size of document might change now!
+    updateViewSize();
 }
 
 void PageView::setZoomMode(ZoomMode mode)
 {
     if (mode != m_zoomMode) {
-        m_imageCache.clear();
         m_zoomMode = mode;
-        setSize(m_size);
+        
+        // fake resize event to recompute sizes, e.g. for fit width/page
+        QResizeEvent e(size(), size());
+        resizeEvent(&e);
+
+        // visual size of document might change now!
+        updateViewSize();
     }
 }
 
@@ -180,9 +189,10 @@ void PageView::setZoom(qreal zoom)
     setZoomMode(Absolute);
 
     if (zoom != m_zoom && zoom >= 0.1 && zoom <= 4.0) {
-        m_imageCache.clear();
         m_zoom = zoom;
-        viewport()->update();
+
+        // visual size of document might change now!
+        updateViewSize();
     }
 }
 
@@ -203,58 +213,10 @@ void PageView::wheelEvent(QWheelEvent *wheelEvent)
 void PageView::setDoubleSideMode(DoubleSideMode mode)
 {
     if (mode != m_doubleSideMode) {
-        m_imageCache.clear();
         m_doubleSideMode = mode;
-        setSize(m_size);
-        viewport()->update();
-    }
-}
 
-void PageView::setSize(const QSize &size)
-{
-    m_size = size;
-
-    if (!m_document)
-        return;
-
-    if (FitWidth == m_zoomMode) {
-        Poppler::Page *page = m_document->page(m_currentPage);
-        if (!page)
-            return;
-        QSizeF pageSize = page->pageSize();
-        pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
-        delete page;
-
-        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode)) {
-            if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
-                pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
-                delete page;
-            }
-        }
-
-        m_zoom = m_size.width() / (m_dpiX * pageSize.width() / 72.0);
-        viewport()->update();
-    } else if (FitPage == m_zoomMode) {
-        Poppler::Page *page = m_document->page(m_currentPage);
-        if (!page)
-            return;
-        QSizeF pageSize = page->pageSize();
-        pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
-        pageSize.setHeight(2 * PAGEFRAME + pageSize.height());
-        delete page;
-
-        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode)) {
-            if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
-                pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
-                delete page;
-            }
-        }
-
-        qreal zx = m_size.width() / (m_dpiX * pageSize.width() / 72.0);
-        qreal zy = m_size.height() / (m_dpiY * pageSize.height() / 72.0);
-
-        m_zoom = qMin(zx, zy);
-        viewport()->update();
+        // visual size of document might change now!
+        updateViewSize();
     }
 }
 
@@ -276,7 +238,7 @@ void PageView::scrolled()
     if (page < 0)
         page = 0;
 
-    if (page < m_document->numPages()) {
+    if (page < (m_document ? m_document->numPages() : 0)) {
         m_currentPage = page;
         emit currentPageChanged(m_currentPage);
     }
@@ -293,8 +255,9 @@ void PageView::gotoPage(int page, int offset)
 
     m_offset = QPoint(m_offset.x(), offset);
     m_currentPage = page;
-    updateScrollBars();
-    viewport()->update();
+    
+    // misuse to go to page
+    updateViewSize(false /* goto mode, don't clear cache */);
 
     emit currentPageChanged(m_currentPage);
 }
@@ -425,15 +388,54 @@ void PageView::paintEvent(QPaintEvent * /*resizeEvent*/)
             pageStart.setY(pageStart.y() + cachedPage.m_image.height() + 2 * PAGEFRAME);
     }
     p.end();
-
-    updateScrollBars();
 }
 
-void PageView::resizeEvent(QResizeEvent * /*resizeEvent*/)
+void PageView::resizeEvent(QResizeEvent *resizeEvent)
 {
-    m_imageCache.clear();
-    setSize(viewport()->size() - QSize(1, 1));
-    viewport()->update();
+    if (!m_document)
+        return;
+
+    if (FitWidth == m_zoomMode) {
+        Poppler::Page *page = m_document->page(m_currentPage);
+        if (!page)
+            return;
+        QSizeF pageSize = page->pageSize();
+        pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
+        delete page;
+
+        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode)) {
+            if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
+                pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
+                delete page;
+            }
+        }
+
+        m_zoom = viewport()->size().width() / (m_dpiX * pageSize.width() / 72.0);
+        updateViewSize();
+    } else if (FitPage == m_zoomMode) {
+        Poppler::Page *page = m_document->page(m_currentPage);
+        if (!page)
+            return;
+        QSizeF pageSize = page->pageSize();
+        pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
+        pageSize.setHeight(2 * PAGEFRAME + pageSize.height());
+        delete page;
+
+        if (DoubleSided == m_doubleSideMode || (DoubleSidedNotFirst == m_doubleSideMode)) {
+            if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
+                pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
+                delete page;
+            }
+        }
+
+        qreal zx = viewport()->size().width() / (m_dpiX * pageSize.width() / 72.0);
+        qreal zy = viewport()->size().height() / (m_dpiY * pageSize.height() / 72.0);
+
+        m_zoom = qMin(zx, zy);
+        updateViewSize();
+    }
+    
+    QAbstractScrollArea::resizeEvent(resizeEvent);
 }
 
 void PageView::keyPressEvent(QKeyEvent *event)
@@ -681,10 +683,14 @@ int PageView::pageWidth()
     ;
 }
 
-void PageView::updateScrollBars()
+void PageView::updateViewSize(bool invalidateCache)
 {
+    // invalidate cache
+    if (invalidateCache)
+        m_imageCache.clear();
+    
     QScrollBar *vbar = verticalScrollBar();
-    int pageCount = m_document->numPages();
+    int pageCount = m_document ? m_document->numPages() : 0;
     int current = currentPage();
     if (m_doubleSideMode) {
         if (pageCount % 2)
@@ -712,6 +718,9 @@ void PageView::updateScrollBars()
     hbar->blockSignals(true);
     hbar->setValue(m_offset.x());
     hbar->blockSignals(false);
+    
+    // update viewport
+    viewport()->update();
 }
 
 FirstAidPage PageView::getPage(int pageNumber)

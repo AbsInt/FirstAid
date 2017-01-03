@@ -107,13 +107,20 @@ public slots:
 private:
     int pageHeight();
     int pageWidth();
-    void updateScrollBars();
+    
+    /**
+     * Update viewport dimensions after:
+     *  - document change
+     *  - change of zoom variant/factor
+     *  - change of single/double page mode
+     * 
+     * @param invalidateCache invalidate page cache? default true, only use that for position setting with false
+     */
+    void updateViewSize(bool invalidateCache = true);
 
     FirstAidPage getPage(int page);
 
 public:
-    void setSize(const QSize &size);
-
     int currentPage() const;
 
 signals:
@@ -127,7 +134,6 @@ private:
     ZoomMode m_zoomMode = Absolute;
     qreal m_zoom = 1.0;
     DoubleSideMode m_doubleSideMode = None;
-    QSize m_size;
     int m_pageHeight = 0;
 
     QCache<int, FirstAidPage> m_imageCache;
