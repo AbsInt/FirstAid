@@ -2,8 +2,8 @@
     <qresource>
         <file>firstaid.svg</file>
         <file>icons/acrobat.svg</file>
-        <file>icons/application-menu.svg</file>
         <file>icons/application-exit.svg</file>
+        <file>icons/application-menu.svg</file>
         <file>icons/bookmark-new.svg</file>
         <file>icons/document-open.svg</file>
         <file>icons/document-print.svg</file>
@@ -14,6 +14,8 @@
         <file>icons/help-about.svg</file>
         <file>icons/view-refresh.svg</file>
         <file>icons/window-close.svg</file>
-        <file>icons/zoom-select-y.svg</file>
+        <file>icons/zoom-fit-best.svg</file>
+        <file>icons/zoom-fit-width.svg</file>
+        <file>icons/zoom.svg</file>
     </qresource>
 </RCC>

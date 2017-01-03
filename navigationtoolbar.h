@@ -30,6 +30,7 @@ class QComboBox;
 class QIntValidator;
 class QLabel;
 class QLineEdit;
+class QToolButton;
 
 class NavigationToolBar : public QToolBar, public DocumentObserver
 {
@@ -57,7 +58,7 @@ private slots:
     void slotGoPrev();
     void slotGoNext();
     void slotPageSet();
-    void slotZoomComboChanged();
+    void slotZoomChanged();
     void slotGoto();
     void slotHideGoto();
     void slotToggleFacingPages();
@@ -69,7 +70,7 @@ private:
     QLabel *m_pageLabel;
     QAction *m_pageLabelAct;
     QAction *m_nextAct;
-    QComboBox *m_zoomCombo;
+    QToolButton *m_zoomButton;
     QIntValidator *m_intValidator;
     QAction *m_toggleFacingPagesAct;
 };

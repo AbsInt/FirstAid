@@ -29,6 +29,7 @@
 #include <QIntValidator>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenu>
 #include <QSettings>
 #include <QShortcut>
 #include <QTimer>
@@ -107,30 +108,33 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     addWidget(spacer);
 
     // add combo box for zooming
-    m_zoomCombo = new QComboBox(this);
-    m_zoomCombo->setFocusPolicy(Qt::NoFocus);
-    m_zoomCombo->addItem(tr("Fit width"));
-    m_zoomCombo->addItem(tr("Fit page"));
-    m_zoomCombo->addItem(tr("10%"));
-    m_zoomCombo->addItem(tr("25%"));
-    m_zoomCombo->addItem(tr("33%"));
-    m_zoomCombo->addItem(tr("50%"));
-    m_zoomCombo->addItem(tr("66%"));
-    m_zoomCombo->addItem(tr("75%"));
-    m_zoomCombo->addItem(tr("100%"));
-    m_zoomCombo->addItem(tr("125%"));
-    m_zoomCombo->addItem(tr("150%"));
-    m_zoomCombo->addItem(tr("200%"));
-    m_zoomCombo->addItem(tr("300%"));
-    m_zoomCombo->addItem(tr("400%"));
+    m_zoomButton = new QToolButton(this);
+    m_zoomButton->setToolTip(tr("Zoom"));
+    QMenu *zoomMenu=new QMenu(this);
+    zoomMenu->addAction(tr("Fit width"));
+    zoomMenu->addAction(tr("Fit page"));
+    zoomMenu->addAction(tr("10%"));
+    zoomMenu->addAction(tr("25%"));
+    zoomMenu->addAction(tr("33%"));
+    zoomMenu->addAction(tr("50%"));
+    zoomMenu->addAction(tr("66%"));
+    zoomMenu->addAction(tr("75%"));
+    zoomMenu->addAction(tr("100%"));
+    zoomMenu->addAction(tr("125%"));
+    zoomMenu->addAction(tr("150%"));
+    zoomMenu->addAction(tr("200%"));
+    zoomMenu->addAction(tr("300%"));
+    zoomMenu->addAction(tr("400%"));
+    m_zoomButton->setMenu(zoomMenu);
+    m_zoomButton->setPopupMode(QToolButton::InstantPopup);
 
-    m_zoomCombo->setCurrentIndex(s.value("MainWindow/zoom", 8).toInt());
-
-    connect(m_zoomCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotZoomComboChanged()));
-    addWidget(m_zoomCombo);
+    foreach (QAction *a, zoomMenu->actions())
+        connect(a, SIGNAL(triggered()), SLOT(slotZoomChanged()));
+    addWidget(m_zoomButton);
 
     // add menu replacement action to right side
     QToolButton *menuButton = new QToolButton();
+    menuButton->setToolTip(tr("Application menu"));
     menuButton->setFocusPolicy(Qt::NoFocus);
     menuButton->setIcon(QIcon(":/icons/application-menu.svg"));
     menuButton->setMenu(menu);
@@ -147,9 +151,15 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_prevAct->setEnabled(false);
     m_nextAct->setEnabled(false);
 
-    // triggere these slots so view gets repainted with stored settings
+    // triggere these slots so view gets redrawn with stored settings
     QTimer::singleShot(0, this, SLOT(slotToggleFacingPages()));
-    QTimer::singleShot(0, this, SLOT(slotZoomComboChanged()));
+
+    int index=s.value("MainWindow/zoom", 8).toInt();
+    QList<QAction *> zoomActions=zoomMenu->actions();
+    if (index>=0 && index<zoomActions.count())
+        QTimer::singleShot(0, zoomActions.at(index), SLOT(trigger()));
+    else
+        qDebug("%d/%d", index, zoomActions.count());
 
     // init page label
     slotHideGoto();
@@ -159,7 +169,6 @@ NavigationToolBar::~NavigationToolBar()
 {
     // store settings
     QSettings s;
-    s.setValue("MainWindow/zoom", m_zoomCombo->currentIndex());
     s.setValue("MainWindow/facingPages", m_toggleFacingPagesAct->isChecked());
 }
 
@@ -251,15 +260,28 @@ void NavigationToolBar::slotHideGoto()
     m_pageEditAct->setVisible(false);
 }
 
-void NavigationToolBar::slotZoomComboChanged()
+void NavigationToolBar::slotZoomChanged()
 {
-    QString text = m_zoomCombo->currentText();
+    QAction *a=qobject_cast<QAction *>(sender());
+    if (!a)
+        return;
 
-    if ("Fit width" == text)
+    QSettings s;
+    s.setValue("MainWindow/zoom", m_zoomButton->menu()->actions().indexOf(a));
+
+    QString text = a->text();
+
+    if ("Fit width" == text) {
+        m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-width.svg"));
         emit zoomModeChanged(PageView::FitWidth);
-    else if ("Fit page" == text)
+    }
+    else if ("Fit page" == text) {
+        m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-best.svg"));
         emit zoomModeChanged(PageView::FitPage);
+    }
     else {
+        m_zoomButton->setIcon(QIcon(":/icons/zoom.svg"));
+
         text.remove("%");
         bool ok;
         int value = text.toInt(&ok);
