@@ -54,15 +54,15 @@ find_package(Qt5PrintSupport)
 find_package(Qt5Xml)
 
 set(firstaid_SRCS
-  abstractinfodock.cpp
-  documentobserver.cpp
-  findbar.cpp
-  main.cpp
-  navigationtoolbar.cpp
-  pageview.cpp
-  searchengine.cpp
-  toc.cpp
-  viewer.cpp
+  src/abstractinfodock.cpp
+  src/documentobserver.cpp
+  src/findbar.cpp
+  src/main.cpp
+  src/navigationtoolbar.cpp
+  src/pageview.cpp
+  src/searchengine.cpp
+  src/toc.cpp
+  src/viewer.cpp
 )
 
 qt5_add_resources(firstaid_QRC_SRCS firstaid.qrc)
