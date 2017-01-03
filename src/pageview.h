@@ -114,7 +114,6 @@ private:
 public:
     void setSize(const QSize &size);
 
-    void reset();
     int currentPage() const;
 
 signals:

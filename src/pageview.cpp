@@ -119,8 +119,6 @@ PageView::PageView(QWidget *parent)
     // behave like QScrollArea => 20
     verticalScrollBar()->setSingleStep(20);
     horizontalScrollBar()->setSingleStep(20);
-
-    reset();
 }
 
 PageView::~PageView()
@@ -149,11 +147,6 @@ QRectF PageView::fromPoints(const QRectF &rect) const
 QRectF PageView::toPoints(const QRectF &rect) const
 {
     return QRectF(rect.left() * 72.0 / resX(), rect.top() * 72.0 / resY(), rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
-}
-
-void PageView::reset()
-{
-    m_currentPage = 0;
 }
 
 int PageView::currentPage() const
