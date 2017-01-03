@@ -23,15 +23,27 @@
 #include <QThread>
 #include <iostream>
 
+/**
+ * Thread to read commands from stdin and pass them on via QueuedConnection
+ * to given object (e.g. Viewer in main thread).
+ */
 class StdinReaderThread : public QThread
 {
 public:
-    StdinReaderThread(QObject *parent)
+    /**
+     * Construct reader, pass object that should receive the commands
+     * @param receiver receiver of commands read from stdin
+     */
+    StdinReaderThread(QObject *receiver)
         : QThread()
-        , m_receiver(parent)
+        , m_receiver(receiver)
     {
     }
 
+    /**
+     * Thread main function, endless stdin reading, until that is closed.
+     * TODO: interruption handling
+     */
     void run()
     {
         /**
@@ -55,5 +67,8 @@ public:
     }
 
 private:
+    /**
+     * receiver for commands
+     */
     QObject *const m_receiver;
 };
