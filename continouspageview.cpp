@@ -230,6 +230,10 @@ bool ContinousPageView::event(QEvent *event)
 
 void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
 {
+    QSize vs = viewport()->size();
+    QPainter p(viewport());
+    p.fillRect(0, 0, vs.width(), vs.height(), Qt::gray);
+
     if (!m_document)
         return;
 
@@ -240,11 +244,6 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
     //show previous page in doubleside mode
     if (m_doubleSideMode && (currentPage>1) && !(currentPage%2))
         --currentPage;
-
-    QSize vs = viewport()->size();
-
-    QPainter p(viewport());
-    p.fillRect(0,0,vs.width(),vs.height(),Qt::gray);
 
     SearchEngine *se = SearchEngine::globalInstance();
     int matchPage;

@@ -172,6 +172,12 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     if (!QFileInfo(file).canonicalFilePath().isEmpty())
         file = QFileInfo(file).canonicalFilePath();
 
+    // bail out early if file does not exist
+    if (!QFileInfo(file).exists()) {
+        QMessageBox::critical(this, tr("File not found"), tr("File '%1' does not exist.").arg(file));
+        return;
+    }
+
     if (file == m_filePath && !forceReload) {
         raise();
         activateWindow();
@@ -180,8 +186,7 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
 
     Poppler::Document *newdoc = Poppler::Document::load(file);
     if (!newdoc || newdoc->isLocked()) {
-        QMessageBox msgbox(QMessageBox::Critical, tr("Open Error"), tr("Cannot open:\n") + file, QMessageBox::Ok, this);
-        msgbox.exec();
+        QMessageBox::critical(this, tr("Open Error"), tr("Cannot open file '%1'.").arg(file));
         return;
     }
 
