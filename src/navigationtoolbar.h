@@ -66,17 +66,17 @@ private slots:
     void slotChangeZoom(qreal currentZoom);
 
 private:
-    QAction *m_toggleFacingPagesAct;
+    QAction *m_toggleFacingPagesAct = nullptr;
 
-    QAction *m_prevAct;
-    QLineEdit *m_pageEdit;
-    QIntValidator *m_intValidator;
-    QAction *m_pageEditAct;
-    QLabel *m_pageLabel;
-    QAction *m_pageLabelAct;
-    QAction *m_nextAct;
+    QAction *m_prevAct = nullptr;
+    QLineEdit *m_pageEdit = nullptr;
+    QIntValidator *m_intValidator = nullptr;
+    QAction *m_pageEditAct = nullptr;
+    QLabel *m_pageLabel = nullptr;
+    QAction *m_pageLabelAct = nullptr;
+    QAction *m_nextAct = nullptr;
 
-    QLabel *m_zoomLabel;
-    QAction *m_zoomLabelAct;
-    QToolButton *m_zoomButton;
+    QLabel *m_zoomLabel = nullptr;
+    QAction *m_zoomLabelAct = nullptr;
+    QToolButton *m_zoomButton = nullptr;
 };

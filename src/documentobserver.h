@@ -36,13 +36,11 @@ public:
     virtual void pageChanged(int page) = 0;
 
 protected:
-    DocumentObserver();
-
     Poppler::Document *document() const;
     void setPage(int page);
     int page() const;
     void reloadPage();
 
 private:
-    PdfViewer *m_viewer;
+    PdfViewer *m_viewer = nullptr;
 };

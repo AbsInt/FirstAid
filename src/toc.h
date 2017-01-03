@@ -44,5 +44,5 @@ protected slots:
     void itemClicked(QTreeWidgetItem *item, int column);
 
 private:
-    QTreeWidget *m_tree;
+    QTreeWidget *m_tree = nullptr;
 };

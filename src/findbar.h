@@ -48,7 +48,7 @@ private slots:
     void slotResetStyle();
 
 private:
-    QLineEdit *m_findEdit;
-    QToolButton *m_prevMatch;
-    QToolButton *m_nextMatch;
+    QLineEdit *m_findEdit = nullptr;
+    QToolButton *m_prevMatch = nullptr;
+    QToolButton *m_nextMatch = nullptr;
 };

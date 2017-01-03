@@ -64,11 +64,11 @@ private:
 
     // members for finding text
     QString m_findText;
-    int m_findCurrentPage;
-    int m_findStopAfterPage;
+    int m_findCurrentPage = 0;
+    int m_findStopAfterPage = 0;
 
     // members for navigating in find results
     QHash<int, QList<QRectF>> m_matchesForPage;
-    int m_currentMatchPage;
-    int m_currentMatchIndex;
+    int m_currentMatchPage = 0;
+    int m_currentMatchIndex = 0;
 };

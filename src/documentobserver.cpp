@@ -20,11 +20,6 @@
 
 #include "viewer.h"
 
-DocumentObserver::DocumentObserver()
-    : m_viewer(0)
-{
-}
-
 DocumentObserver::~DocumentObserver()
 {
 }

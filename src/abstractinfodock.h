@@ -41,5 +41,5 @@ private Q_SLOTS:
     void slotVisibilityChanged(bool visible);
 
 private:
-    bool m_filled;
+    bool m_filled = false;
 };
