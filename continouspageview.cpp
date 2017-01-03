@@ -403,18 +403,15 @@ void ContinousPageView::mousePressEvent(QMouseEvent *event)
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
                         int offset = gotoLink.isChangeTop()?gotoLink.top()* displayRect.height():0;
                         emit gotoRequested(QString::number(gotoLink.pageNumber())+"#"+QString::number(offset));
-                        delete link;
                     }
                     return;
 
                     case Poppler::Link::Browse:
                         QDesktopServices::openUrl(QUrl(static_cast<Poppler::LinkBrowse *>(link)->url()));
-                        delete link;
                         return;
 
                     default:
                         qDebug("Not yet handled link type %d.", link->linkType());
-                        delete link;
                         return;
                 }
 
