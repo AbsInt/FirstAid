@@ -32,6 +32,8 @@ class Document;
 
 class PageView : public QAbstractScrollArea
 {
+    Q_OBJECT
+
 public:
     enum ZoomMode { FitWidth, FitPage, Absolute };
     enum DoubleSideMode { None, DoubleSided, DoubleSidedNotFirst };
@@ -48,6 +50,10 @@ public:
     QRectF fromPoints(const QRectF &rect) const;
     QRectF toPoints(const QRectF &rect) const;
 
+protected:
+    void wheelEvent( QWheelEvent *wheelEvent )override;
+    void keyPressEvent(QKeyEvent *event) override;
+
 public:
     void setSize(const QSize &size);
 
@@ -59,6 +65,9 @@ public:
     virtual int currentPage() const;
     virtual void gotoPage(int page, int offset = 0) = 0;
     virtual void gotoDestination(const QString &destination);
+
+signals:
+    void zoomChanged(qreal CurrentZoom);
 
 
 protected:

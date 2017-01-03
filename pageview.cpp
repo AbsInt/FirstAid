@@ -24,6 +24,7 @@
 
 #include <poppler-qt5.h>
 #include <QApplication>
+#include <QKeyEvent>
 #include <QDesktopWidget>
 
 /*
@@ -119,10 +120,40 @@ void PageView::setZoom(qreal zoom)
 {
     m_zoomMode = Absolute;
 
-    if (zoom != m_zoom) {
+    if (zoom != m_zoom && zoom >= 0.1 && zoom <= 4.0) {
         m_zoom = zoom;
         viewport()->update();
     }
+}
+
+void PageView::wheelEvent(QWheelEvent *wheelEvent)
+{
+     if( wheelEvent->modifiers() & Qt::ControlModifier )
+     {
+         if (wheelEvent->delta()>0)
+             setZoom(m_zoom+0.1);
+         else
+             setZoom(m_zoom-0.1);
+         emit zoomChanged(m_zoom);
+         return;
+     }
+
+     QAbstractScrollArea::wheelEvent(wheelEvent);
+}
+
+void PageView::keyPressEvent(QKeyEvent *event)
+{
+    if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Plus) {
+        setZoom(m_zoom+0.1);
+        emit zoomChanged(m_zoom);
+        return;
+    }
+    if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Minus) {
+        setZoom(m_zoom-0.1);
+        emit zoomChanged(m_zoom);
+        return;
+    }
+    QAbstractScrollArea::keyPressEvent(event);
 }
 
 void PageView::setDoubleSideMode(DoubleSideMode mode)

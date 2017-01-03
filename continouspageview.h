@@ -41,10 +41,7 @@ public:
         , m_annotations(annotations)
     {}
 
-    ~FirstAidPage() {
-        delete m_image;
-        qDeleteAll(m_annotations);
-    }
+    ~FirstAidPage();
 
     QImage* m_image;
     QList<Poppler::Annotation *> m_annotations;

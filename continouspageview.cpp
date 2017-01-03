@@ -44,6 +44,19 @@
 
 #include <QDebug>
 
+
+
+/*
+ * Helper class
+ */
+
+
+FirstAidPage::~FirstAidPage() {
+    delete m_image;
+    qDeleteAll(m_annotations);
+}
+
+
 /*
  * constructors / destructor
  */
@@ -280,7 +293,7 @@ void ContinousPageView::keyPressEvent(QKeyEvent *event)
         }
     }
 
-    QAbstractScrollArea::keyPressEvent(event);
+    PageView::keyPressEvent(event);
 }
 
 void ContinousPageView::mouseMoveEvent(QMouseEvent *event)

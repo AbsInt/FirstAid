@@ -63,6 +63,7 @@ private slots:
     void slotHideGoto();
     void slotToggleFacingPages();
 
+    void slotChangeZoom(qreal currentZoom);
 private:
     QAction *m_toggleFacingPagesAct;
 

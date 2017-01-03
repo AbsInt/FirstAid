@@ -115,6 +115,7 @@ PdfViewer::PdfViewer(const QString &file)
     NavigationToolBar *navbar = new NavigationToolBar(tocDock->toggleViewAction(), menu, this);
     addToolBar(navbar);
     m_observers.append(navbar);
+    connect(m_view, SIGNAL(zoomChanged(qreal)), navbar,  SLOT(slotChangeZoom(qreal)));
 
     SearchEngine *se = SearchEngine::globalInstance();
     m_observers << se;
