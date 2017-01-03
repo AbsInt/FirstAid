@@ -64,13 +64,17 @@ private slots:
     void slotToggleFacingPages();
 
 private:
+    QAction *m_toggleFacingPagesAct;
+
     QAction *m_prevAct;
     QLineEdit *m_pageEdit;
+    QIntValidator *m_intValidator;
     QAction *m_pageEditAct;
     QLabel *m_pageLabel;
     QAction *m_pageLabelAct;
     QAction *m_nextAct;
+
+    QLabel *m_zoomLabel;
+    QAction *m_zoomLabelAct;
     QToolButton *m_zoomButton;
-    QIntValidator *m_intValidator;
-    QAction *m_toggleFacingPagesAct;
 };

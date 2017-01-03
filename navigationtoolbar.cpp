@@ -107,7 +107,12 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(spacer);
 
-    // add combo box for zooming
+    // add label and combo box for zooming
+    m_zoomLabel=new QLabel(this);
+    m_zoomLabel->setAlignment(Qt::AlignCenter);
+    m_zoomLabelAct=addWidget(m_zoomLabel);
+    m_zoomLabel->installEventFilter(this);
+
     m_zoomButton = new QToolButton(this);
     m_zoomButton->setToolTip(tr("Zoom"));
     QMenu *zoomMenu=new QMenu(this);
@@ -208,6 +213,10 @@ bool NavigationToolBar::eventFilter(QObject *object, QEvent *event)
     if (object==m_pageLabel && QEvent::MouseButtonPress==event->type())
         QTimer::singleShot(0, this, SLOT(slotGoto()));
 
+    // clicking on the zoom label displaying the current scale factor will trigger zoom menu
+    else if (object==m_zoomLabel && QEvent::MouseButtonPress==event->type())
+        QTimer::singleShot(0, m_zoomButton, SLOT(showMenu()));
+
     return QToolBar::eventFilter(object, event);
 }
 
@@ -272,14 +281,18 @@ void NavigationToolBar::slotZoomChanged()
     QString text = a->text();
 
     if ("Fit width" == text) {
+        m_zoomLabelAct->setVisible(false);
         m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-width.svg"));
         emit zoomModeChanged(PageView::FitWidth);
     }
     else if ("Fit page" == text) {
+        m_zoomLabelAct->setVisible(false);
         m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-best.svg"));
         emit zoomModeChanged(PageView::FitPage);
     }
     else {
+        m_zoomLabelAct->setVisible(true);
+        m_zoomLabel->setText(text);
         m_zoomButton->setIcon(QIcon(":/icons/zoom.svg"));
 
         text.remove("%");
