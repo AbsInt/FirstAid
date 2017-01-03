@@ -41,6 +41,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -164,6 +165,13 @@ QSize PdfViewer::sizeHint() const
 
 void PdfViewer::loadDocument(QString file, bool forceReload)
 {
+    // absolute path in any case, to have full url for later external open!
+    file = QFileInfo(file).absoluteFilePath();
+
+    // try to canonicalize, might fail if not there
+    if (!QFileInfo(file).canonicalFilePath().isEmpty())
+        file = QFileInfo(file).canonicalFilePath();
+
     if (file == m_filePath && !forceReload) {
         raise();
         activateWindow();
