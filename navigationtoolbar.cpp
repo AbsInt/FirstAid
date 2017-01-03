@@ -114,6 +114,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomLabel->installEventFilter(this);
 
     m_zoomButton = new QToolButton(this);
+    m_zoomButton->setFocusPolicy(Qt::NoFocus);
     m_zoomButton->setToolTip(tr("Zoom"));
     QMenu *zoomMenu=new QMenu(this);
     zoomMenu->addAction(tr("Fit width"));
