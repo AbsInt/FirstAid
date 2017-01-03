@@ -312,6 +312,6 @@ void NavigationToolBar::slotToggleFacingPages()
 void NavigationToolBar::slotChangeZoom(qreal currentZoom)
 {
     m_zoomLabelAct->setVisible(true);
-    m_zoomLabel->setText(QString("%1%%").arg(currentZoom*100));
+    m_zoomLabel->setText(QString("%1%").arg(qRound(currentZoom*100)));
     m_zoomButton->setIcon(QIcon(":/icons/zoom.svg"));
 }
