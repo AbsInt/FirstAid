@@ -228,9 +228,12 @@ void ContinousPageView::paintEvent(QPaintEvent * /*resizeEvent*/)
         int doubleSideOffset = 0;
         if (m_doubleSideMode)
         {
-            doubleSideOffset = image->width()/2;
-            if (currentPage%2)
-                doubleSideOffset *= -1;
+            // special handling for first page
+            if (0 != currentPage) {
+                doubleSideOffset = image->width()/2;
+                if (currentPage%2)
+                    doubleSideOffset *= -1;
+            }
         }
 
         pageStart.setX(qMax(0, vs.width() - image->width()) / 2 -m_offset.x() + doubleSideOffset + ((m_zoomMode==Absolute)?PAGEFRAME:0));
