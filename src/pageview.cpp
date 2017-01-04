@@ -218,6 +218,20 @@ void PageView::wheelEvent(QWheelEvent *wheelEvent)
     QAbstractScrollArea::wheelEvent(wheelEvent);
 }
 
+void PageView::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu m(this);
+    m.addAction("Copy");
+
+    if (!m.exec(event->globalPos()))
+        return;
+
+    m_panStartPoint = QPoint();
+    m_rubberBandOrigin = qMakePair(m_currentPage, event->pos());
+    m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
+    m_rubberBand->show();
+}
+
 void PageView::setDoubleSideMode(DoubleSideMode mode)
 {
     if (mode != m_doubleSideMode) {
@@ -442,6 +456,12 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
+    // update rubber band?
+    if (m_rubberBandOrigin.first >= 0) {
+        QRect r=QRect(m_rubberBandOrigin.second, event->pos()).intersected(m_pageRects.value(m_rubberBandOrigin.first));
+        m_rubberBand->setGeometry(r.normalized());
+    }
+
     // now check if we want to highlight a link location
     QHashIterator<int, QRect> it(m_pageRects);
     while (it.hasNext()) {
@@ -464,11 +484,6 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
         }
 
         setCursor(Qt::ArrowCursor);
-
-        if (m_rubberBandOrigin.first >= 0) {
-            QRect r=QRect(m_rubberBandOrigin.second, event->pos()).intersected(m_pageRects.value(m_rubberBandOrigin.first));
-            m_rubberBand->setGeometry(r.normalized());
-        }
     }
 }
 
