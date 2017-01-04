@@ -121,6 +121,13 @@ PageView::PageView(QWidget *parent)
     // behave like QScrollArea => 20
     verticalScrollBar()->setSingleStep(20);
     horizontalScrollBar()->setSingleStep(20);
+
+    // add some shortcuts
+    new QShortcut(Qt::Key_Backspace, this, SLOT(stepBack()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::Key_Space, this, SLOT(advance()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::ControlModifier+Qt::Key_0, this, SLOT(zoomOriginal()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::ControlModifier+Qt::Key_Plus, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::ControlModifier+Qt::Key_Minus, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
 }
 
 PageView::~PageView()
@@ -448,45 +455,6 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
     QAbstractScrollArea::resizeEvent(resizeEvent);
 }
 
-void PageView::keyPressEvent(QKeyEvent *event)
-{
-    if (m_document) {
-        if (event->key() == Qt::Key_Backspace) {
-            stepBack();
-            return;
-        }
-
-        if (event->key() == Qt::Key_Space) {
-            advance();
-            return;
-        }
-    }
-
-    if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier)) {
-        switch (event->key()) {
-            case Qt::Key_0:
-                setZoom(1.0);
-                emit zoomChanged(m_zoom);
-                return;
-
-            case Qt::Key_Plus:
-                setZoom(m_zoom + 0.1);
-                emit zoomChanged(m_zoom);
-                return;
-
-            case Qt::Key_Minus:
-                setZoom(m_zoom - 0.1);
-                emit zoomChanged(m_zoom);
-                return;
-
-            default:
-                ; // nothing to do
-        }
-    }
-
-    QAbstractScrollArea::keyPressEvent(event);
-}
-
 void PageView::mouseMoveEvent(QMouseEvent *event)
 {
     if (!m_document)
@@ -613,6 +581,24 @@ void PageView::advance()
 {
     // TODO go to end of current page if not visible or to next page
     gotoNextPage();
+}
+
+void PageView::zoomIn()
+{
+    setZoom(m_zoom + 0.1);
+    emit zoomChanged(m_zoom);
+}
+
+void PageView::zoomOut()
+{
+    setZoom(m_zoom - 0.1);
+    emit zoomChanged(m_zoom);
+}
+
+void PageView::zoomOriginal()
+{
+    setZoom(1.0);
+    emit zoomChanged(m_zoom);
 }
 
 /*

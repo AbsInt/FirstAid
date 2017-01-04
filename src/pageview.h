@@ -21,10 +21,11 @@
 
 #include <memory>
 
-#include <QImage>
-#include <QCache>
-#include <QRubberBand>
 #include <QAbstractScrollArea>
+#include <QCache>
+#include <QImage>
+#include <QRubberBand>
+#include <QShortcut>
 
 #include <poppler-qt5.h>
 
@@ -85,7 +86,6 @@ protected:
     bool event(QEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
@@ -96,6 +96,9 @@ public slots:
     void gotoNextPage();
     void stepBack();
     void advance();
+    void zoomIn();
+    void zoomOut();
+    void zoomOriginal();
 
 public slots:
     void gotoDestination(const QString &destination);
