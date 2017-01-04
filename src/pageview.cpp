@@ -352,9 +352,10 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
 
     QPoint pageStart = -m_offset + QPoint(0, PAGEFRAME);
 
+    p.setClipRect(paintEvent->rect());
+
     while (pageStart.y() < 0 || vs.height() > (pageStart.y() + 2 * PAGEFRAME)) {
         // draw another page
-
         FirstAidPage cachedPage = getPage(currentPage);
 
         if (cachedPage.m_image.isNull())
