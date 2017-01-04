@@ -3,6 +3,7 @@
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  * Copyright (C) 2016, Christoph Cullmann <cullmann@absint.com>
+ * Copyright (C) 2016, Jan Pohland <pohland@absint.com>
  *
  * With portions of code from okular/ui/pageview.cpp by:
  *     Copyright (C) 2004-2005 by Enrico Ros <eros.kde@email.it>
@@ -220,16 +221,24 @@ void PageView::wheelEvent(QWheelEvent *wheelEvent)
 
 void PageView::contextMenuEvent(QContextMenuEvent *event)
 {
+    m_panStartPoint = QPoint();
+
     QMenu m(this);
-    m.addAction("Copy");
+    m.addAction(QIcon(":/icons/edit-copy.svg"), "Copy");
 
     if (!m.exec(event->globalPos()))
         return;
 
-    m_panStartPoint = QPoint();
-    m_rubberBandOrigin = qMakePair(m_currentPage, event->pos());
-    m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
-    m_rubberBand->show();
+    int pageNumber=pageForPoint(event->pos()+m_offset);
+    if (-1 != pageNumber) {
+        m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
+        m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
+
+        QRect r=QRect(m_rubberBandOrigin.second, m_offset+mapFromGlobal(QCursor::pos())).intersected(m_pageRects.value(m_rubberBandOrigin.first));
+        m_rubberBand->setGeometry(r.normalized());
+
+        m_rubberBand->show();
+    }
 }
 
 void PageView::setDoubleSideMode(DoubleSideMode mode)
@@ -493,6 +502,15 @@ void PageView::mousePressEvent(QMouseEvent *event)
     if (!m_document)
         return;
 
+    // special case: end rubber band that has been created by context menu copy
+    if (m_rubberBandOrigin.first >= 0) {
+        QRect displayRect=m_pageRects.value(m_rubberBandOrigin.first);
+        slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().translated(-displayRect.topLeft()));
+        m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
+        m_rubberBand->hide();
+        return;
+    }
+
     // first check for clicks on links and text selection
     QHashIterator<int, QRect> it(m_pageRects);
     while (it.hasNext()) {
@@ -586,7 +604,10 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
         if (!displayRect.isValid())
             return;
 
-        slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
+        QMenu m(this);
+        QAction *copyAction = m.addAction(QIcon(":/icons/edit-copy.svg"), "Copy");
+        if (copyAction == m.exec(QCursor::pos()))
+            slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
 
         m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
         m_rubberBand->hide();
@@ -684,12 +705,6 @@ void PageView::gotoDestination(const QString &destination)
 void PageView::slotCopyRequested(int page, const QRectF &rect)
 {
     if (rect.isNull())
-        return;
-
-    QMenu m(this);
-    QAction *copyAction = m.addAction(QIcon(":/icons/edit-copy.svg"), "Copy");
-
-    if (copyAction != m.exec(QCursor::pos()))
         return;
 
     if (Poppler::Page *p= m_document->page(page)) {
