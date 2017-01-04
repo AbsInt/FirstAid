@@ -74,7 +74,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 
     // previous page action
     m_prevAct = addAction(QIcon(":/icons/go-previous.svg"), tr("Previous page"), this, SLOT(slotGoPrev()));
-    QShortcut *previousShortcut = new QShortcut(Qt::Key_Backspace, this);
+    QShortcut *previousShortcut = new QShortcut(Qt::Key_PageUp, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
     // combined line edit for goto action and status label
@@ -99,7 +99,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 
     // next page action
     m_nextAct = addAction(QIcon(":/icons/go-next.svg"), tr("Next page"), this, SLOT(slotGoNext()));
-    QShortcut *nextShortcut = new QShortcut(Qt::Key_Space, this);
+    QShortcut *nextShortcut = new QShortcut(Qt::Key_PageDown, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
     // more space for centering

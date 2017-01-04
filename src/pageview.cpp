@@ -443,15 +443,13 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
 void PageView::keyPressEvent(QKeyEvent *event)
 {
     if (m_document) {
-        if (event->key() == Qt::Key_PageUp) {
-            // TODO only go to next page if page is fully visible
-            gotoNextPage();
+        if (event->key() == Qt::Key_Backspace) {
+            stepBack();
             return;
         }
 
-        if (event->key() == Qt::Key_PageDown) {
-            // TODO only go to previous page if page is at top
-            gotoPreviousPage();
+        if (event->key() == Qt::Key_Space) {
+            advance();
             return;
         }
     }
@@ -577,14 +575,26 @@ void PageView::mouseReleaseEvent(QMouseEvent *)
 
 void PageView::gotoPreviousPage()
 {
-    int newPage = qMin(m_document->numPages() - 1, m_currentPage + (m_doubleSideMode ? 2 : 1));
+    int newPage = qMax(0, m_currentPage - (m_doubleSideMode ? 2 : 1));
     gotoPage(newPage, 0);
 }
 
 void PageView::gotoNextPage()
 {
-    int newPage = qMax(0, m_currentPage - (m_doubleSideMode ? 2 : 1));
+    int newPage = qMin(m_document->numPages() - 1, m_currentPage + (m_doubleSideMode ? 2 : 1));
     gotoPage(newPage, 0);
+}
+
+void PageView::stepBack()
+{
+    // TODO go to start of current page if not visible or to previous page
+    gotoPreviousPage();
+}
+
+void PageView::advance()
+{
+    // TODO go to end of current page if not visible or to next page
+    gotoNextPage();
 }
 
 /*

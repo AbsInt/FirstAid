@@ -94,6 +94,8 @@ protected:
 public slots:
     void gotoPreviousPage();
     void gotoNextPage();
+    void stepBack();
+    void advance();
 
 public slots:
     void gotoDestination(const QString &destination);
