@@ -140,12 +140,12 @@ PageView::~PageView()
 
 qreal PageView::resX() const
 {
-    return m_dpiX * m_zoom;
+    return m_dpiX * m_zoom * devicePixelRatio();
 }
 
 qreal PageView::resY() const
 {
-    return m_dpiY * m_zoom;
+    return m_dpiY * m_zoom * devicePixelRatio();
 }
 
 QRectF PageView::fromPoints(const QRectF &rect) const
@@ -365,13 +365,13 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         if (m_doubleSideMode) {
             // special handling for first page and documents with only two pages
             if (0!=currentPage || 2==m_document->numPages()) {
-                doubleSideOffset = cachedPage.m_image.width() / 2;
+                doubleSideOffset = cachedPage.m_image.width() /  devicePixelRatio() / 2;
                 if (currentPage % 2)
                     doubleSideOffset *= -1;
             }
         }
 
-        pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width()) / 2 - m_offset.x() + doubleSideOffset + ((m_zoomMode == Absolute) ? PAGEFRAME : 0));
+        pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width() /  devicePixelRatio()) / 2 - m_offset.x() + doubleSideOffset + ((m_zoomMode == Absolute) ? PAGEFRAME : 0));
 
         // match further matches on page
         double sx = resX() / 72.0;
@@ -393,7 +393,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
 
         p.drawImage(pageStart, cachedPage.m_image);
         m_pageRects.append(qMakePair(currentPage, QRect(pageStart, cachedPage.m_image.size())));
-        m_pageHeight = cachedPage.m_image.height();
+        m_pageHeight = cachedPage.m_image.height() /  devicePixelRatio();
 
         p.setPen(Qt::darkGray);
         p.drawRect(QRect(pageStart, cachedPage.m_image.size()).adjusted(-1, -1, 1, 1));
@@ -402,7 +402,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         ++currentPage;
 
         if (!m_doubleSideMode || (currentPage % 2))
-            pageStart.setY(pageStart.y() + cachedPage.m_image.height() + 2 * PAGEFRAME);
+            pageStart.setY(pageStart.y() + cachedPage.m_image.height() /  devicePixelRatio() + 2 * PAGEFRAME);
     }
     p.end();
 }
@@ -746,7 +746,12 @@ FirstAidPage PageView::getPage(int pageNumber)
     if (!cachedPage) {
         if (Poppler::Page *page = m_document->page(pageNumber)) {
             QList<Poppler::Annotation *> annots = page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
+
+            /**
+             * we render in too high resolution and then set the right ratio
+             */
             cachedPage = new FirstAidPage(page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0), annots);
+            cachedPage->m_image.setDevicePixelRatio(devicePixelRatio());
 
             m_imageCache.insert(pageNumber, cachedPage);
             delete page;
