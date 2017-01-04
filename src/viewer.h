@@ -24,6 +24,7 @@
 #include <QFileSystemWatcher>
 
 #include "pageview.h"
+#include "searchengine.h"
 
 class DocumentObserver;
 class QAction;
@@ -42,8 +43,36 @@ class PdfViewer : public QMainWindow
     friend class DocumentObserver;
 
 public:
+    /**
+     * Construct viewer image, is a singleton.
+     * @param file file to open, if not empty
+     */
     PdfViewer(const QString &file);
+
+    /**
+     * Destruct the viewer window.
+     */
     ~PdfViewer();
+
+    /**
+     * Access to global instance.
+     * @return global instance
+     */
+    static PdfViewer *instance()
+    {
+        Q_ASSERT(s_instance);
+        return s_instance;
+    }
+
+    /**
+     * Access to global search instance.
+     * @return global search instance
+     */
+    static SearchEngine *searchEngine()
+    {
+        Q_ASSERT(s_instance);
+        return &s_instance->m_searchEngine;
+    }
 
     QSize sizeHint() const override;
 
@@ -85,6 +114,11 @@ private:
 
 private:
     /**
+     *
+     */
+    static PdfViewer *s_instance;
+
+    /**
      * PDF view, renders the pages
      */
     PageView *m_view = nullptr;
@@ -123,4 +157,9 @@ private:
      * action: print file
      */
     QAction *m_filePrintAct = nullptr;
+
+    /**
+     * search engine
+     */
+    SearchEngine m_searchEngine;
 };

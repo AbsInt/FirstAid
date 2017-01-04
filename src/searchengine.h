@@ -28,12 +28,9 @@ class SearchEngine : public QObject, public DocumentObserver
 {
     Q_OBJECT
 
+public:
     SearchEngine();
     ~SearchEngine();
-
-public:
-    static SearchEngine *globalInstance();
-    static void destroy();
 
     void documentLoaded();
     void documentClosed();
@@ -60,8 +57,6 @@ protected slots:
     void find();
 
 private:
-    static SearchEngine *s_globalInstance;
-
     // members for finding text
     QString m_findText;
     int m_findCurrentPage = 0;

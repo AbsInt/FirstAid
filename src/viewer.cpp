@@ -53,9 +53,14 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
+PdfViewer *PdfViewer::s_instance = nullptr;
+
 PdfViewer::PdfViewer(const QString &file)
     : QMainWindow()
 {
+    // register singleton
+    s_instance = this;
+
     setWindowIcon(QIcon(":/firstaid.svg"));
 
     setStyleSheet(
@@ -117,8 +122,8 @@ PdfViewer::PdfViewer(const QString &file)
     m_observers.append(navbar);
     connect(m_view, SIGNAL(zoomChanged(qreal)), navbar, SLOT(slotChangeZoom(qreal)));
 
-    SearchEngine *se = SearchEngine::globalInstance();
-    m_observers << se;
+    // register our own search engine
+    m_observers << &m_searchEngine;
 
     foreach (DocumentObserver *obs, m_observers)
         obs->m_viewer = this;
@@ -155,6 +160,9 @@ PdfViewer::PdfViewer(const QString &file)
 PdfViewer::~PdfViewer()
 {
     closeDocument();
+
+    // register singleton
+    s_instance = nullptr;
 }
 
 QSize PdfViewer::sizeHint() const

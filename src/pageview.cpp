@@ -37,7 +37,7 @@
  */
 
 #include "pageview.h"
-#include "searchengine.h"
+#include "viewer.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -94,10 +94,9 @@ PageView::PageView(QWidget *parent)
     grabGesture(Qt::SwipeGesture);
     grabGesture(Qt::PanGesture);
 
-    SearchEngine *se = SearchEngine::globalInstance();
-    connect(se, SIGNAL(started()), SLOT(slotFindStarted()));
-    connect(se, SIGNAL(highlightMatch(int, QRectF)), SLOT(slotHighlightMatch(int, QRectF)));
-    connect(se, SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotMatchesFound(int, QList<QRectF>)));
+    connect(PdfViewer::searchEngine(), SIGNAL(started()), SLOT(slotFindStarted()));
+    connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(slotHighlightMatch(int, QRectF)));
+    connect(PdfViewer::searchEngine(), SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotMatchesFound(int, QList<QRectF>)));
 
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(scrolled()));
     connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(scrolled()));
@@ -174,7 +173,7 @@ void PageView::setZoomMode(ZoomMode mode)
 {
     if (mode != m_zoomMode) {
         m_zoomMode = mode;
-        
+
         // fake resize event to recompute sizes, e.g. for fit width/page
         QResizeEvent e(size(), size());
         resizeEvent(&e);
@@ -214,7 +213,7 @@ void PageView::setDoubleSideMode(DoubleSideMode mode)
 {
     if (mode != m_doubleSideMode) {
         m_doubleSideMode = mode;
-        
+
         // fake resize event to recompute sizes, e.g. for fit width/page
         QResizeEvent e(size(), size());
         resizeEvent(&e);
@@ -259,7 +258,7 @@ void PageView::gotoPage(int page, int offset)
 
     m_offset = QPoint(m_offset.x(), offset);
     m_currentPage = page;
-    
+
     // misuse to go to page
     updateViewSize(false /* goto mode, don't clear cache */);
 
@@ -333,10 +332,9 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     if (m_doubleSideMode && (currentPage > 1) && !(currentPage % 2))
         --currentPage;
 
-    SearchEngine *se = SearchEngine::globalInstance();
     int matchPage;
     QRectF matchRect;
-    se->currentMatch(matchPage, matchRect);
+    PdfViewer::searchEngine()->currentMatch(matchPage, matchRect);
 
     QPoint pageStart = -m_offset + QPoint(0, PAGEFRAME);
 
@@ -367,7 +365,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         QPainter sp(&cachedPage.m_image);
         sp.setPen(Qt::NoPen);
 
-        foreach (QRectF rect, se->matchesFor(currentPage)) {
+        foreach (QRectF rect, PdfViewer::searchEngine()->matchesFor(currentPage)) {
             QColor matchColor = QColor(255, 255, 0, 64);
             if (currentPage == matchPage && rect == matchRect)
                 matchColor = QColor(255, 128, 0, 128);
@@ -438,7 +436,7 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
         m_zoom = qMin(zx, zy);
         updateViewSize();
     }
-    
+
     QAbstractScrollArea::resizeEvent(resizeEvent);
 }
 
@@ -692,7 +690,7 @@ void PageView::updateViewSize(bool invalidateCache)
     // invalidate cache
     if (invalidateCache)
         m_imageCache.clear();
-    
+
     QScrollBar *vbar = verticalScrollBar();
     int pageCount = m_document ? m_document->numPages() : 0;
     int current = currentPage();
@@ -722,7 +720,7 @@ void PageView::updateViewSize(bool invalidateCache)
     hbar->blockSignals(true);
     hbar->setValue(m_offset.x());
     hbar->blockSignals(false);
-    
+
     // update viewport
     viewport()->update();
 }

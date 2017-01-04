@@ -34,12 +34,6 @@
 #define PagePileSize 20
 
 /*
- * class members
- */
-
-SearchEngine *SearchEngine::s_globalInstance = nullptr;
-
-/*
  * constructors / destructor
  */
 
@@ -56,22 +50,6 @@ SearchEngine::~SearchEngine()
 /*
  * public methods
  */
-
-SearchEngine *SearchEngine::globalInstance()
-{
-    if (!s_globalInstance)
-        s_globalInstance = new SearchEngine();
-
-    return s_globalInstance;
-}
-
-void SearchEngine::destroy()
-{
-    if (s_globalInstance) {
-        delete s_globalInstance;
-        s_globalInstance = nullptr;
-    }
-}
 
 void SearchEngine::documentLoaded()
 {

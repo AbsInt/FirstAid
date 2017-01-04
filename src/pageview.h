@@ -107,13 +107,13 @@ public slots:
 private:
     int pageHeight();
     int pageWidth();
-    
+
     /**
      * Update viewport dimensions after:
      *  - document change
      *  - change of zoom variant/factor
      *  - change of single/double page mode
-     * 
+     *
      * @param invalidateCache invalidate page cache? default true, only use that for position setting with false
      */
     void updateViewSize(bool invalidateCache = true);

@@ -17,7 +17,7 @@
  */
 
 #include "findbar.h"
-#include "searchengine.h"
+#include "viewer.h"
 
 #include <poppler-qt5.h>
 
@@ -69,10 +69,9 @@ FindBar::FindBar(QWidget *parent)
     addAction(closeAction);
     connect(closeAction, SIGNAL(triggered()), SLOT(slotHide()));
 
-    SearchEngine *se = SearchEngine::globalInstance();
-    connect(se, SIGNAL(finished()), SLOT(slotFindDone()));
-    connect(m_prevMatch, SIGNAL(clicked()), se, SLOT(previousMatch()));
-    connect(m_nextMatch, SIGNAL(clicked()), se, SLOT(nextMatch()));
+    connect(PdfViewer::searchEngine(), SIGNAL(finished()), SLOT(slotFindDone()));
+    connect(m_prevMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(previousMatch()));
+    connect(m_nextMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(nextMatch()));
 
     documentClosed();
 }
@@ -103,18 +102,18 @@ void FindBar::pageChanged(int)
 
 void FindBar::slotFind()
 {
-    SearchEngine::globalInstance()->find(m_findEdit->text());
+    PdfViewer::searchEngine()->find(m_findEdit->text());
 }
 
 void FindBar::slotHide()
 {
     hide();
-    SearchEngine::globalInstance()->find(QString());
+    PdfViewer::searchEngine()->find(QString());
 }
 
 void FindBar::slotFindDone()
 {
-    if (isVisible() && SearchEngine::globalInstance()->matches().isEmpty()) {
+    if (isVisible() && PdfViewer::searchEngine()->matches().isEmpty()) {
         m_findEdit->setStyleSheet("background-color: #f08080");
         QTimer::singleShot(5000, this, SLOT(slotResetStyle()));
     }
