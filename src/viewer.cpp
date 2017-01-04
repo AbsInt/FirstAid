@@ -136,8 +136,12 @@ PdfViewer::PdfViewer(const QString &file)
 
     /**
      * auto-reload
+     * delay it by 1 second to allow files to be written
      */
-    connect(&m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &PdfViewer::slotReload);
+    m_fileWatcherReloadTimer.setSingleShot(true);
+    m_fileWatcherReloadTimer.setInterval(1000);
+    connect(&m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &PdfViewer::slotDelayedReload);
+    connect(&m_fileWatcherReloadTimer, &QTimer::timeout, this, &PdfViewer::slotReload);
 
     // update action state & co
     updateOnDocumentChange();
@@ -309,6 +313,12 @@ void PdfViewer::slotReload()
 {
     if (!m_filePath.isEmpty())
         loadDocument(m_filePath, true /* force reload */);
+}
+
+void PdfViewer::slotDelayedReload()
+{
+    // restart singleshot timer => 1 second later we will reload
+    m_fileWatcherReloadTimer.start();
 }
 
 void PdfViewer::slotPrint()

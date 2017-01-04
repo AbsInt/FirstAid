@@ -22,6 +22,7 @@
 
 #include <QMainWindow>
 #include <QFileSystemWatcher>
+#include <QTimer>
 
 #include "pageview.h"
 #include "searchengine.h"
@@ -93,6 +94,7 @@ private Q_SLOTS:
     void slotOpenFile();
     void slotOpenFileExternal();
     void slotReload();
+    void slotDelayedReload();
     void slotPrint();
     void slotAbout();
 
@@ -132,6 +134,11 @@ private:
      * watcher to auto-reload, does watch m_filePath
      */
     QFileSystemWatcher m_fileWatcher;
+
+    /**
+     * timer to trigger reload delayed for file watcher
+     */
+    QTimer m_fileWatcherReloadTimer;
 
     /**
      * current open document, if any
