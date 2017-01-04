@@ -349,7 +349,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width() /  devicePixelRatio()) / 2 - m_offset.x() + doubleSideOffset + ((m_zoomMode == Absolute) ? PAGEFRAME : 0));
         p.drawImage(pageStart, cachedPage.m_image);
 
-        m_pageRects.append(qMakePair(currentPage, QRect(pageStart, cachedPage.m_image.size())));
+        m_pageRects.insert(currentPage, QRect(pageStart, cachedPage.m_image.size()));
         m_pageHeight = cachedPage.m_image.height() /  devicePixelRatio();
 
         // draw matches on page
@@ -443,15 +443,18 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // now check if we want to highlight a link location
-    for (int i = 0; i < m_pageRects.length(); ++i) {
-        QPair<int, QRect> currentPage = m_pageRects.at(i);
-        QRect displayRect = currentPage.second;
+    QHashIterator<int, QRect> it(m_pageRects);
+    while (it.hasNext()) {
+        it.next();
+
+        int pageNumber = it.key();
+        QRect displayRect = it.value();
 
         qreal xPos = (event->x() - displayRect.x()) / (qreal)displayRect.width();
         qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        FirstAidPage cachedPage = getPage(currentPage.first);
+        FirstAidPage cachedPage = getPage(pageNumber);
 
         for (auto &a : *cachedPage.m_annotations) {
             if (a->boundary().contains(p)) {
@@ -462,8 +465,10 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
 
         setCursor(Qt::ArrowCursor);
 
-        if (m_rubberBandOrigin.first >= 0)
-            m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, event->pos()).normalized());
+        if (m_rubberBandOrigin.first >= 0) {
+            QRect r=QRect(m_rubberBandOrigin.second, event->pos()).intersected(m_pageRects.value(m_rubberBandOrigin.first));
+            m_rubberBand->setGeometry(r.normalized());
+        }
     }
 }
 
@@ -474,10 +479,13 @@ void PageView::mousePressEvent(QMouseEvent *event)
         return;
 
     // first check for clicks on links and text selection
-    for (int i = 0; i < m_pageRects.length(); ++i) {
-        QPair<int, QRect> currentPage = m_pageRects.at(i);
-        QRect displayRect = currentPage.second;
-        FirstAidPage cachedPage = getPage(currentPage.first);
+    QHashIterator<int, QRect> it(m_pageRects);
+    while (it.hasNext()) {
+        it.next();
+
+        int pageNumber = it.key();
+        QRect displayRect = it.value();
+        FirstAidPage cachedPage = getPage(pageNumber);
 
         qreal xPos = (event->x() - displayRect.x()) / (qreal)displayRect.width();
         qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
@@ -507,7 +515,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
         }
 
         if (event->modifiers().testFlag(Qt::ShiftModifier)) {
-            m_rubberBandOrigin = qMakePair(currentPage.first, event->pos());
+            m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
             m_rubberBand->show();
         }
@@ -556,21 +564,14 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
     // reset rubber band if needed
     if (m_rubberBandOrigin.first >= 0) {
-        QRect displayRect;
-
-        for (int i = 0; i < m_pageRects.length(); ++i) {
-            if (m_pageRects.at(i).first == m_rubberBandOrigin.first) {
-                displayRect = m_pageRects.at(i).second;
-                break;
-            }
-        }
-
+        QRect displayRect=m_pageRects.value(m_rubberBandOrigin.first);
         if (!displayRect.isValid())
             return;
 
+        slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
+
         m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
         m_rubberBand->hide();
-        emit copyRequested(m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
     }
 }
 
@@ -662,7 +663,7 @@ void PageView::gotoDestination(const QString &destination)
     }
 }
 
-void PageView::slotCopyRequested(const QRectF &rect)
+void PageView::slotCopyRequested(int page, const QRectF &rect)
 {
     if (rect.isNull())
         return;
@@ -673,10 +674,10 @@ void PageView::slotCopyRequested(const QRectF &rect)
     if (copyAction != m.exec(QCursor::pos()))
         return;
 
-    if (Poppler::Page *page = m_document->page(m_currentPage)) {
+    if (Poppler::Page *p= m_document->page(page)) {
         QRectF r = toPoints(rect);
-        QString text = page->text(r);
-        delete page;
+        QString text = p->text(r);
+        delete p;
 
         QClipboard *clipboard = QGuiApplication::clipboard();
         clipboard->setText(text, QClipboard::Clipboard);

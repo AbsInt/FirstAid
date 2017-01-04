@@ -101,7 +101,7 @@ public slots:
     void zoomOriginal();
 
     void gotoDestination(const QString &destination);
-    void slotCopyRequested(const QRectF &rect);
+    void slotCopyRequested(int page, const QRectF &rect);
 
     void slotFindStarted();
     void slotMatchesFound(int page, const QList<QRectF> &matches);
@@ -145,7 +145,7 @@ private:
 
     QPoint m_offset;
 
-    QList<QPair<int, QRect>> m_pageRects;
+    QHash<int, QRect> m_pageRects;
     QList<Poppler::Annotation *> m_annotations;
     QPair<int, QPoint> m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
     QRubberBand *m_rubberBand = nullptr;
