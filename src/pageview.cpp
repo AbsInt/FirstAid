@@ -95,7 +95,7 @@ PageView::PageView(QWidget *parent)
     grabGesture(Qt::PanGesture);
 
     connect(PdfViewer::searchEngine(), SIGNAL(started()), SLOT(slotFindStarted()));
-    connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(slotHighlightMatch(int, QRectF)));
+    connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(gotoPage(int, QRectF)));
     connect(PdfViewer::searchEngine(), SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotMatchesFound(int, QList<QRectF>)));
 
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(scrolled()));
@@ -103,6 +103,9 @@ PageView::PageView(QWidget *parent)
 
     // we have static content that can be scrolled like an image
     setAttribute(Qt::WA_StaticContents);
+
+    // no additional frame
+    setFrameStyle(QFrame::NoFrame);
 
     /**
      * track the mouse + viewport should have focus
@@ -164,7 +167,7 @@ int PageView::currentPage() const
 }
 
 /*
- * public slots
+ * public methods
  */
 
 void PageView::setDocument(Poppler::Document *document)
@@ -252,24 +255,6 @@ void PageView::scrolled()
         m_currentPage = page;
         emit currentPageChanged(m_currentPage);
     }
-}
-
-/*
- * public methods
- */
-
-void PageView::gotoPage(int page, int offset)
-{
-    if (!m_document || page < 0 || page >= m_document->numPages())
-        return;
-
-    m_offset = QPoint(m_offset.x(), offset);
-    m_currentPage = page;
-
-    // misuse to go to page
-    updateViewSize(false /* goto mode, don't clear cache */);
-
-    emit currentPageChanged(m_currentPage);
 }
 
 /*
@@ -372,13 +357,16 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         }
 
         pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width() /  devicePixelRatio()) / 2 - m_offset.x() + doubleSideOffset + ((m_zoomMode == Absolute) ? PAGEFRAME : 0));
+        p.drawImage(pageStart, cachedPage.m_image);
 
-        // match further matches on page
+        m_pageRects.append(qMakePair(currentPage, QRect(pageStart, cachedPage.m_image.size())));
+        m_pageHeight = cachedPage.m_image.height() /  devicePixelRatio();
+
+        // draw matches on page
         double sx = resX() / 72.0;
         double sy = resY() / 72.0;
 
-        QPainter sp(&cachedPage.m_image);
-        sp.setPen(Qt::NoPen);
+        p.setPen(Qt::NoPen);
 
         foreach (QRectF rect, PdfViewer::searchEngine()->matchesFor(currentPage)) {
             QColor matchColor = QColor(255, 255, 0, 64);
@@ -387,14 +375,10 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
 
             QRectF r = QRectF(rect.left() * sx, rect.top() * sy, rect.width() * sx, rect.height() * sy);
             r.adjust(-3, -5, 3, 2);
-            sp.fillRect(r, matchColor);
+            p.fillRect(r.translated(pageStart), matchColor);
         }
-        sp.end();
 
-        p.drawImage(pageStart, cachedPage.m_image);
-        m_pageRects.append(qMakePair(currentPage, QRect(pageStart, cachedPage.m_image.size())));
-        m_pageHeight = cachedPage.m_image.height() /  devicePixelRatio();
-
+        // draw border around page
         p.setPen(Qt::darkGray);
         p.drawRect(QRect(pageStart, cachedPage.m_image.size()).adjusted(-1, -1, 1, 1));
 
@@ -505,7 +489,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
                         int offset = gotoLink.isChangeTop() ? gotoLink.top() * displayRect.height() : 0;
-                        emit gotoRequested(QString::number(gotoLink.pageNumber()) + "#" + QString::number(offset));
+                        gotoPage(gotoLink.pageNumber()-1, offset);
                     }
                         return;
 
@@ -559,6 +543,29 @@ void PageView::mouseReleaseEvent(QMouseEvent *)
  * public slots
  */
 
+void PageView::gotoPage(int page, int offset)
+{
+    if (!m_document || page < 0 || page >= m_document->numPages())
+        return;
+
+    if (page==m_currentPage && m_offset.y()==offset)
+        return;
+
+    m_offset = QPoint(m_offset.x(), offset);
+    m_currentPage = page;
+
+    // misuse to go to page
+    updateViewSize(false /* goto mode, don't clear cache */);
+
+    emit currentPageChanged(m_currentPage);
+}
+
+void PageView::gotoPage(int page, const QRectF &rect)
+{
+    // TODO instead of moving rect on top of the visible area we should ensure that the area is visible
+    gotoPage(page, rect.top()/72.0*resX());
+}
+
 void PageView::gotoPreviousPage()
 {
     int newPage = qMax(0, m_currentPage - (m_doubleSideMode ? 2 : 1));
@@ -608,23 +615,13 @@ void PageView::zoomOriginal()
 void PageView::gotoDestination(const QString &destination)
 {
     bool ok = false;
-    int pageNumber = 0;
-    int offset = 0;
-    if (destination.contains("#")) {
-        QList<QString> values = destination.split("#");
-        if (values.length() == 2) {
-            pageNumber = values.at(0).toInt(&ok);
-            if (ok)
-                offset = values.at(1).toInt(&ok);
-        }
-    } else
-        pageNumber = destination.toInt(&ok);
+    int pageNumber = destination.toInt(&ok);
 
     if (ok)
-        gotoPage(pageNumber - 1, offset);
+        gotoPage(pageNumber - 1);
     else if (m_document) {
         if (Poppler::LinkDestination *link = m_document->linkDestination(destination)) {
-            gotoPage(link->pageNumber() - 1, (link->isChangeTop() && m_pageHeight) ? (m_pageHeight * link->top()) : 0);
+            gotoPage(link->pageNumber() - 1, (link->isChangeTop() ? link->top() : 0));
             delete link;
         }
     }
@@ -655,11 +652,6 @@ void PageView::slotCopyRequested(const QRectF &rect)
 void PageView::slotFindStarted()
 {
     viewport()->update();
-}
-
-void PageView::slotHighlightMatch(int page, const QRectF &)
-{
-    gotoPage(page);
 }
 
 void PageView::slotMatchesFound(int page, const QList<QRectF> &)

@@ -103,7 +103,6 @@ PdfViewer::PdfViewer(const QString &file)
     m_view = new PageView(this);
     vbl->addWidget(m_view);
     connect(m_view, SIGNAL(currentPageChanged(int)), SLOT(slotCurrentPageChanged(int)));
-    connect(m_view, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
 
     setFocusProxy(m_view);
 

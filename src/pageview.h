@@ -71,7 +71,6 @@ public:
     QRectF fromPoints(const QRectF &rect) const;
     QRectF toPoints(const QRectF &rect) const;
 
-    void gotoPage(int page, int offset = 0);
     void setDocument(Poppler::Document *document);
     void setDoubleSideMode(DoubleSideMode mode);
     void setZoomMode(ZoomMode mode);
@@ -79,7 +78,6 @@ public:
 
 signals:
     void currentPageChanged(int page);
-    void gotoRequested(const QString &dest);
     void copyRequested(const QRectF &area);
 
 protected:
@@ -92,6 +90,8 @@ protected:
     void wheelEvent(QWheelEvent *wheelEvent) override;
 
 public slots:
+    void gotoPage(int page, int offset = -1);
+    void gotoPage(int page, const QRectF &rect);
     void gotoPreviousPage();
     void gotoNextPage();
     void stepBack();
@@ -100,12 +100,10 @@ public slots:
     void zoomOut();
     void zoomOriginal();
 
-public slots:
     void gotoDestination(const QString &destination);
     void slotCopyRequested(const QRectF &rect);
 
     void slotFindStarted();
-    void slotHighlightMatch(int page, const QRectF &match);
     void slotMatchesFound(int page, const QList<QRectF> &matches);
     void scrolled();
 
