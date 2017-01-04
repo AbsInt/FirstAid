@@ -257,6 +257,12 @@ void PageView::scrolled()
     }
 }
 
+void PageView::setOffset(const QPoint &offset)
+{
+    horizontalScrollBar()->setValue(offset.x());
+    verticalScrollBar()->setValue(offset.y());
+}
+
 /*
  * protected methods
  */
@@ -441,9 +447,18 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
 
 void PageView::mouseMoveEvent(QMouseEvent *event)
 {
+    // nothing to do if there is no document at all
     if (!m_document)
         return;
 
+    // handle panning first
+    if (!m_panStartPoint.isNull()) {
+        setCursor(Qt::ClosedHandCursor);
+        setOffset(m_panOldOffset+m_panStartPoint-event->globalPos());
+        return;
+    }
+
+    // now check if we want to highlight a link location
     for (int i = 0; i < m_pageRects.length(); ++i) {
         QPair<int, QRect> currentPage = m_pageRects.at(i);
         QRect displayRect = currentPage.second;
@@ -470,9 +485,11 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
 
 void PageView::mousePressEvent(QMouseEvent *event)
 {
+    // nothing to do if there is no document at all
     if (!m_document)
         return;
 
+    // first check for clicks on links and text selection
     for (int i = 0; i < m_pageRects.length(); ++i) {
         QPair<int, QRect> currentPage = m_pageRects.at(i);
         QRect displayRect = currentPage.second;
@@ -488,18 +505,17 @@ void PageView::mousePressEvent(QMouseEvent *event)
                 switch (link->linkType()) {
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
-                        int offset = gotoLink.isChangeTop() ? gotoLink.top() * displayRect.height() : 0;
-                        gotoPage(gotoLink.pageNumber()-1, offset);
+                        m_mousePressPage = gotoLink.pageNumber()-1;
+                        m_mousePressPageOffset = gotoLink.isChangeTop() ? gotoLink.top() * displayRect.height() : 0;
                     }
-                        return;
+                        break;
 
                     case Poppler::Link::Browse:
-                        QDesktopServices::openUrl(QUrl(static_cast<Poppler::LinkBrowse *>(link)->url()));
-                        return;
+                        m_mousePressUrl=static_cast<Poppler::LinkBrowse *>(link)->url();
+                        break;
 
                     default:
                         qDebug("Not yet handled link type %d.", link->linkType());
-                        return;
                 }
 
                 break;
@@ -512,31 +528,66 @@ void PageView::mousePressEvent(QMouseEvent *event)
             m_rubberBand->show();
         }
     }
+
+    // if there is no Shift pressed we start panning
+    if (!event->modifiers().testFlag(Qt::ShiftModifier)) {
+        m_panOldOffset=QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+        m_panStartPoint=event->globalPos();
+
+        if (-1==m_mousePressPage && m_mousePressUrl.isEmpty())
+            setCursor(Qt::ClosedHandCursor);
+    }
 }
 
-void PageView::mouseReleaseEvent(QMouseEvent *)
+void PageView::mouseReleaseEvent(QMouseEvent *event)
 {
+    // nothing to do if there is no document at all
     if (!m_document)
         return;
 
-    if (m_rubberBandOrigin.first < 0)
+    // restore mouse cursor
+    setCursor(Qt::ArrowCursor);
+
+    // reset pan information
+    if (!m_panStartPoint.isNull() && m_panStartPoint!=event->globalPos()) {
+        m_panStartPoint=QPoint(0, 0);
         return;
-
-    QRect displayRect;
-
-    for (int i = 0; i < m_pageRects.length(); ++i) {
-        if (m_pageRects.at(i).first == m_rubberBandOrigin.first) {
-            displayRect = m_pageRects.at(i).second;
-            break;
-        }
     }
 
-    if (!displayRect.isValid())
-        return;
+    m_panStartPoint=QPoint(0, 0);
 
-    m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
-    m_rubberBand->hide();
-    emit copyRequested(m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
+    // was there a page to goto?
+    if (m_mousePressPage != -1) {
+        gotoPage(m_mousePressPage, m_mousePressPageOffset);
+        m_mousePressPage=-1;
+        return;
+    }
+
+    // was there an url to open?
+    if (!m_mousePressUrl.isEmpty()) {
+        QDesktopServices::openUrl(QUrl(m_mousePressUrl));
+        m_mousePressUrl.clear();
+        return;
+    }
+
+    // reset rubber band if needed
+    if (m_rubberBandOrigin.first >= 0) {
+        QRect displayRect;
+
+        for (int i = 0; i < m_pageRects.length(); ++i) {
+            if (m_pageRects.at(i).first == m_rubberBandOrigin.first) {
+                displayRect = m_pageRects.at(i).second;
+                break;
+            }
+        }
+
+        if (!displayRect.isValid())
+            return;
+
+        m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
+        m_rubberBand->hide();
+        emit copyRequested(m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
+    }
 }
 
 /*

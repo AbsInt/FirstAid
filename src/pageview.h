@@ -107,6 +107,8 @@ public slots:
     void slotMatchesFound(int page, const QList<QRectF> &matches);
     void scrolled();
 
+    void setOffset(const QPoint &point);
+
 private:
     int pageHeight();
     int pageWidth();
@@ -147,4 +149,11 @@ private:
     QList<Poppler::Annotation *> m_annotations;
     QPair<int, QPoint> m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
     QRubberBand *m_rubberBand = nullptr;
+
+    QPoint m_panOldOffset;   //! the current offset when panning starts
+    QPoint m_panStartPoint;  //! the global cursor position then panning starts
+
+    int m_mousePressPage=-1;        //! page of link at mouse press
+    int m_mousePressPageOffset=0;   //! offset for page of link
+    QString m_mousePressUrl;        //! url at mouse press
 };
