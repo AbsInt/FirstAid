@@ -128,9 +128,9 @@ PageView::PageView(QWidget *parent)
     // add some shortcuts
     new QShortcut(Qt::Key_Backspace, this, SLOT(stepBack()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(Qt::Key_Space, this, SLOT(advance()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(Qt::ControlModifier+Qt::Key_0, this, SLOT(zoomOriginal()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(Qt::ControlModifier+Qt::Key_Plus, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(Qt::ControlModifier+Qt::Key_Minus, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::ControlModifier + Qt::Key_0, this, SLOT(zoomOriginal()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::ControlModifier + Qt::Key_Plus, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::ControlModifier + Qt::Key_Minus, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
 }
 
 PageView::~PageView()
@@ -230,12 +230,12 @@ void PageView::contextMenuEvent(QContextMenuEvent *event)
     if (!m.exec(event->globalPos()))
         return;
 
-    int pageNumber=pageForPoint(event->pos()+m_offset);
+    int pageNumber = pageForPoint(event->pos() + m_offset);
     if (-1 != pageNumber) {
         m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
 
-        QRect r=QRect(m_rubberBandOrigin.second, m_offset+viewport()->mapFromGlobal(QCursor::pos())).intersected(m_pageRects.value(m_rubberBandOrigin.first));
+        QRect r = QRect(m_rubberBandOrigin.second, m_offset + viewport()->mapFromGlobal(QCursor::pos())).intersected(m_pageRects.value(m_rubberBandOrigin.first));
         m_rubberBand->setGeometry(r.normalized());
 
         m_rubberBand->show();
@@ -363,18 +363,18 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         int doubleSideOffset = 0;
         if (m_doubleSideMode) {
             // special handling for first page and documents with only two pages
-            if (0!=currentPage || 2==m_document->numPages()) {
-                doubleSideOffset = cachedPage.m_image.width() /  devicePixelRatio() / 2;
+            if (0 != currentPage || 2 == m_document->numPages()) {
+                doubleSideOffset = cachedPage.m_image.width() / devicePixelRatio() / 2;
                 if (currentPage % 2)
                     doubleSideOffset *= -1;
             }
         }
 
-        pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width() /  devicePixelRatio()) / 2 - m_offset.x() + doubleSideOffset + ((m_zoomMode == Absolute) ? PAGEFRAME : 0));
+        pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width() / devicePixelRatio()) / 2 - m_offset.x() + doubleSideOffset + ((m_zoomMode == Absolute) ? PAGEFRAME : 0));
         p.drawImage(pageStart, cachedPage.m_image);
 
         m_pageRects.insert(currentPage, QRect(pageStart, cachedPage.m_image.size()));
-        m_pageHeight = cachedPage.m_image.height() /  devicePixelRatio();
+        m_pageHeight = cachedPage.m_image.height() / devicePixelRatio();
 
         // draw matches on page
         double sx = resX() / 72.0;
@@ -400,7 +400,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         ++currentPage;
 
         if (!m_doubleSideMode || (currentPage % 2))
-            pageStart.setY(pageStart.y() + cachedPage.m_image.height() /  devicePixelRatio() + 2 * PAGEFRAME);
+            pageStart.setY(pageStart.y() + cachedPage.m_image.height() / devicePixelRatio() + 2 * PAGEFRAME);
     }
     p.end();
 }
@@ -462,13 +462,13 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
     // handle panning first
     if (!m_panStartPoint.isNull()) {
         setCursor(Qt::ClosedHandCursor);
-        setOffset(m_panOldOffset+m_panStartPoint-event->globalPos());
+        setOffset(m_panOldOffset + m_panStartPoint - event->globalPos());
         return;
     }
 
     // update rubber band?
     if (m_rubberBandOrigin.first >= 0) {
-        QRect r=QRect(m_rubberBandOrigin.second, event->pos()).intersected(m_pageRects.value(m_rubberBandOrigin.first));
+        QRect r = QRect(m_rubberBandOrigin.second, event->pos()).intersected(m_pageRects.value(m_rubberBandOrigin.first));
         m_rubberBand->setGeometry(r.normalized());
     }
 
@@ -505,7 +505,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
     // special case: end rubber band that has been created by context menu copy
     if (m_rubberBandOrigin.first >= 0) {
-        QRect displayRect=m_pageRects.value(m_rubberBandOrigin.first);
+        QRect displayRect = m_pageRects.value(m_rubberBandOrigin.first);
         slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().translated(-displayRect.topLeft()));
         m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
         m_rubberBand->hide();
@@ -531,13 +531,12 @@ void PageView::mousePressEvent(QMouseEvent *event)
                 switch (link->linkType()) {
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
-                        m_mousePressPage = gotoLink.pageNumber()-1;
+                        m_mousePressPage = gotoLink.pageNumber() - 1;
                         m_mousePressPageOffset = gotoLink.isChangeTop() ? gotoLink.top() * displayRect.height() : 0;
-                    }
-                        break;
+                    } break;
 
                     case Poppler::Link::Browse:
-                        m_mousePressUrl=static_cast<Poppler::LinkBrowse *>(link)->url();
+                        m_mousePressUrl = static_cast<Poppler::LinkBrowse *>(link)->url();
                         break;
 
                     default:
@@ -550,7 +549,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
     }
 
     if (event->modifiers().testFlag(Qt::ShiftModifier)) {
-        int pageNumber=pageForPoint(event->pos()+m_offset);
+        int pageNumber = pageForPoint(event->pos() + m_offset);
         if (-1 != pageNumber) {
             m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
@@ -560,10 +559,10 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
     // if there is no Shift pressed we start panning
     if (!event->modifiers().testFlag(Qt::ShiftModifier)) {
-        m_panOldOffset=QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
-        m_panStartPoint=event->globalPos();
+        m_panOldOffset = QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+        m_panStartPoint = event->globalPos();
 
-        if (-1==m_mousePressPage && m_mousePressUrl.isEmpty())
+        if (-1 == m_mousePressPage && m_mousePressUrl.isEmpty())
             setCursor(Qt::ClosedHandCursor);
     }
 }
@@ -578,17 +577,17 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
     setCursor(Qt::ArrowCursor);
 
     // reset pan information
-    if (!m_panStartPoint.isNull() && m_panStartPoint!=event->globalPos()) {
-        m_panStartPoint=QPoint(0, 0);
+    if (!m_panStartPoint.isNull() && m_panStartPoint != event->globalPos()) {
+        m_panStartPoint = QPoint(0, 0);
         return;
     }
 
-    m_panStartPoint=QPoint(0, 0);
+    m_panStartPoint = QPoint(0, 0);
 
     // was there a page to goto?
     if (m_mousePressPage != -1) {
         gotoPage(m_mousePressPage, m_mousePressPageOffset);
-        m_mousePressPage=-1;
+        m_mousePressPage = -1;
         return;
     }
 
@@ -601,7 +600,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
     // reset rubber band if needed
     if (m_rubberBandOrigin.first >= 0) {
-        QRect displayRect=m_pageRects.value(m_rubberBandOrigin.first);
+        QRect displayRect = m_pageRects.value(m_rubberBandOrigin.first);
         if (!displayRect.isValid())
             return;
 
@@ -624,7 +623,7 @@ void PageView::gotoPage(int page, int offset)
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
-    if (page==m_currentPage && m_offset.y()==offset)
+    if (page == m_currentPage && m_offset.y() == offset)
         return;
 
     m_offset = QPoint(m_offset.x(), offset);
@@ -639,7 +638,7 @@ void PageView::gotoPage(int page, int offset)
 void PageView::gotoPage(int page, const QRectF &rect)
 {
     // TODO instead of moving rect on top of the visible area we should ensure that the area is visible
-    gotoPage(page, rect.top()/72.0*resX());
+    gotoPage(page, rect.top() / 72.0 * resX());
 }
 
 void PageView::gotoPreviousPage()
@@ -708,7 +707,7 @@ void PageView::slotCopyRequested(int page, const QRectF &rect)
     if (rect.isNull())
         return;
 
-    if (Poppler::Page *p= m_document->page(page)) {
+    if (Poppler::Page *p = m_document->page(page)) {
         QRectF r = toPoints(rect);
         QString text = p->text(r);
         delete p;
@@ -836,5 +835,4 @@ int PageView::pageForPoint(const QPoint &point)
     }
 
     return -1;
-
 }
