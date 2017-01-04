@@ -528,8 +528,11 @@ void PageView::mousePressEvent(QMouseEvent *event)
                 break;
             }
         }
+    }
 
-        if (event->modifiers().testFlag(Qt::ShiftModifier)) {
+    if (event->modifiers().testFlag(Qt::ShiftModifier)) {
+        int pageNumber=pageForPoint(event->pos()+m_offset);
+        if (-1 != pageNumber) {
             m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
             m_rubberBand->show();
@@ -804,4 +807,18 @@ FirstAidPage PageView::getPage(int pageNumber)
         return *cachedPage;
 
     return FirstAidPage(QImage(), QList<Poppler::Annotation *>());
+}
+
+int PageView::pageForPoint(const QPoint &point)
+{
+    QHashIterator<int, QRect> it(m_pageRects);
+    while (it.hasNext()) {
+        it.next();
+
+        if (it.value().contains(point))
+            return it.key();
+    }
+
+    return -1;
+
 }

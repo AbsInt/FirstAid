@@ -125,6 +125,7 @@ private:
     void updateViewSize(bool invalidateCache = true);
 
     FirstAidPage getPage(int page);
+    int pageForPoint(const QPoint &point);
 
 public:
     int currentPage() const;
