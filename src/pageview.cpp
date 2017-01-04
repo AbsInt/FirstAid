@@ -280,11 +280,13 @@ bool PageView::event(QEvent *event)
             if (QSwipeGesture::Up == swipe->verticalDirection()) {
                 printf("Swipe up detected");
                 gotoNextPage();
+                ge->accept(swipe);
                 return true;
             }
             if (QSwipeGesture::Down == swipe->verticalDirection()) {
                 printf("Swipe down detected");
                 gotoPreviousPage();
+                ge->accept(swipe);
                 return true;
             }
         }
@@ -299,6 +301,7 @@ bool PageView::event(QEvent *event)
             setZoom(pinchStartZoom * pinch->totalScaleFactor());
             emit zoomChanged(m_zoom);
 
+            ge->accept(pinch);
             return true;
         }
 
@@ -312,6 +315,7 @@ bool PageView::event(QEvent *event)
             horizontalScrollBar()->setValue(panStartOffset.x() + pan->offset().x());
             verticalScrollBar()->setValue(panStartOffset.y() + pan->offset().y());
 
+            ge->accept(pan);
             return true;
         }
     }
