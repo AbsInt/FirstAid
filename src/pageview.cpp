@@ -462,22 +462,26 @@ void PageView::keyPressEvent(QKeyEvent *event)
         }
     }
 
-    if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_0) {
-        setZoom(1.0);
-        emit zoomChanged(m_zoom);
-        return;
-    }
+    if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier)) {
+        switch (event->key()) {
+            case Qt::Key_0:
+                setZoom(1.0);
+                emit zoomChanged(m_zoom);
+                return;
 
-    if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Plus) {
-        setZoom(m_zoom + 0.1);
-        emit zoomChanged(m_zoom);
-        return;
-    }
+            case Qt::Key_Plus:
+                setZoom(m_zoom + 0.1);
+                emit zoomChanged(m_zoom);
+                return;
 
-    if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Minus) {
-        setZoom(m_zoom - 0.1);
-        emit zoomChanged(m_zoom);
-        return;
+            case Qt::Key_Minus:
+                setZoom(m_zoom - 0.1);
+                emit zoomChanged(m_zoom);
+                return;
+
+            default:
+                ; // nothing to do
+        }
     }
 
     QAbstractScrollArea::keyPressEvent(event);
