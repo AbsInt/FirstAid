@@ -222,6 +222,7 @@ void PageView::wheelEvent(QWheelEvent *wheelEvent)
 void PageView::contextMenuEvent(QContextMenuEvent *event)
 {
     m_panStartPoint = QPoint();
+    setCursor(Qt::ArrowCursor);
 
     QMenu m(this);
     m.addAction(QIcon(":/icons/edit-copy.svg"), "Copy");
@@ -234,7 +235,7 @@ void PageView::contextMenuEvent(QContextMenuEvent *event)
         m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
 
-        QRect r=QRect(m_rubberBandOrigin.second, m_offset+mapFromGlobal(QCursor::pos())).intersected(m_pageRects.value(m_rubberBandOrigin.first));
+        QRect r=QRect(m_rubberBandOrigin.second, m_offset+viewport()->mapFromGlobal(QCursor::pos())).intersected(m_pageRects.value(m_rubberBandOrigin.first));
         m_rubberBand->setGeometry(r.normalized());
 
         m_rubberBand->show();
