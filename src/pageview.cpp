@@ -272,9 +272,11 @@ void PageView::gotoPage(int page, int offset)
 bool PageView::event(QEvent *event)
 {
     if (event->type() == QEvent::Gesture) {
+        printf("Gesture detected...");
         QGestureEvent *ge = static_cast<QGestureEvent *>(event);
 
         if (QSwipeGesture *swipe = static_cast<QSwipeGesture *>(ge->gesture(Qt::SwipeGesture))) {
+            printf("SWIPE");
             if (QSwipeGesture::Up == swipe->verticalDirection()) {
                 printf("Swipe up detected");
                 gotoNextPage();
@@ -288,6 +290,7 @@ bool PageView::event(QEvent *event)
         }
 
         if (QPinchGesture *pinch = static_cast<QPinchGesture *>(ge->gesture(Qt::PinchGesture))) {
+            printf("PINCH");
             static qreal pinchStartZoom;
 
             if (Qt::GestureStarted == pinch->state())
@@ -300,6 +303,7 @@ bool PageView::event(QEvent *event)
         }
 
         if (QPanGesture *pan = static_cast<QPanGesture *>(ge->gesture(Qt::PanGesture))) {
+            printf("PAN");
             static QPoint panStartOffset;
 
             if (Qt::GestureStarted == pan->state())
