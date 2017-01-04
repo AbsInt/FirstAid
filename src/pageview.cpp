@@ -92,7 +92,6 @@ PageView::PageView(QWidget *parent)
     // ensure we recognize pinch and swipe guestures
     grabGesture(Qt::PinchGesture);
     grabGesture(Qt::SwipeGesture);
-    grabGesture(Qt::PanGesture);
 
     connect(PdfViewer::searchEngine(), SIGNAL(started()), SLOT(slotFindStarted()));
     connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(gotoPage(int, QRectF)));
@@ -290,7 +289,6 @@ bool PageView::event(QEvent *event)
         }
 
         if (QPinchGesture *pinch = static_cast<QPinchGesture *>(ge->gesture(Qt::PinchGesture))) {
-            printf("PINCH");
             static qreal pinchStartZoom;
 
             if (Qt::GestureStarted == pinch->state())
@@ -300,20 +298,6 @@ bool PageView::event(QEvent *event)
             emit zoomChanged(m_zoom);
 
             ge->accept(pinch);
-            return true;
-        }
-
-        if (QPanGesture *pan = static_cast<QPanGesture *>(ge->gesture(Qt::PanGesture))) {
-            printf("PAN");
-            static QPoint panStartOffset;
-
-            if (Qt::GestureStarted == pan->state())
-                panStartOffset = QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
-
-            horizontalScrollBar()->setValue(panStartOffset.x() + pan->offset().x());
-            verticalScrollBar()->setValue(panStartOffset.y() + pan->offset().y());
-
-            ge->accept(pan);
             return true;
         }
     }
