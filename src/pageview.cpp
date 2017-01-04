@@ -356,8 +356,8 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
 
         int doubleSideOffset = 0;
         if (m_doubleSideMode) {
-            // special handling for first page
-            if (0 != currentPage) {
+            // special handling for first page and documents with only two pages
+            if (0!=currentPage || 2==m_document->numPages()) {
                 doubleSideOffset = cachedPage.m_image.width() / 2;
                 if (currentPage % 2)
                     doubleSideOffset *= -1;
@@ -460,6 +460,12 @@ void PageView::keyPressEvent(QKeyEvent *event)
             advance();
             return;
         }
+    }
+
+    if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_0) {
+        setZoom(1.0);
+        emit zoomChanged(m_zoom);
+        return;
     }
 
     if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Plus) {
