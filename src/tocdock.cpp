@@ -104,9 +104,9 @@ void TocDock::pageChanged(int page)
 void TocDock::fillInfo()
 {
     const QDomDocument *toc = document()->toc();
-    if (toc) {
+    if (toc)
         fillToc(*toc, m_tree, 0);
-    } else {
+    else {
         QTreeWidgetItem *item = new QTreeWidgetItem();
         item->setText(0, tr("No table of contents available."));
         item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
