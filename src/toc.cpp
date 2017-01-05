@@ -113,8 +113,8 @@ void TocDock::documentClosed()
 void TocDock::pageChanged(int page)
 {
     if (m_markedItem) {
-        m_markedItem->setData(0, Qt::ForegroundRole, QVariant());
-        m_markedItem->setData(1, Qt::ForegroundRole, QVariant());
+        m_markedItem->setData(0, Qt::FontRole, QVariant());
+        m_markedItem->setData(1, Qt::FontRole, QVariant());
 
         while (m_markedItem) {
             if (m_markedItem->data(0, Qt::UserRole+1).isValid())
@@ -127,9 +127,10 @@ void TocDock::pageChanged(int page)
         m_markedItem = m_pageToItemMap.value(1+page--);
 
     if (m_markedItem) {
-        QColor highlightColor = Qt::blue;
-        m_markedItem->setData(0, Qt::ForegroundRole, highlightColor);
-        m_markedItem->setData(1, Qt::ForegroundRole, highlightColor);
+        QFont font=m_tree->font();
+        font.setBold(true);
+        m_markedItem->setData(0, Qt::FontRole, font);
+        m_markedItem->setData(1, Qt::FontRole, font);
 
         QTreeWidgetItem *item = m_markedItem;
         while (item) {
