@@ -645,15 +645,23 @@ void PageView::gotoPage(int page, const QRectF &rect)
         gotoPage(page, rect.top() / 72.0 * resY());
         return;
     }
+    pageRect.translate(m_offset);
 
-    QRectF visibleArea=QRectF(m_offset, size());
-    QRectF r=fromPoints(rect.translated(m_offset+pageRect.topLeft()));
+    QRectF visibleArea=QRectF(m_offset, viewport()->size());
+    QRectF r=fromPoints(rect).translated(pageRect.topLeft());
 
     if (visibleArea.contains(r)) {
         viewport()->update();
         return;
     }
 
+    if (r.width()<visibleArea.width() && r.height()<visibleArea.height()) {
+        int voff=r.center().y()-visibleArea.height()/2;
+        gotoPage(page, voff);
+        return;
+    }
+
+    // last action: move rect on top of view
     gotoPage(page, rect.top() / 72.0 * resY());
 }
 
