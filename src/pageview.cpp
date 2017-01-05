@@ -624,8 +624,10 @@ void PageView::gotoPage(int page, int offset)
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
-    if (page == m_currentPage && m_offset.y() == offset)
+    if (page == m_currentPage && m_offset.y() == offset) {
+        viewport()->update();
         return;
+    }
 
     m_offset = QPoint(m_offset.x(), offset);
     m_currentPage = page;
@@ -638,8 +640,21 @@ void PageView::gotoPage(int page, int offset)
 
 void PageView::gotoPage(int page, const QRectF &rect)
 {
-    // TODO instead of moving rect on top of the visible area we should ensure that the area is visible
-    gotoPage(page, rect.top() / 72.0 * resX());
+    QRectF pageRect=m_pageRects.value(page);
+    if (pageRect.isNull()) {
+        gotoPage(page, rect.top() / 72.0 * resY());
+        return;
+    }
+
+    QRectF visibleArea=QRectF(m_offset, size());
+    QRectF r=fromPoints(rect.translated(m_offset+pageRect.topLeft()));
+
+    if (visibleArea.contains(r)) {
+        viewport()->update();
+        return;
+    }
+
+    gotoPage(page, rect.top() / 72.0 * resY());
 }
 
 void PageView::gotoPreviousPage()
@@ -697,7 +712,8 @@ void PageView::gotoDestination(const QString &destination)
         gotoPage(pageNumber - 1);
     else if (m_document) {
         if (Poppler::LinkDestination *link = m_document->linkDestination(destination)) {
-            gotoPage(link->pageNumber() - 1, (link->isChangeTop() ? link->top() : 0));
+            int pageNumber=link->pageNumber()-1;
+            gotoPage(pageNumber, (link->isChangeTop() ? link->top() * m_pageRects.value(pageNumber).height(): 0));
             delete link;
         }
     }
