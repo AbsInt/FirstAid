@@ -606,10 +606,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
         if (!displayRect.isValid())
             return;
 
-        QMenu m(this);
-        QAction *copyAction = m.addAction(QIcon(":/icons/edit-copy.svg"), "Copy");
-        if (copyAction == m.exec(QCursor::pos()))
-            slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
+        slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
 
         m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
         m_rubberBand->hide();
