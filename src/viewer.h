@@ -20,13 +20,13 @@
 
 #pragma once
 
-#include <QMainWindow>
-#include <QFileSystemWatcher>
-#include <QTimer>
-
 #include "document.h"
 #include "pageview.h"
 #include "searchengine.h"
+
+#include <QFileSystemWatcher>
+#include <QMainWindow>
+#include <QTimer>
 
 class DocumentObserver;
 class QAction;
@@ -98,10 +98,10 @@ public:
      */
     QMenu *createPopupMenu() override;
 
-public Q_SLOTS:
+public slots:
     void processCommand(const QString &command);
 
-private Q_SLOTS:
+private slots:
     void slotOpenFile();
     void slotOpenFileExternal();
     void slotReload();
@@ -110,6 +110,10 @@ private Q_SLOTS:
     void slotAbout();
 
     void slotCurrentPageChanged(int page);
+
+protected:
+    void dropEvent(QDropEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
 
 private:
     void setPage(int page);

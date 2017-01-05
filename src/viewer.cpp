@@ -40,11 +40,14 @@
 #include <QAction>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QMimeData>
 #include <QPainter>
 #include <QPrintDialog>
 #include <QPrinter>
@@ -72,6 +75,9 @@ PdfViewer::PdfViewer(const QString &file)
                 "padding-bottom: 0px }"
                 "QToolButton::menu-indicator { image: url(empty.png) }"
                 "QMenu { padding: 1px }"));
+
+    // allow gui to potentially accept drops at all
+    setAcceptDrops(true);
 
     // setup the menu action
     QMenu *menu = new QMenu(this);
@@ -382,6 +388,25 @@ void PdfViewer::slotCurrentPageChanged(int page)
 {
     foreach (DocumentObserver *obs, m_observers)
         obs->pageChanged(page);
+}
+
+void PdfViewer::dropEvent(QDropEvent *event)
+{
+    QList<QUrl> urls=event->mimeData()->urls();
+    if (!urls.isEmpty() && urls.first().isLocalFile())
+        loadDocument(urls.first().toLocalFile(), true/* force reload */);
+}
+
+void PdfViewer::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (Qt::CopyAction == event->proposedAction()) {
+        const QMimeData *mimeData=event->mimeData();
+        if (mimeData->hasUrls()) {
+            QList<QUrl> urls=mimeData->urls();
+            if (1==urls.count() && urls.first().isLocalFile())
+                event->acceptProposedAction();
+        }
+    }
 }
 
 void PdfViewer::setPage(int page)
