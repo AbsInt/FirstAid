@@ -24,34 +24,8 @@
 #include <QHeaderView>
 #include <QTreeWidget>
 
-static void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
-{
-    QTreeWidgetItem *newitem = nullptr;
-    for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
-        QDomElement e = node.toElement();
-
-        if (!parentItem)
-            newitem = new QTreeWidgetItem(tree, newitem);
-        else
-            newitem = new QTreeWidgetItem(parentItem, newitem);
-
-        newitem->setText(0, e.tagName());
-        newitem->setData(0, Qt::UserRole, e.attribute("DestinationName"));
-
-        bool isOpen = false;
-        if (e.hasAttribute(QString::fromLatin1("Open")))
-            isOpen = QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
-
-        if (isOpen)
-            tree->expandItem(newitem);
-
-        if (e.hasChildNodes())
-            fillToc(node, tree, newitem);
-    }
-}
-
 TocDock::TocDock(QWidget *parent)
-    : AbstractInfoDock(parent)
+       : AbstractInfoDock(parent)
 {
     setWindowTitle(tr("Table of contents"));
 
@@ -60,7 +34,11 @@ TocDock::TocDock(QWidget *parent)
 
     m_tree = new QTreeWidget(this);
     m_tree->setAlternatingRowColors(true);
+    m_tree->setColumnCount(2);
     m_tree->header()->hide();
+    m_tree->header()->setStretchLastSection(false);
+    m_tree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    m_tree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     m_tree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     setWidget(m_tree);
@@ -85,17 +63,91 @@ void TocDock::fillInfo()
     }
 }
 
+void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
+{
+    QTreeWidgetItem *newitem = nullptr;
+    for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
+        QDomElement e = node.toElement();
+
+        if (!parentItem)
+            newitem = new QTreeWidgetItem(tree, newitem);
+        else
+            newitem = new QTreeWidgetItem(parentItem, newitem);
+
+        QString destination=e.attribute("DestinationName");
+
+        newitem->setText(0, e.tagName());
+        newitem->setData(0, Qt::UserRole, destination);
+
+        if (Poppler::LinkDestination *link = document()->linkDestination(destination)) {
+            int pageNumber=link->pageNumber();
+            delete link;
+
+            newitem->setText(1, QString::number(pageNumber));
+            newitem->setData(1, Qt::TextAlignmentRole, Qt::AlignRight);
+
+            if (!m_pageToItemMap.contains(pageNumber))
+                m_pageToItemMap.insert(pageNumber, newitem);
+        }
+
+        bool isOpen = false;
+        if (e.hasAttribute(QString::fromLatin1("Open")))
+            isOpen = QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
+
+        if (isOpen)
+            tree->expandItem(newitem);
+
+        if (e.hasChildNodes())
+            fillToc(node, tree, newitem);
+    }
+}
+
 void TocDock::documentClosed()
 {
     m_tree->clear();
+    m_pageToItemMap.clear();
+    m_markedItem = nullptr;
     AbstractInfoDock::documentClosed();
 }
 
-void TocDock::itemClicked(QTreeWidgetItem *item, int column)
+void TocDock::pageChanged(int page)
+{
+    if (m_markedItem) {
+        m_markedItem->setData(0, Qt::ForegroundRole, QVariant());
+        m_markedItem->setData(1, Qt::ForegroundRole, QVariant());
+
+        while (m_markedItem) {
+            if (m_markedItem->data(0, Qt::UserRole+1).isValid())
+                m_tree->setItemExpanded(m_markedItem, false);
+            m_markedItem = m_markedItem->parent();
+        }
+    }
+
+    while (!m_markedItem && page >= 0)
+        m_markedItem = m_pageToItemMap.value(1+page--);
+
+    if (m_markedItem) {
+        QColor highlightColor = Qt::blue;
+        m_markedItem->setData(0, Qt::ForegroundRole, highlightColor);
+        m_markedItem->setData(1, Qt::ForegroundRole, highlightColor);
+
+        QTreeWidgetItem *item = m_markedItem;
+        while (item) {
+            if (!item->isExpanded()) {
+                m_tree->setItemExpanded(item, true);
+                item->setData(0, Qt::UserRole+1, true);
+            }
+
+            item = item->parent();
+        }
+    }
+}
+
+void TocDock::itemClicked(QTreeWidgetItem *item, int)
 {
     if (!item)
         return;
 
-    QString dest = item->data(column, Qt::UserRole).toString();
+    QString dest = item->data(0, Qt::UserRole).toString();
     emit gotoRequested(dest);
 }

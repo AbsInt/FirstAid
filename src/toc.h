@@ -21,6 +21,9 @@
 
 #include "abstractinfodock.h"
 
+#include <QHash>
+
+class QDomNode;
 class QTreeWidget;
 class QTreeWidgetItem;
 
@@ -32,17 +35,21 @@ public:
     TocDock(QWidget *parent = 0);
     ~TocDock();
 
-    /*virtual*/ void documentClosed();
+    void documentClosed() override;
+    void pageChanged(int page) override;
 
 signals:
     void gotoRequested(const QString &dest);
 
 protected:
-    /*virtual*/ void fillInfo();
+    void fillInfo() override;
+    void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem);
 
 protected slots:
     void itemClicked(QTreeWidgetItem *item, int column);
 
 private:
     QTreeWidget *m_tree = nullptr;
+    QHash<int, QTreeWidgetItem *> m_pageToItemMap;
+    QTreeWidgetItem *m_markedItem = nullptr;
 };
