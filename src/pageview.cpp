@@ -56,6 +56,7 @@
 #include <QRubberBand>
 #include <QScrollBar>
 #include <QScroller>
+#include <QShortcut>
 
 #include <QDebug>
 

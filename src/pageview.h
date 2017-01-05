@@ -27,8 +27,6 @@
 #include <QAbstractScrollArea>
 #include <QCache>
 #include <QImage>
-#include <QRubberBand>
-#include <QShortcut>
 
 #include <poppler-qt5.h>
 
