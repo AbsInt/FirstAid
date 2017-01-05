@@ -55,6 +55,7 @@
 #include <QPixmap>
 #include <QRubberBand>
 #include <QScrollBar>
+#include <QScroller>
 
 #include <QDebug>
 
@@ -93,6 +94,9 @@ PageView::PageView(QWidget *parent)
     // ensure we recognize pinch and swipe guestures
     grabGesture(Qt::PinchGesture);
     grabGesture(Qt::SwipeGesture);
+
+    // add scroller
+    QScroller::grabGesture(viewport(), QScroller::TouchGesture);
 
     connect(PdfViewer::searchEngine(), SIGNAL(started()), SLOT(slotFindStarted()));
     connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(gotoPage(int, QRectF)));
@@ -328,6 +332,22 @@ bool PageView::event(QEvent *event)
             ge->accept(pinch);
             return true;
         }
+    }
+
+    if (event->type() == QEvent::ScrollPrepare) {
+        QScrollPrepareEvent *spe=static_cast<QScrollPrepareEvent *>(event);
+        spe->setViewportSize(viewport()->size());
+        spe->setContentPosRange(QRect(0, 0, horizontalScrollBar()->maximum(), verticalScrollBar()->maximum()));
+        spe->setContentPos(m_offset);
+        spe->accept();
+        return true;
+    }
+
+    if (event->type() == QEvent::Scroll) {
+        QScrollEvent *se=static_cast<QScrollEvent *>(event);
+        setOffset(se->contentPos().toPoint());
+        se->accept();
+        return true;
     }
 
     return QAbstractScrollArea::event(event);
