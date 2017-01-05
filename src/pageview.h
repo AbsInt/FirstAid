@@ -91,7 +91,10 @@ public slots:
     void zoomOut();
     void zoomOriginal();
 
-    void gotoDestination(const QString &destination);
+    void historyPrev();
+    void historyNext();
+
+    void gotoDestination(const QString &destination, bool updateHistory=true);
     void slotCopyRequested(int page, const QRectF &rect);
 
     void slotFindStarted();
@@ -162,4 +165,7 @@ private:
     int m_mousePressPage = -1;      //! page of link at mouse press
     int m_mousePressPageOffset = 0; //! offset for page of link
     QString m_mousePressUrl;        //! url at mouse press
+
+    QStringList m_historyStack; //! stack of last jumped destinations
+    int m_historyIndex = -1;    //! current triggered index in history
 };

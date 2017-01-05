@@ -132,6 +132,8 @@ PageView::PageView(QWidget *parent)
     new QShortcut(QKeySequence::ZoomIn, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(Qt::ControlModifier + Qt::Key_Equal, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::ZoomOut, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(QKeySequence::Back, this, SLOT(historyPrev()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(QKeySequence::Forward, this, SLOT(historyNext()), nullptr, Qt::ApplicationShortcut);
 }
 
 PageView::~PageView()
@@ -175,6 +177,9 @@ void PageView::setDocument(Poppler::Document *document)
 {
     m_document = document;
     m_currentPage = 0;
+
+    m_historyStack.clear();
+    m_historyIndex = -1;
 
     // visual size of document might change now!
     updateViewSize();
@@ -638,23 +643,23 @@ void PageView::gotoPage(int page, int offset)
 
 void PageView::gotoPage(int page, const QRectF &rect)
 {
-    QRectF pageRect=m_pageRects.value(page);
+    QRectF pageRect = m_pageRects.value(page);
     if (pageRect.isNull()) {
         gotoPage(page, rect.top() / 72.0 * resY());
         return;
     }
     pageRect.translate(m_offset);
 
-    QRectF visibleArea=QRectF(m_offset, viewport()->size());
-    QRectF r=fromPoints(rect).translated(pageRect.topLeft());
+    QRectF visibleArea = QRectF(m_offset, viewport()->size());
+    QRectF r = fromPoints(rect).translated(pageRect.topLeft());
 
     if (visibleArea.contains(r)) {
         viewport()->update();
         return;
     }
 
-    if (r.width()<visibleArea.width() && r.height()<visibleArea.height()) {
-        int voff=r.center().y()-visibleArea.height()/2;
+    if (r.width() < visibleArea.width() && r.height() < visibleArea.height()) {
+        int voff = r.center().y() - visibleArea.height() / 2;
         gotoPage(page, voff);
         return;
     }
@@ -705,11 +710,27 @@ void PageView::zoomOriginal()
     emit zoomChanged(m_zoom);
 }
 
+void PageView::historyPrev()
+{
+    if (m_historyIndex > 0) {
+        m_historyIndex--;
+        gotoDestination(m_historyStack.at(m_historyIndex), false);
+    }
+}
+
+void PageView::historyNext()
+{
+    if (m_historyIndex < m_historyStack.count() - 1) {
+        m_historyIndex++;
+        gotoDestination(m_historyStack.at(m_historyIndex), false);
+    }
+}
+
 /*
  * protected slots
  */
 
-void PageView::gotoDestination(const QString &destination)
+void PageView::gotoDestination(const QString &destination, bool updateHistory)
 {
     bool ok = false;
     int pageNumber = destination.toInt(&ok);
@@ -718,9 +739,18 @@ void PageView::gotoDestination(const QString &destination)
         gotoPage(pageNumber - 1);
     else if (m_document) {
         if (Poppler::LinkDestination *link = m_document->linkDestination(destination)) {
-            int pageNumber=link->pageNumber()-1;
-            gotoPage(pageNumber, (link->isChangeTop() ? link->top() * m_pageRects.value(pageNumber).height(): 0));
+            int pageNumber = link->pageNumber() - 1;
+            gotoPage(pageNumber, (link->isChangeTop() ? link->top() * m_pageRects.value(pageNumber).height() : 0));
             delete link;
+
+            if (updateHistory) {
+                // remember destination
+                while (m_historyIndex >= 0 && m_historyIndex+1 < m_historyStack.count())
+                    m_historyStack.takeLast();
+
+                m_historyStack << destination;
+                m_historyIndex=m_historyStack.count()-1;
+            }
         }
     }
 }
