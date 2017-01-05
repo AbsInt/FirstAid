@@ -33,6 +33,7 @@
 #include <poppler-qt5.h>
 
 #include "documentobserver.h"
+#include "historystack.h"
 
 #define PAGEFRAME 5
 
@@ -95,6 +96,7 @@ public slots:
     void historyNext();
 
     void gotoDestination(const QString &destination, bool updateHistory=true);
+    void gotoHistoryEntry(const HistoryEntry &entry);
     void slotCopyRequested(int page, const QRectF &rect);
 
     void slotFindStarted();
@@ -166,6 +168,5 @@ private:
     int m_mousePressPageOffset = 0; //! offset for page of link
     QString m_mousePressUrl;        //! url at mouse press
 
-    QStringList m_historyStack; //! stack of last jumped destinations
-    int m_historyIndex = -1;    //! current triggered index in history
+    HistoryStack m_historyStack;
 };

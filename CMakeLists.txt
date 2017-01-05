@@ -60,6 +60,8 @@ set(firstaid_SRCS
   src/documentobserver.h
   src/findbar.cpp
   src/findbar.h
+  src/historystack.cpp
+  src/historystack.h
   src/main.cpp
   src/navigationtoolbar.cpp
   src/navigationtoolbar.h

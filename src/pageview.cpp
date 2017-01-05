@@ -179,7 +179,6 @@ void PageView::setDocument(Poppler::Document *document)
     m_currentPage = 0;
 
     m_historyStack.clear();
-    m_historyIndex = -1;
 
     // visual size of document might change now!
     updateViewSize();
@@ -593,6 +592,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
     // was there a page to goto?
     if (m_mousePressPage != -1) {
+        m_historyStack.add(m_mousePressPage, m_mousePressPageOffset);
         gotoPage(m_mousePressPage, m_mousePressPageOffset);
         m_mousePressPage = -1;
         return;
@@ -712,18 +712,16 @@ void PageView::zoomOriginal()
 
 void PageView::historyPrev()
 {
-    if (m_historyIndex > 0) {
-        m_historyIndex--;
-        gotoDestination(m_historyStack.at(m_historyIndex), false);
-    }
+    HistoryEntry entry;
+    if (m_historyStack.previous(entry))
+        gotoHistoryEntry(entry);
 }
 
 void PageView::historyNext()
 {
-    if (m_historyIndex < m_historyStack.count() - 1) {
-        m_historyIndex++;
-        gotoDestination(m_historyStack.at(m_historyIndex), false);
-    }
+    HistoryEntry entry;
+    if (m_historyStack.next(entry))
+        gotoHistoryEntry(entry);
 }
 
 /*
@@ -743,16 +741,19 @@ void PageView::gotoDestination(const QString &destination, bool updateHistory)
             gotoPage(pageNumber, (link->isChangeTop() ? link->top() * m_pageRects.value(pageNumber).height() : 0));
             delete link;
 
-            if (updateHistory) {
-                // remember destination
-                while (m_historyIndex >= 0 && m_historyIndex+1 < m_historyStack.count())
-                    m_historyStack.takeLast();
-
-                m_historyStack << destination;
-                m_historyIndex=m_historyStack.count()-1;
-            }
+            if (updateHistory)
+                m_historyStack.add(destination);
         }
     }
+}
+
+void PageView::gotoHistoryEntry(const HistoryEntry &entry)
+{
+    if (HistoryEntry::PageWithOffset == entry.m_type)
+        gotoPage(entry.m_page, entry.m_offset);
+
+    else if (HistoryEntry::Destination == entry.m_type)
+        gotoDestination(entry.m_destination, false);
 }
 
 void PageView::slotCopyRequested(int page, const QRectF &rect)
