@@ -56,6 +56,8 @@ find_package(Qt5Xml)
 set(firstaid_SRCS
   src/abstractinfodock.cpp
   src/abstractinfodock.h
+  src/document.cpp
+  src/document.h
   src/documentobserver.cpp
   src/documentobserver.h
   src/findbar.cpp

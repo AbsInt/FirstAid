@@ -16,6 +16,8 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "document.h"
+
 #pragma once
 
 class PdfViewer;
@@ -36,7 +38,7 @@ public:
     virtual void pageChanged(int page) = 0;
 
 protected:
-    Poppler::Document *document() const;
+    Document *document() const;
     void setPage(int page);
     int page() const;
     void reloadPage();

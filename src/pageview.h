@@ -74,7 +74,7 @@ public:
     QRectF fromPoints(const QRectF &rect) const;
     QRectF toPoints(const QRectF &rect) const;
 
-    void setDocument(Poppler::Document *document);
+    void setDocument(Document *document);
 
 public slots:
     void setDoubleSideMode(bool on);
@@ -143,7 +143,7 @@ signals:
     void zoomChanged(qreal CurrentZoom);
 
 private:
-    Poppler::Document *m_document = nullptr;
+    Document *m_document = nullptr;
     int m_dpiX = 72;
     int m_dpiY = 72;
     int m_currentPage = 0;

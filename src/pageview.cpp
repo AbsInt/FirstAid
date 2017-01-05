@@ -173,7 +173,7 @@ int PageView::currentPage() const
  * public methods
  */
 
-void PageView::setDocument(Poppler::Document *document)
+void PageView::setDocument(Document *document)
 {
     m_document = document;
     m_currentPage = 0;
@@ -421,13 +421,10 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
             return;
         QSizeF pageSize = page->pageSize();
         pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
-        delete page;
 
         if (m_doubleSideMode) {
-            if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
+            if (Poppler::Page *page = m_document->page(m_currentPage + 1))
                 pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
-                delete page;
-            }
         }
 
         m_zoom = viewport()->size().width() / (m_dpiX * pageSize.width() / 72.0);
@@ -439,13 +436,10 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
         QSizeF pageSize = page->pageSize();
         pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
         pageSize.setHeight(2 * PAGEFRAME + pageSize.height());
-        delete page;
 
         if (m_doubleSideMode) {
-            if (Poppler::Page *page = m_document->page(m_currentPage + 1)) {
+            if (Poppler::Page *page = m_document->page(m_currentPage + 1))
                 pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
-                delete page;
-            }
         }
 
         qreal zx = viewport()->size().width() / (m_dpiX * pageSize.width() / 72.0);
@@ -763,7 +757,6 @@ void PageView::slotCopyRequested(int page, const QRectF &rect)
     if (Poppler::Page *p = m_document->page(page)) {
         QRectF r = toPoints(rect);
         QString text = p->text(r);
-        delete p;
 
         QClipboard *clipboard = QGuiApplication::clipboard();
         clipboard->setText(text, QClipboard::Clipboard);
@@ -792,10 +785,8 @@ int PageView::pageHeight()
         return 0;
 
     int pageSize = 0;
-    if (Poppler::Page *popplerPage = m_document->page(currentPage())) {
+    if (Poppler::Page *popplerPage = m_document->page(currentPage()))
         pageSize = popplerPage->pageSize().height();
-        delete popplerPage;
-    }
     return (pageSize * resY()) / 72.0;
 }
 
@@ -805,10 +796,8 @@ int PageView::pageWidth()
         return 0;
 
     int pageSize = 0;
-    if (Poppler::Page *popplerPage = m_document->page(currentPage())) {
+    if (Poppler::Page *popplerPage = m_document->page(currentPage()))
         pageSize = popplerPage->pageSize().width();
-        delete popplerPage;
-    }
     return (pageSize * resX()) / 72.0;
     ;
 }
@@ -868,7 +857,6 @@ FirstAidPage PageView::getPage(int pageNumber)
             cachedPage->m_image.setDevicePixelRatio(devicePixelRatio());
 
             m_imageCache.insert(pageNumber, cachedPage);
-            delete page;
             return *cachedPage;
         }
     } else

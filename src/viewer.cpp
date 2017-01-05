@@ -194,21 +194,11 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
         return;
     }
 
-    Poppler::Document *newdoc = Poppler::Document::load(file);
-    if (!newdoc || newdoc->isLocked()) {
-        QMessageBox::critical(this, tr("Open Error"), tr("Cannot open file '%1'.").arg(file));
-        return;
-    }
-
     closeDocument();
 
-    m_doc = newdoc;
-
-    m_doc->setRenderHint(Poppler::Document::TextAntialiasing, true);
-    m_doc->setRenderHint(Poppler::Document::Antialiasing, true);
-    m_doc->setRenderBackend(Poppler::Document::SplashBackend);
-
-    m_view->setDocument(m_doc);
+    QString errorMsg;
+    m_document.setDocument(file,&errorMsg);
+    m_view->setDocument(&m_document);
 
     // set file + watch
     m_filePath = file;
@@ -230,7 +220,7 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
 
 void PdfViewer::closeDocument()
 {
-    if (!m_doc)
+    if (!m_document.isValid())
         return;
 
     QSettings settings;
@@ -243,8 +233,7 @@ void PdfViewer::closeDocument()
     foreach (DocumentObserver *obs, m_observers)
         obs->documentClosed();
 
-    delete m_doc;
-    m_doc = 0;
+    m_document = Document();
 
     // remove path
     m_fileWatcher.removePath(m_filePath);
@@ -290,7 +279,7 @@ void PdfViewer::slotOpenFile()
      * only allow to open in THIS instance, if no file opened ATM
      * else we might open a different document in the online help mode => that would confuse the main application
      */
-    if (!m_doc) {
+    if (!m_document.isValid()) {
         loadDocument(fileName);
         return;
     }
@@ -330,7 +319,7 @@ void PdfViewer::slotPrint()
 
     // determine range
     int fromPage = qMax(printer.fromPage(), 1);
-    int toPage = qMin(printer.toPage(), m_doc->numPages());
+    int toPage = qMin(printer.toPage(), m_document.numPages());
 
     // provide some feedback
     QProgressDialog pd("Printing...", "Abort", fromPage, toPage, this);
@@ -348,7 +337,7 @@ void PdfViewer::slotPrint()
             break;
 
         // get page
-        Poppler::Page *page = m_doc->page(pageNumber - 1);
+        Poppler::Page *page = m_document.page(pageNumber - 1);
 
         // compute resolution so that page fits within the printable area
         QSizeF pageSize = page->pageSizeF();
@@ -358,9 +347,6 @@ void PdfViewer::slotPrint()
 
         // render page to image
         QImage image = page->renderToImage(res, res);
-
-        // free page
-        delete page;
 
         // print image
         painter.drawImage(printerPageRect.topLeft(), image);
@@ -400,7 +386,7 @@ void PdfViewer::slotCurrentPageChanged(int page)
 
 void PdfViewer::setPage(int page)
 {
-    if (!m_doc || 0 > page || page >= m_doc->numPages())
+    if (!m_document.isValid() || 0 > page || page >= m_document.numPages())
         return;
 
     if (page == this->page())
@@ -419,21 +405,20 @@ void PdfViewer::updateOnDocumentChange()
     /**
      * action states
      */
-    m_fileOpenExternalAct->setEnabled(m_doc);
-    m_fileReloadAct->setEnabled(m_doc);
-    m_filePrintAct->setEnabled(m_doc);
+    m_fileOpenExternalAct->setEnabled(m_document.isValid());
+    m_fileReloadAct->setEnabled(m_document.isValid());
+    m_filePrintAct->setEnabled(m_document.isValid());
 
     /**
      * Window title update
      */
-    if (m_doc) {
-        if (m_doc->title().isEmpty())
+    if (m_filePath.isEmpty())
+        setWindowTitle(tr("FirstAid"));
+    else
+        if (m_document.title().isEmpty())
             setWindowTitle(QFileInfo(m_filePath).fileName());
         else
-            setWindowTitle(m_doc->title());
-    } else {
-        setWindowTitle(tr("FirstAid"));
-    }
+            setWindowTitle(m_document.title());
 }
 
 QMenu *PdfViewer::createPopupMenu()

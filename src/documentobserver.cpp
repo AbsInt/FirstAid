@@ -24,9 +24,9 @@ DocumentObserver::~DocumentObserver()
 {
 }
 
-Poppler::Document *DocumentObserver::document() const
+Document *DocumentObserver::document() const
 {
-    return m_viewer ? m_viewer->m_doc : nullptr;
+    return m_viewer ? &m_viewer->m_document: nullptr;
 }
 
 void DocumentObserver::setPage(int page)

@@ -24,6 +24,7 @@
 #include <QFileSystemWatcher>
 #include <QTimer>
 
+#include "document.h"
 #include "pageview.h"
 #include "searchengine.h"
 
@@ -73,6 +74,16 @@ public:
     {
         Q_ASSERT(s_instance);
         return &s_instance->m_searchEngine;
+    }
+
+    /**
+     * Access to global document.
+     * @return document instance
+     */
+    static Document *document()
+    {
+        Q_ASSERT(s_instance);
+        return &s_instance->m_document;
     }
 
     QSize sizeHint() const override;
@@ -136,11 +147,6 @@ private:
     QTimer m_fileWatcherReloadTimer;
 
     /**
-     * current open document, if any
-     */
-    Poppler::Document *m_doc = nullptr;
-
-    /**
      * registered observers for the document
      */
     QList<DocumentObserver *> m_observers;
@@ -164,4 +170,9 @@ private:
      * search engine
      */
     SearchEngine m_searchEngine;
+
+    /**
+     * document
+     */
+    Document m_document;
 };

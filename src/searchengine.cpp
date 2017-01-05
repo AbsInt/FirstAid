@@ -216,7 +216,6 @@ void SearchEngine::find()
         // find our text on the current search page
         Poppler::Page *p = document()->page(m_findCurrentPage);
         QList<QRectF> matches = p->search(m_findText, Poppler::Page::IgnoreCase);
-        delete p;
 
         // signal matches and remember them
         if (!matches.isEmpty()) {
