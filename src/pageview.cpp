@@ -129,8 +129,9 @@ PageView::PageView(QWidget *parent)
     new QShortcut(Qt::Key_Backspace, this, SLOT(stepBack()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(Qt::Key_Space, this, SLOT(advance()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(Qt::ControlModifier + Qt::Key_0, this, SLOT(zoomOriginal()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(Qt::ControlModifier + Qt::Key_Plus, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(Qt::ControlModifier + Qt::Key_Minus, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(QKeySequence::ZoomIn, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::ControlModifier + Qt::Key_Equal, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(QKeySequence::ZoomOut, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
 }
 
 PageView::~PageView()
