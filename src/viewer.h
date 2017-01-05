@@ -98,11 +98,6 @@ private Q_SLOTS:
     void slotPrint();
     void slotAbout();
 
-    void slotSetZoom(qreal zoom);
-    void slotSetZoomMode(PageView::ZoomMode mode);
-    void slotGotoDestination(const QString &destination);
-    void slotToggleFacingPages(bool on);
-
     void slotCurrentPageChanged(int page);
 
 private:

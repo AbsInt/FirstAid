@@ -210,6 +210,8 @@ void SearchEngine::find()
     if (m_findText.isEmpty())
         return;
 
+    bool delayAfterFirstMatch = false;
+
     for (int count = 0; count < PagePileSize; count++) {
         // find our text on the current search page
         Poppler::Page *p = document()->page(m_findCurrentPage);
@@ -222,6 +224,7 @@ void SearchEngine::find()
                 m_currentMatchPage = m_findCurrentPage;
                 m_currentMatchIndex = 0;
                 emit highlightMatch(m_currentMatchPage, matches.first());
+                delayAfterFirstMatch = true;
             }
 
             m_matchesForPage.insert(m_findCurrentPage, matches);
@@ -239,9 +242,12 @@ void SearchEngine::find()
         m_findCurrentPage++;
         if (m_findCurrentPage >= document()->numPages())
             m_findCurrentPage = 0;
+
+        if (delayAfterFirstMatch)
+            break;
     }
 
-    QTimer::singleShot(0, this, SLOT(find()));
+    QTimer::singleShot(delayAfterFirstMatch ? 10 : 0, this, SLOT(find()));
 }
 
 /*

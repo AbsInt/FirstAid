@@ -63,7 +63,6 @@ public:
 
 public:
     enum ZoomMode { FitWidth, FitPage, Absolute };
-    enum DoubleSideMode { None, DoubleSided, DoubleSidedNotFirst };
 
     static QColor matchColor();
     static QColor highlightColor();
@@ -75,23 +74,11 @@ public:
     QRectF toPoints(const QRectF &rect) const;
 
     void setDocument(Poppler::Document *document);
-    void setDoubleSideMode(DoubleSideMode mode);
-    void setZoomMode(ZoomMode mode);
+
+public slots:
+    void setDoubleSideMode(bool on);
+    void setZoomMode(PageView::ZoomMode mode);
     void setZoom(qreal zoom);
-
-signals:
-    void currentPageChanged(int page);
-    void copyRequested(const QRectF &area);
-
-protected:
-    bool event(QEvent *event) override;
-    void paintEvent(QPaintEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void wheelEvent(QWheelEvent *wheelEvent) override;
-    void contextMenuEvent(QContextMenuEvent *event) override;
 
 public slots:
     void gotoPage(int page, int offset = -1);
@@ -112,6 +99,20 @@ public slots:
     void scrolled();
 
     void setOffset(const QPoint &point);
+
+signals:
+    void currentPageChanged(int page);
+    void copyRequested(const QRectF &area);
+
+protected:
+    bool event(QEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *wheelEvent) override;
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
     int pageHeight();
@@ -143,7 +144,7 @@ private:
     int m_currentPage = 0;
     ZoomMode m_zoomMode = Absolute;
     qreal m_zoom = 1.0;
-    DoubleSideMode m_doubleSideMode = None;
+    bool m_doubleSideMode = false;
     int m_pageHeight = 0;
 
     QCache<int, FirstAidPage> m_imageCache;

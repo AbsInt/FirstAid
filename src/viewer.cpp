@@ -127,11 +127,11 @@ PdfViewer::PdfViewer(const QString &file)
     foreach (DocumentObserver *obs, m_observers)
         obs->m_viewer = this;
 
-    connect(navbar, SIGNAL(zoomChanged(qreal)), SLOT(slotSetZoom(qreal)));
-    connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), SLOT(slotSetZoomMode(PageView::ZoomMode)));
-    connect(navbar, SIGNAL(toggleFacingPages(bool)), SLOT(slotToggleFacingPages(bool)));
+    connect(navbar, SIGNAL(zoomChanged(qreal)), m_view, SLOT(setZoom(qreal)));
+    connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), m_view, SLOT(setZoomMode(PageView::ZoomMode)));
+    connect(navbar, SIGNAL(toggleFacingPages(bool)), m_view, SLOT(setDoubleSideMode(bool)));
 
-    connect(tocDock, SIGNAL(gotoRequested(QString)), SLOT(slotGotoDestination(QString)));
+    connect(tocDock, SIGNAL(gotoRequested(QString)), m_view, SLOT(gotoDestination(QString)));
 
     /**
      * auto-reload
@@ -260,7 +260,7 @@ void PdfViewer::processCommand(const QString &command)
         loadDocument(command.mid(5));
 
     else if (command.startsWith("goto "))
-        slotGotoDestination(command.mid(5));
+        m_view->gotoDestination(command.mid(5));
 
     else if (command.startsWith("close"))
         qApp->quit();
@@ -390,26 +390,6 @@ void PdfViewer::slotAbout()
                           "<p>Licensed under the <a href=\"https://github.com/AbsInt/FirstAid/blob/master/COPYING\">GPLv2+</a>.</p>"
                           "<p>Sources available on <a href=\"https://github.com/AbsInt/FirstAid\">https://github.com/AbsInt/FirstAid</a>.</p>")
                            .arg(releaseInfo));
-}
-
-void PdfViewer::slotSetZoom(qreal zoom)
-{
-    m_view->setZoom(zoom);
-}
-
-void PdfViewer::slotSetZoomMode(PageView::ZoomMode mode)
-{
-    m_view->setZoomMode(mode);
-}
-
-void PdfViewer::slotGotoDestination(const QString &destination)
-{
-    m_view->gotoDestination(destination);
-}
-
-void PdfViewer::slotToggleFacingPages(bool on)
-{
-    m_view->setDoubleSideMode(on ? PageView::DoubleSidedNotFirst : PageView::None);
 }
 
 void PdfViewer::slotCurrentPageChanged(int page)
