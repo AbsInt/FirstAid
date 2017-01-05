@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "toc.h"
+#include "tocdock.h"
 
 #include <poppler-qt5.h>
 
@@ -25,7 +25,7 @@
 #include <QTreeWidget>
 
 TocDock::TocDock(QWidget *parent)
-       : AbstractInfoDock(parent)
+       : QDockWidget(parent)
 {
     setWindowTitle(tr("Table of contents"));
 
@@ -43,11 +43,62 @@ TocDock::TocDock(QWidget *parent)
 
     setWidget(m_tree);
 
+    connect(this, SIGNAL(visibilityChanged(bool)), SLOT(visibilityChanged(bool)));
     connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), SLOT(itemClicked(QTreeWidgetItem *, int)));
 }
 
 TocDock::~TocDock()
 {
+}
+
+void TocDock::documentLoaded()
+{
+    if (!isHidden()) {
+        fillInfo();
+        m_filled = true;
+    }
+}
+
+void TocDock::documentClosed()
+{
+    m_tree->clear();
+    m_pageToItemMap.clear();
+    m_markedItem = nullptr;
+    m_filled = false;
+}
+
+void TocDock::pageChanged(int page)
+{
+    if (m_markedItem) {
+        m_markedItem->setData(0, Qt::FontRole, QVariant());
+        m_markedItem->setData(1, Qt::FontRole, QVariant());
+
+        while (m_markedItem) {
+            if (m_markedItem->data(0, Qt::UserRole+1).isValid())
+                m_tree->setItemExpanded(m_markedItem, false);
+            m_markedItem = m_markedItem->parent();
+        }
+    }
+
+    while (!m_markedItem && page >= 0)
+        m_markedItem = m_pageToItemMap.value(1+page--);
+
+    if (m_markedItem) {
+        QFont font=m_tree->font();
+        font.setBold(true);
+        m_markedItem->setData(0, Qt::FontRole, font);
+        m_markedItem->setData(1, Qt::FontRole, font);
+
+        QTreeWidgetItem *item = m_markedItem;
+        while (item) {
+            if (!item->isExpanded()) {
+                m_tree->setItemExpanded(item, true);
+                item->setData(0, Qt::UserRole+1, true);
+            }
+
+            item = item->parent();
+        }
+    }
 }
 
 void TocDock::fillInfo()
@@ -102,45 +153,11 @@ void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem
     }
 }
 
-void TocDock::documentClosed()
+void TocDock::visibilityChanged(bool visible)
 {
-    m_tree->clear();
-    m_pageToItemMap.clear();
-    m_markedItem = nullptr;
-    AbstractInfoDock::documentClosed();
-}
-
-void TocDock::pageChanged(int page)
-{
-    if (m_markedItem) {
-        m_markedItem->setData(0, Qt::FontRole, QVariant());
-        m_markedItem->setData(1, Qt::FontRole, QVariant());
-
-        while (m_markedItem) {
-            if (m_markedItem->data(0, Qt::UserRole+1).isValid())
-                m_tree->setItemExpanded(m_markedItem, false);
-            m_markedItem = m_markedItem->parent();
-        }
-    }
-
-    while (!m_markedItem && page >= 0)
-        m_markedItem = m_pageToItemMap.value(1+page--);
-
-    if (m_markedItem) {
-        QFont font=m_tree->font();
-        font.setBold(true);
-        m_markedItem->setData(0, Qt::FontRole, font);
-        m_markedItem->setData(1, Qt::FontRole, font);
-
-        QTreeWidgetItem *item = m_markedItem;
-        while (item) {
-            if (!item->isExpanded()) {
-                m_tree->setItemExpanded(item, true);
-                item->setData(0, Qt::UserRole+1, true);
-            }
-
-            item = item->parent();
-        }
+    if (visible && document() && !m_filled) {
+        fillInfo();
+        m_filled = true;
     }
 }
 

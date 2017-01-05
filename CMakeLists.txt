@@ -54,8 +54,6 @@ find_package(Qt5PrintSupport)
 find_package(Qt5Xml)
 
 set(firstaid_SRCS
-  src/abstractinfodock.cpp
-  src/abstractinfodock.h
   src/document.cpp
   src/document.h
   src/documentobserver.cpp
@@ -71,8 +69,8 @@ set(firstaid_SRCS
   src/pageview.h
   src/searchengine.cpp
   src/searchengine.h
-  src/toc.cpp
-  src/toc.h
+  src/tocdock.cpp
+  src/tocdock.h
   src/viewer.cpp
   src/viewer.h
 )

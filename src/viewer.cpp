@@ -29,7 +29,7 @@
 #include "pageview.h"
 #include "searchengine.h"
 #include "stdinreaderthread.h"
-#include "toc.h"
+#include "tocdock.h"
 
 #include <poppler-qt5.h>
 
