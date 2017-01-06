@@ -356,7 +356,6 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         return;
 
     m_pageRects.clear();
-    m_pageHeight = 0;
     int currentPage = m_document->currentPage();
 
     // show previous page in doubleside mode
@@ -392,7 +391,6 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         p.drawImage(pageStart, cachedPage.m_image);
 
         m_pageRects.insert(currentPage, QRect(pageStart, cachedPage.m_image.size()));
-        m_pageHeight = cachedPage.m_image.height() / devicePixelRatio();
 
         // draw matches on page
         double sx = resX() / 72.0;

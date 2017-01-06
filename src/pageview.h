@@ -139,7 +139,6 @@ private:
     ZoomMode m_zoomMode = Absolute;
     qreal m_zoom = 1.0;
     bool m_doubleSideMode = false;
-    int m_pageHeight = 0;
 
     QCache<int, FirstAidPage> m_imageCache;
 
