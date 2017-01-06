@@ -37,19 +37,27 @@ void Document::setDocument(Poppler::Document *document)
     // reset old content
     reset();
 
+    // remember poppler document
     m_document = document;
 
-    m_document->setRenderHint(Poppler::Document::TextAntialiasing, true);
-    m_document->setRenderHint(Poppler::Document::Antialiasing, true);
-    m_document->setRenderBackend(Poppler::Document::SplashBackend);
+    // passing a nullptr is valid as it only resets the object
+    if (m_document) {
+        // set render hints
+        m_document->setRenderHint(Poppler::Document::TextAntialiasing, true);
+        m_document->setRenderHint(Poppler::Document::Antialiasing, true);
+        m_document->setRenderBackend(Poppler::Document::SplashBackend);
 
-    m_pages.reserve(document->numPages());
-    m_annotations.reserve(document->numPages());
-    for (int i = 0; i < document->numPages(); ++i) {
-        Poppler::Page *page = document->page(i);
-        m_pages.append(page);
-        m_annotations.append(page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink));
+        // precompue needed information
+        m_pages.reserve(document->numPages());
+        m_annotations.reserve(document->numPages());
+        for (int i = 0; i < document->numPages(); ++i) {
+            Poppler::Page *page = document->page(i);
+            m_pages.append(page);
+            m_annotations.append(page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink));
+        }
     }
+
+    emit documentChanged();
 }
 
 int Document::numPages() const
@@ -81,6 +89,14 @@ const QList<Poppler::Annotation *> &Document::annotations(int page)
     return m_annotations.at(page);
 }
 
+QString Document::title()
+{
+    if (!m_document)
+        return QString();
+
+    return m_document->title();
+}
+
 void Document::reset()
 {
     for (int i = 0; i < m_annotations.length(); ++i) {
@@ -95,10 +111,3 @@ void Document::reset()
     m_document = nullptr;
 }
 
-QString Document::title()
-{
-    if (!m_document)
-        return QString();
-
-    return m_document->title();
-}

@@ -32,7 +32,10 @@ public:
     Document();
     ~Document();
 
+    /*! Returns true if we are holding a valid Poppler document */
     bool isValid() const;
+
+    /*! Set Poppler document to use, any old data will be deleted. */
     void setDocument(Poppler::Document *document);
 
     int numPages() const;
@@ -41,9 +44,13 @@ public:
     Poppler::LinkDestination *linkDestination(const QString &destination);
     const QList<Poppler::Annotation *> &annotations(int page);
 
-    void reset();
-
     QString title();
+
+signals:
+    void documentChanged();
+
+private:
+    void reset();
 
 private:
     /**
