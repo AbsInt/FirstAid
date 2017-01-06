@@ -567,7 +567,6 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
 void PageView::gotoPage(int page, int offset)
 {
-    qDebug("goto page %d", page);
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
