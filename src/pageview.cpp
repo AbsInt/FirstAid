@@ -382,8 +382,8 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         QRectF pageRect = m_document->pageRect(page);
         QRectF displayRect = fromPoints(pageRect);
 
-        FirstAidPage cachedPage = getPage(page);
-        p.drawImage(displayRect.topLeft(), cachedPage.m_image);
+        QImage cachedPage = getPage(page);
+        p.drawImage(displayRect.topLeft(), cachedPage);
 
         // draw matches on page
         double sx = resX() / 72.0;
@@ -779,17 +779,17 @@ void PageView::updateViewSize()
     viewport()->update();
 }
 
-FirstAidPage PageView::getPage(int pageNumber)
+QImage PageView::getPage(int pageNumber)
 {
-    FirstAidPage *cachedPage = m_imageCache.object(pageNumber);
+    QImage *cachedPage = m_imageCache.object(pageNumber);
 
     if (!cachedPage) {
         if (Poppler::Page *page = m_document->page(pageNumber)) {
             /**
              * we render in too high resolution and then set the right ratio
              */
-            cachedPage = new FirstAidPage(page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0));
-            cachedPage->m_image.setDevicePixelRatio(devicePixelRatio());
+            cachedPage = new QImage(page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0));
+            cachedPage->setDevicePixelRatio(devicePixelRatio());
 
             m_imageCache.insert(pageNumber, cachedPage);
             return *cachedPage;
@@ -797,5 +797,5 @@ FirstAidPage PageView::getPage(int pageNumber)
     } else
         return *cachedPage;
 
-    return FirstAidPage(QImage());
+    return QImage();
 }

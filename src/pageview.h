@@ -36,17 +36,6 @@
 
 class QRubberBand;
 
-class FirstAidPage
-{
-public:
-    FirstAidPage(QImage image)
-        : m_image(image)
-    {
-    }
-
-    QImage m_image;
-};
-
 class PageView : public QAbstractScrollArea
 {
     Q_OBJECT
@@ -129,7 +118,7 @@ private slots:
     void updateViewSize();
 
 private:
-    FirstAidPage getPage(int page);
+    QImage getPage(int page);
     int pageForPoint(const QPoint &point);
 
 signals:
@@ -145,7 +134,7 @@ private:
     bool m_doubleSided = false;
     int m_currentPage = -1;
 
-    QCache<int, FirstAidPage> m_imageCache;
+    QCache<int, QImage> m_imageCache;
 
     QPoint m_offset;
 
