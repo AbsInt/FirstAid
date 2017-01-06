@@ -60,6 +60,19 @@ void Document::setDocument(Poppler::Document *document)
     emit documentChanged();
 }
 
+void Document::setCurrentPage(int page)
+{
+    if (m_currentPage != page) {
+        m_currentPage = page;
+        emit pageChanged(m_currentPage);
+    }
+}
+
+int Document::currentPage() const
+{
+    return m_currentPage;
+}
+
 int Document::numPages() const
 {
     return m_pages.size();
@@ -107,6 +120,7 @@ void Document::reset()
     m_annotations.clear();
     qDeleteAll(m_pages);
     m_pages.clear();
+    m_currentPage = -1;
     delete m_document;
     m_document = nullptr;
 }
