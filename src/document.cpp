@@ -93,7 +93,7 @@ QSizeF Document::layoutSize() const
     if (m_pageRects.isEmpty())
         return QSizeF();
 
-    const int spacing = 10;
+    const int spacing = 5;
 
     QRectF boundingRect = m_pageRects.first();
     boundingRect = boundingRect.united(m_pageRects.last());
@@ -160,7 +160,7 @@ void Document::relayout(bool emitSignal)
 
     // TODO: for now we assume all pages have the same size
     PageView *view = PdfViewer::view();
-    qreal spacing = 10;
+    qreal spacing = 5;
 
     QPointF offset(spacing, spacing);
 
