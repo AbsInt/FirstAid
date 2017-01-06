@@ -51,11 +51,10 @@ void Document::setDocument(const QString &fileName, QString *errorMessage)
     m_document->setRenderHint(Poppler::Document::TextAntialiasing, true);
     m_document->setRenderHint(Poppler::Document::Antialiasing, true);
     m_document->setRenderBackend(Poppler::Document::SplashBackend);
-    m_numPages = newdoc->numPages();
 
-    m_pages.reserve(m_numPages);
-    m_annotations.reserve(m_numPages);
-    for (int i = 0; i < m_numPages; ++i)
+    m_pages.reserve(newdoc->numPages());
+    m_annotations.reserve(newdoc->numPages());
+    for (int i = 0; i < newdoc->numPages(); ++i)
     {
         Poppler::Page *page = newdoc->page(i);
         m_pages.append(page);
@@ -83,7 +82,7 @@ Poppler::LinkDestination *Document::linkDestination(const QString &destination)
 
 const QList<Poppler::Annotation *> &Document::annotations(int page)
 {
-    Q_ASSERT(page <= m_annotations.length());
+    Q_ASSERT(page < m_annotations.length());
     return m_annotations.at(page);
 }
 
@@ -98,10 +97,9 @@ void Document::reset()
     m_annotations.clear();
     qDeleteAll(m_pages);
     m_pages.clear();
-    m_fileName = QString();
+    m_fileName.clear();
     delete m_document;
     m_document = nullptr;
-    m_numPages = 0;
 }
 
 QString Document::title()

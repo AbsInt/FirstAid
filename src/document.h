@@ -32,7 +32,7 @@ public:
 
     void setDocument(const QString & fileName,QString *errorMessage);
 
-    int numPages() {return m_numPages;}
+    int numPages() {return m_pages.size();}
     Poppler::Page* page(int page);
     const QDomDocument *toc();
     Poppler::LinkDestination *linkDestination(const QString &destination);
@@ -45,10 +45,23 @@ public:
     QString title();
 
 private:
-    int m_numPages = 0;
-    QList<Poppler::Page*> m_pages;
-    QList<QList<Poppler::Annotation *>> m_annotations;
+    /**
+     * current open file
+     */
     QString m_fileName;
 
+    /**
+     * current open poppler document
+     */
     Poppler::Document *m_document = nullptr;
+
+    /**
+     * list of cached poppler pages, index == page
+     */
+    QList<Poppler::Page*> m_pages;
+
+    /**
+     * list of cached poppler annotations, index == page
+     */
+    QList<QList<Poppler::Annotation *>> m_annotations;
 };
