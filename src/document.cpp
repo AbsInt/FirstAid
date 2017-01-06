@@ -27,6 +27,11 @@ Document::~Document()
     reset();
 }
 
+bool Document::isValid() const
+{
+    return m_document != nullptr;
+}
+
 void Document::setDocument(Poppler::Document *document)
 {
     // reset old content
@@ -45,6 +50,11 @@ void Document::setDocument(Poppler::Document *document)
         m_pages.append(page);
         m_annotations.append(page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink));
     }
+}
+
+int Document::numPages() const
+{
+    return m_pages.size();
 }
 
 Poppler::Page *Document::page(int page)

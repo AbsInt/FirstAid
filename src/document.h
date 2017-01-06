@@ -1,5 +1,7 @@
 /*
  * Copyright (C) 2016, Jan Pohland <pohland@absint.com>
+ * Copyright (C) 2016, Christoph Cullmann <cullmann@absint.com>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,21 +32,14 @@ public:
     Document();
     ~Document();
 
+    bool isValid() const;
     void setDocument(Poppler::Document *document);
 
-    int numPages()
-    {
-        return m_pages.size();
-    }
+    int numPages() const;
     Poppler::Page *page(int page);
     const QDomDocument *toc();
     Poppler::LinkDestination *linkDestination(const QString &destination);
     const QList<Poppler::Annotation *> &annotations(int page);
-
-    bool isValid()
-    {
-        return m_document != nullptr;
-    }
 
     void reset();
 
