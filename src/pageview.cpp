@@ -274,11 +274,14 @@ void PageView::setDoubleSided(bool on)
 void PageView::scrolled()
 {
     if (m_document) {
-        int page = m_document->pageForPoint(offset());
-
         // TODO
+        qreal x=(offset().x() / resX() * 72.0 + 5);
+        qreal y=(offset().y() / resY() * 72.0 + 5);
+        int page = m_document->pageForPoint(QPointF(x, y));
+
         if (page != m_currentPage) {
             m_currentPage = qMax(0, page);
+
             emit pageChanged(m_currentPage);
         }
     }
@@ -564,12 +567,13 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
 void PageView::gotoPage(int page, int offset)
 {
+    qDebug("goto page %d", page);
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
     QPoint newOffset = (fromPoints(m_document->pageRect(page)).topLeft() + QPointF(0, offset)).toPoint();
     // QScroller::scroller(viewport())->scrollTo(newOffset);
-    setOffset(newOffset);
+    setOffset(QPoint(0, newOffset.y()));
 }
 
 void PageView::gotoPage(int page, const QRectF &rect)
