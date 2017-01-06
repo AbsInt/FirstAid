@@ -120,7 +120,6 @@ PdfViewer::PdfViewer(const QString &file)
 
     TocDock *tocDock = new TocDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, tocDock);
-    m_observers.append(tocDock);
 
     NavigationToolBar *navbar = new NavigationToolBar(tocDock->toggleViewAction(), menu, this);
     addToolBar(navbar);

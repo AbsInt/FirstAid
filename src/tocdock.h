@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include "documentobserver.h"
 #include <QDockWidget>
 #include <QHash>
 
@@ -27,17 +26,13 @@ class QDomNode;
 class QTreeWidget;
 class QTreeWidgetItem;
 
-class TocDock : public QDockWidget, public DocumentObserver
+class TocDock : public QDockWidget
 {
     Q_OBJECT
 
 public:
     TocDock(QWidget *parent = 0);
     ~TocDock();
-
-    void documentLoaded() override;
-    void documentClosed() override;
-    void pageChanged(int page) override;
 
 signals:
     void gotoRequested(const QString &dest);
@@ -47,6 +42,8 @@ protected:
     void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem);
 
 protected slots:
+    void documentChanged();
+    void pageChanged(int page);
     void visibilityChanged(bool visible);
     void itemClicked(QTreeWidgetItem *item, int column);
 

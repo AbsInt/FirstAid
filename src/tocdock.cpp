@@ -18,6 +18,7 @@
  */
 
 #include "tocdock.h"
+#include "viewer.h"
 
 #include <poppler-qt5.h>
 
@@ -45,26 +46,82 @@ TocDock::TocDock(QWidget *parent)
 
     connect(this, SIGNAL(visibilityChanged(bool)), SLOT(visibilityChanged(bool)));
     connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), SLOT(itemClicked(QTreeWidgetItem *, int)));
+
+    connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(documentChanged()));
 }
 
 TocDock::~TocDock()
 {
 }
 
-void TocDock::documentLoaded()
+void TocDock::fillInfo()
 {
-    if (!isHidden()) {
-        fillInfo();
-        m_filled = true;
+    if (const QDomDocument *toc = PdfViewer::document()->toc())
+        fillToc(*toc, m_tree, 0);
+    else {
+        QTreeWidgetItem *item = new QTreeWidgetItem();
+        item->setText(0, tr("No table of contents available."));
+        item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+        m_tree->addTopLevelItem(item);
     }
 }
 
-void TocDock::documentClosed()
+void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
 {
+    QTreeWidgetItem *newitem = nullptr;
+    for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
+        QDomElement e = node.toElement();
+
+        if (!parentItem)
+            newitem = new QTreeWidgetItem(tree, newitem);
+        else
+            newitem = new QTreeWidgetItem(parentItem, newitem);
+
+        QString destination = e.attribute("DestinationName");
+
+        newitem->setText(0, e.tagName());
+        newitem->setData(0, Qt::UserRole, destination);
+
+        if (Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(destination)) {
+            int pageNumber = link->pageNumber();
+            delete link;
+
+            newitem->setText(1, QString::number(pageNumber));
+            newitem->setData(1, Qt::TextAlignmentRole, Qt::AlignRight);
+
+            if (!m_pageToItemMap.contains(pageNumber))
+                m_pageToItemMap.insert(pageNumber, newitem);
+        }
+
+        bool isOpen = false;
+        if (e.hasAttribute(QString::fromLatin1("Open")))
+            isOpen = QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
+
+        if (isOpen)
+            tree->expandItem(newitem);
+
+        if (e.hasChildNodes())
+            fillToc(node, tree, newitem);
+    }
+}
+
+/*
+ * protected slots
+ */
+
+void TocDock::documentChanged()
+{
+    // reset old data
     m_tree->clear();
     m_pageToItemMap.clear();
     m_markedItem = nullptr;
     m_filled = false;
+
+    // try to fill toc if visible
+    if (!isHidden()) {
+        fillInfo();
+        m_filled = true;
+    }
 }
 
 void TocDock::pageChanged(int page)
@@ -101,61 +158,9 @@ void TocDock::pageChanged(int page)
     }
 }
 
-void TocDock::fillInfo()
-{
-    const QDomDocument *toc = document()->toc();
-    if (toc)
-        fillToc(*toc, m_tree, 0);
-    else {
-        QTreeWidgetItem *item = new QTreeWidgetItem();
-        item->setText(0, tr("No table of contents available."));
-        item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-        m_tree->addTopLevelItem(item);
-    }
-}
-
-void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
-{
-    QTreeWidgetItem *newitem = nullptr;
-    for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
-        QDomElement e = node.toElement();
-
-        if (!parentItem)
-            newitem = new QTreeWidgetItem(tree, newitem);
-        else
-            newitem = new QTreeWidgetItem(parentItem, newitem);
-
-        QString destination = e.attribute("DestinationName");
-
-        newitem->setText(0, e.tagName());
-        newitem->setData(0, Qt::UserRole, destination);
-
-        if (Poppler::LinkDestination *link = document()->linkDestination(destination)) {
-            int pageNumber = link->pageNumber();
-            delete link;
-
-            newitem->setText(1, QString::number(pageNumber));
-            newitem->setData(1, Qt::TextAlignmentRole, Qt::AlignRight);
-
-            if (!m_pageToItemMap.contains(pageNumber))
-                m_pageToItemMap.insert(pageNumber, newitem);
-        }
-
-        bool isOpen = false;
-        if (e.hasAttribute(QString::fromLatin1("Open")))
-            isOpen = QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
-
-        if (isOpen)
-            tree->expandItem(newitem);
-
-        if (e.hasChildNodes())
-            fillToc(node, tree, newitem);
-    }
-}
-
 void TocDock::visibilityChanged(bool visible)
 {
-    if (visible && document() && !m_filled) {
+    if (visible && !m_filled) {
         fillInfo();
         m_filled = true;
     }
