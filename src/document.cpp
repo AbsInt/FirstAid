@@ -31,6 +31,9 @@ Document::~Document()
 
 void Document::setDocument(const QString &fileName, QString *errorMessage)
 {
+    // reset old content
+    reset();
+
     m_fileName = fileName;
     if (errorMessage)
         *errorMessage = QString();
@@ -50,11 +53,8 @@ void Document::setDocument(const QString &fileName, QString *errorMessage)
     m_document->setRenderBackend(Poppler::Document::SplashBackend);
     m_numPages = newdoc->numPages();
 
-    m_pages = QList<Poppler::Page*>();
     m_pages.reserve(m_numPages);
-    m_annotations.clear();
     m_annotations.reserve(m_numPages);
-
     for (int i = 0; i < m_numPages; ++i)
     {
         Poppler::Page *page = newdoc->page(i);
