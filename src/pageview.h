@@ -30,7 +30,7 @@
 
 #include <poppler-qt5.h>
 
-#include "documentobserver.h"
+#include "document.h"
 #include "historystack.h"
 
 #define PAGEFRAME 5
