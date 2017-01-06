@@ -93,7 +93,7 @@ QSizeF Document::layoutSize() const
     if (m_pageRects.isEmpty())
         return QSizeF();
 
-    const int spacing = PdfViewer::view()->spacing();
+    const int spacing = 10;
 
     QRectF boundingRect = m_pageRects.first();
     boundingRect = boundingRect.united(m_pageRects.last());
@@ -160,7 +160,7 @@ void Document::relayout(bool emitSignal)
 
     // TODO: for now we assume all pages have the same size
     PageView *view = PdfViewer::view();
-    const int spacing = view->spacing();
+    qreal spacing = 10;
 
     QPointF offset(spacing, spacing);
 
@@ -168,7 +168,7 @@ void Document::relayout(bool emitSignal)
         int currentPage = 0;
         while (currentPage < numPages()) {
             Poppler::Page *p = page(currentPage);
-            QRectF pageRect = view->fromPoints(QRectF(QPointF(), p->pageSizeF()));
+            QRectF pageRect = QRectF(QPointF(), p->pageSizeF());
 
             // special handling for first page in documents with more than 2 pages
             if (currentPage == 0 && numPages() >2) {
@@ -181,7 +181,7 @@ void Document::relayout(bool emitSignal)
 
                 if (currentPage < numPages()) {
                     p = page(currentPage);
-                    pageRect = view->fromPoints(QRectF(QPointF(), p->pageSizeF())).translated(offset+QPointF(pageRect.width(), 0));
+                    pageRect = QRectF(QPointF(), p->pageSizeF()).translated(offset+QPointF(pageRect.width(), 0));
                     m_pageRects << pageRect;
                 }
             }
@@ -194,7 +194,7 @@ void Document::relayout(bool emitSignal)
         for (int i = 0; i < numPages(); ++i) {
             Poppler::Page *p = page(i);
 
-            QRectF pageRect = view->fromPoints(QRectF(QPointF(), p->pageSizeF())).translated(offset);
+            QRectF pageRect = QRectF(QPointF(), p->pageSizeF()).translated(offset);
             m_pageRects << pageRect;
 
             offset += QPointF(0, pageRect.height() + spacing);

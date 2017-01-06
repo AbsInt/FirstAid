@@ -57,7 +57,6 @@ public:
 public:
     enum ZoomMode { FitWidth, FitPage, Absolute };
 
-    static int spacing();
     static QColor matchColor();
     static QColor highlightColor();
 
