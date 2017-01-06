@@ -275,8 +275,8 @@ void PageView::scrolled()
 {
     if (m_document) {
         // TODO
-        qreal x=(offset().x() / resX() * 72.0 + 5);
-        qreal y=(offset().y() / resY() * 72.0 + 5);
+        qreal x = (offset().x() / resX() * 72.0 + 5);
+        qreal y = (offset().y() / resY() * 72.0 + 5);
         int page = m_document->pageForPoint(QPointF(x, y));
 
         if (page != m_currentPage) {
