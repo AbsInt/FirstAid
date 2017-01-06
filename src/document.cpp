@@ -27,33 +27,21 @@ Document::~Document()
     reset();
 }
 
-void Document::setDocument(const QString &fileName, QString *errorMessage)
+void Document::setDocument(Poppler::Document *document)
 {
     // reset old content
     reset();
 
-    m_fileName = fileName;
-    if (errorMessage)
-        *errorMessage = QString();
-
-    Poppler::Document *newdoc = Poppler::Document::load(fileName);
-    if (!newdoc || newdoc->isLocked()) {
-        *errorMessage = QString("Cannot open file '%1'.").arg(fileName);
-        if (newdoc)
-            delete newdoc;
-        return;
-    }
-
-    m_document = newdoc;
+    m_document = document;
 
     m_document->setRenderHint(Poppler::Document::TextAntialiasing, true);
     m_document->setRenderHint(Poppler::Document::Antialiasing, true);
     m_document->setRenderBackend(Poppler::Document::SplashBackend);
 
-    m_pages.reserve(newdoc->numPages());
-    m_annotations.reserve(newdoc->numPages());
-    for (int i = 0; i < newdoc->numPages(); ++i) {
-        Poppler::Page *page = newdoc->page(i);
+    m_pages.reserve(document->numPages());
+    m_annotations.reserve(document->numPages());
+    for (int i = 0; i < document->numPages(); ++i) {
+        Poppler::Page *page = document->page(i);
         m_pages.append(page);
         m_annotations.append(page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink));
     }
@@ -93,7 +81,6 @@ void Document::reset()
     m_annotations.clear();
     qDeleteAll(m_pages);
     m_pages.clear();
-    m_fileName.clear();
     delete m_document;
     m_document = nullptr;
 }

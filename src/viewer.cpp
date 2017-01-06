@@ -194,16 +194,26 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
         return;
     }
 
+    // we try to load the same document without forced reload => just activate the window and be done
     if (file == m_filePath && !forceReload) {
         raise();
         activateWindow();
         return;
     }
 
+    // cleanup old document
     closeDocument();
 
-    QString errorMsg;
-    m_document.setDocument(file, &errorMsg);
+    // try to load the document
+    Poppler::Document *newdoc = Poppler::Document::load(file);
+    if (!newdoc || newdoc->isLocked()) {
+        delete newdoc;
+        QMessageBox::critical(this, tr("Cannot open file"), tr("Cannot open file '%1'.").arg(file));
+        return;
+    }
+
+    // pass loaded poppler document to our internal one
+    m_document.setDocument(newdoc);
     m_view->setDocument(&m_document);
 
     // set file + watch

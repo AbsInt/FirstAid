@@ -30,7 +30,7 @@ public:
     Document();
     ~Document();
 
-    void setDocument(const QString &fileName, QString *errorMessage);
+    void setDocument(Poppler::Document *document);
 
     int numPages()
     {
@@ -51,11 +51,6 @@ public:
     QString title();
 
 private:
-    /**
-     * current open file
-     */
-    QString m_fileName;
-
     /**
      * current open poppler document
      */
