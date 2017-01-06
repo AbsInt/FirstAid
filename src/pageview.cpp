@@ -126,6 +126,10 @@ PageView::PageView(QWidget *parent)
     viewport()->setAttribute(Qt::WA_NoSystemBackground);
     viewport()->setAttribute(Qt::WA_OpaquePaintEvent);
 
+    // always on to make resizing less magic
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
     // behave like QScrollArea => 20
     verticalScrollBar()->setSingleStep(20);
     horizontalScrollBar()->setSingleStep(20);
@@ -199,10 +203,6 @@ void PageView::setZoomMode(ZoomMode mode)
     if (mode != m_zoomMode) {
         m_zoomMode = mode;
 
-        // fake resize event to recompute sizes, e.g. for fit width/page
-        QResizeEvent e(size(), size());
-        resizeEvent(&e);
-
         // visual size of document might change now!
         updateViewSize();
     }
@@ -265,10 +265,6 @@ void PageView::setDoubleSided(bool on)
 
         if (m_document)
             m_document->relayout();
-
-        // fake resize event to recompute sizes, e.g. for fit width/page
-        QResizeEvent e(size(), size());
-        resizeEvent(&e);
 
         // visual size of document might change now!
         updateViewSize();
@@ -402,21 +398,11 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
 
 void PageView::resizeEvent(QResizeEvent *resizeEvent)
 {
-    if (!m_document || m_document->numPages() == 0)
-        return;
-
-    if (FitWidth == m_zoomMode) {
-        m_zoom = qreal(viewport()->width()) / m_document->layoutSize().width();
-        updateViewSize();
-    }
-    else if (FitPage == m_zoomMode) {
-        const qreal zx = qreal(viewport()->width()) / m_document->layoutSize().width();
-        const qreal zy = qreal(viewport()->height()) / m_document->pageRect(0).height();
-        m_zoom = qMin(zx, zy);
-        updateViewSize();
-    }
-
     QAbstractScrollArea::resizeEvent(resizeEvent);
+
+    // trigger delayed update
+    QTimer::singleShot(0, this, SLOT(updateViewSize()));
+
 }
 
 void PageView::mouseMoveEvent(QMouseEvent *event)
@@ -761,14 +747,25 @@ void PageView::updateViewSize(bool invalidateCache)
     if (invalidateCache)
         m_imageCache.clear();
 
+    if (!m_document || m_document->numPages() == 0)
+        return;
+
+    if (FitWidth == m_zoomMode) {
+        m_zoom = qreal(viewport()->width()) / (m_document->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
+    }
+    else if (FitPage == m_zoomMode) {
+        const qreal zx = qreal(viewport()->width()) / (m_document->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
+        const qreal zy = qreal(viewport()->height()) / (m_document->pageRect(0).height() / 72.0 * m_dpiY * devicePixelRatio());
+        m_zoom = qMin(zx, zy);
+    }
+
     QSizeF size;
     if (m_document) {
         size = m_document->layoutSize() / 72.0 * resX();
-        size -= viewport()->size();
     }
 
-    horizontalScrollBar()->setRange(0, qMax(0, int(size.width())));
-    verticalScrollBar()->setRange(0, qMax(0, int(size.height())));
+    horizontalScrollBar()->setRange(0, qMax(0, int(size.width() - viewport()->width())));
+    verticalScrollBar()->setRange(0, qMax(0, int(size.height() - viewport()->height())));
 
     // update viewport
     viewport()->update();
