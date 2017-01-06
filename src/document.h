@@ -44,11 +44,20 @@ public:
     /*! Returns the table of contents of nullptr. */
     const QDomDocument *toc() const;
 
+    /*! Returns the required size of a viewport. */
+    QSizeF layoutSize() const;
+
     /*! Returns the number of available pages. */
     int numPages() const;
 
+    /*! Returns page numbers visible in given rectangle. */
+    QList<int> visiblePages(const QRectF &rect) const;
+
     /*! Returns a rectangle descriping the page's position in the viewport. */
     QRectF pageRect(int page) const;
+
+    /*! Returns the page for the given point in the layout. */
+    int pageForPoint(const QPointF &point) const;
 
     /*! Returns a Poppler page for the given page number or nullptr. */
     Poppler::Page *page(int page) const;
@@ -60,7 +69,7 @@ public:
     Poppler::LinkDestination *linkDestination(const QString &destination) const;
 
     /*! Performa a relayout of the current document. */
-    void relayout(bool emitSignal=true);
+    void relayout(bool emitSignal = true);
 
 signals:
     void documentChanged();

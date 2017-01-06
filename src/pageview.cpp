@@ -181,7 +181,7 @@ QRectF PageView::toPoints(const QRectF &rect) const
 void PageView::setDocument(Document *document)
 {
     m_document = document;
-    m_currentPage = -1;
+    m_currentPage = 0;
 
     m_historyStack.clear();
 
@@ -250,12 +250,13 @@ void PageView::contextMenuEvent(QContextMenuEvent *event)
     if (!m.exec(event->globalPos()))
         return;
 
-    int pageNumber = pageForPoint(event->pos() + m_offset);
+    int pageNumber = m_document->pageForPoint(event->pos() + offset());
     if (-1 != pageNumber) {
         m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
 
-        QRect r = QRect(m_rubberBandOrigin.second, m_offset + viewport()->mapFromGlobal(QCursor::pos())).intersected(m_pageRects.value(m_rubberBandOrigin.first));
+        // TODO CHECK
+        QRect r = QRect(m_rubberBandOrigin.second, offset() + viewport()->mapFromGlobal(QCursor::pos())).intersected(m_document->pageRect(m_rubberBandOrigin.first).toRect());
         m_rubberBand->setGeometry(r.normalized());
 
         m_rubberBand->show();
@@ -278,26 +279,20 @@ void PageView::setDoubleSided(bool on)
 
 void PageView::scrolled()
 {
-    int pageSize = pageHeight();
+    if (m_document) {
+        int page = m_document->pageForPoint(offset()+(QPoint(spacing(), spacing())));
 
-    // compute page
-    int value = verticalScrollBar()->value();
-    int page = value / (pageSize + 2 * spacing());
-
-    // set page
-    value -= (page * (pageSize + 2 * spacing()));
-    // scroll(page,value);
-    m_offset = QPoint(horizontalScrollBar()->value(), value);
-
-    if (m_doubleSided)
-        page = page * 2 - 1;
-    if (page < 0)
-        page = 0;
-
-    if (page < (m_document ? m_document->numPages() : 0)) {
-        m_currentPage = page;
-        emit pageChanged(m_currentPage);
+        // TODO
+        if (page != m_currentPage) {
+            m_currentPage = qMax(0, page);
+            emit pageChanged(m_currentPage);
+        }
     }
+}
+
+QPoint PageView::offset() const
+{
+    return QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
 }
 
 void PageView::setOffset(const QPoint &offset)
@@ -349,7 +344,7 @@ bool PageView::event(QEvent *event)
         QScrollPrepareEvent *spe = static_cast<QScrollPrepareEvent *>(event);
         spe->setViewportSize(viewport()->size());
         spe->setContentPosRange(QRect(0, 0, horizontalScrollBar()->maximum(), verticalScrollBar()->maximum()));
-        spe->setContentPos(m_offset);
+        spe->setContentPos(offset());
         spe->accept();
         return true;
     }
@@ -366,23 +361,54 @@ bool PageView::event(QEvent *event)
 
 void PageView::paintEvent(QPaintEvent *paintEvent)
 {
-    QSize vs = viewport()->size();
     QPainter p(viewport());
     p.fillRect(paintEvent->rect(), Qt::gray);
+    p.translate(-offset());
 
-    if (!m_document)
-        return;
-
-    m_pageRects.clear();
-    int currentPage = m_currentPage;
-
-    // show previous page in doubleside mode
-    if (m_doubleSided && (currentPage > 1) && !(currentPage % 2))
-        --currentPage;
+    if (viewport()->width() > m_document->layoutSize().width())
+        p.translate((viewport()->width() - m_document->layoutSize().width()) / 2, 0);
 
     int matchPage;
     QRectF matchRect;
     PdfViewer::searchEngine()->currentMatch(matchPage, matchRect);
+
+    foreach (int page, m_document->visiblePages(paintEvent->rect().translated(offset()))) {
+        QRectF pageRect=m_document->pageRect(page);
+#if 0
+        p.fillRect(pageRect, Qt::red);
+        p.drawRect(pageRect);
+        p.drawText(pageRect, Qt::AlignCenter, QString("Page %1").arg(page+1));
+#else
+        FirstAidPage cachedPage = getPage(page);
+        p.drawImage(pageRect.topLeft(), cachedPage.m_image);
+
+        // draw matches on page
+        double sx = resX() / 72.0;
+        double sy = resY() / 72.0;
+
+        p.setPen(Qt::NoPen);
+
+        foreach (QRectF rect, PdfViewer::searchEngine()->matchesFor(page)) {
+            QColor matchColor = QColor(255, 255, 0, 64);
+            if (page == matchPage && rect == matchRect)
+                matchColor = QColor(255, 128, 0, 128);
+
+            QRectF r = QRectF(rect.left() * sx, rect.top() * sy, rect.width() * sx, rect.height() * sy);
+            r.adjust(-3, -5, 3, 2);
+            p.fillRect(r.translated(pageRect.topLeft()), matchColor);
+        }
+
+        // draw border around page
+        p.setPen(Qt::darkGray);
+        p.drawRect(pageRect.adjusted(-1, -1, 1, 1));
+
+#endif
+    }
+
+#if 0
+    // show previous page in doubleside mode
+    if (m_doubleSided && (currentPage > 1) && !(currentPage % 2))
+        --currentPage;
 
     QPoint pageStart = -m_offset + QPoint(0, spacing());
 
@@ -437,6 +463,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
             pageStart.setY(pageStart.y() + cachedPage.m_image.height() / devicePixelRatio() + 2 * spacing());
     }
     p.end();
+#endif
 }
 
 void PageView::resizeEvent(QResizeEvent *resizeEvent)
@@ -445,34 +472,31 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
         return;
 
     if (FitWidth == m_zoomMode) {
-        Poppler::Page *page = m_document->page(m_currentPage);
-        if (!page)
-            return;
-        QSizeF pageSize = page->pageSize();
+        QSizeF pageSize = m_document->pageRect(m_currentPage).size();
         pageSize.setWidth(2 * spacing() + pageSize.width());
 
         if (m_doubleSided) {
-            if (Poppler::Page *page = m_document->page(m_currentPage + 1))
-                pageSize.setWidth(pageSize.width() + page->pageSize().width() + spacing());
+            // TODO not sure if the m_currentPage +1 always exists
+            QSizeF rightPageSize = m_document->pageRect(m_currentPage + 1).size();
+            pageSize.setWidth(pageSize.width() + rightPageSize.width());
         }
 
-        m_zoom = viewport()->size().width() / (m_dpiX * pageSize.width() / 72.0);
+        m_zoom = viewport()->width() / (qreal)pageSize.width();
         updateViewSize();
-    } else if (FitPage == m_zoomMode) {
-        Poppler::Page *page = m_document->page(m_currentPage);
-        if (!page)
-            return;
-        QSizeF pageSize = page->pageSize();
+    } 
+    else if (FitPage == m_zoomMode) {
+        QSizeF pageSize = m_document->pageRect(m_currentPage).size();
         pageSize.setWidth(2 * spacing() + pageSize.width());
         pageSize.setHeight(2 * spacing() + pageSize.height());
 
         if (m_doubleSided) {
-            if (Poppler::Page *page = m_document->page(m_currentPage + 1))
-                pageSize.setWidth(pageSize.width() + page->pageSize().width() + spacing());
+            // TODO not sure if the m_currentPage +1 always exists
+            QSizeF rightPageSize = m_document->pageRect(m_currentPage + 1).size();
+            pageSize.setWidth(pageSize.width() + rightPageSize.width());
         }
 
-        qreal zx = viewport()->size().width() / (m_dpiX * pageSize.width() / 72.0);
-        qreal zy = viewport()->size().height() / (m_dpiY * pageSize.height() / 72.0);
+        qreal zx = viewport()->size().width() / (qreal)pageSize.width();
+        qreal zy = viewport()->size().height() / (qreal)pageSize.height();
 
         m_zoom = qMin(zx, zy);
         updateViewSize();
@@ -496,31 +520,27 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
 
     // update rubber band?
     if (m_rubberBandOrigin.first >= 0) {
-        QRect r = QRect(m_rubberBandOrigin.second, event->pos()).intersected(m_pageRects.value(m_rubberBandOrigin.first));
+        QRect r = QRect(m_rubberBandOrigin.second, event->pos()).intersected(m_document->pageRect(m_rubberBandOrigin.first).toRect());
         m_rubberBand->setGeometry(r.normalized());
     }
 
     // now check if we want to highlight a link location
-    QHashIterator<int, QRect> it(m_pageRects);
-    while (it.hasNext()) {
-        it.next();
-
-        int pageNumber = it.key();
-        QRect displayRect = it.value();
-
-        qreal xPos = (event->x() - displayRect.x()) / (qreal)displayRect.width();
-        qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
+    int page = m_document->pageForPoint(offset() + event->pos());
+    if (-1 != page) {
+        QRectF pageRect = m_document->pageRect(page);
+        qreal xPos = (event->x() - pageRect.x()) / (qreal)pageRect.width();
+        qreal yPos = (event->y() - pageRect.y()) / (qreal)pageRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        for (auto &l : m_document->links(pageNumber)) {
+        for (auto &l : m_document->links(page)) {
             if (l->boundary().contains(p)) {
                 setCursor(Qt::PointingHandCursor);
                 return;
             }
         }
-
-        setCursor(Qt::ArrowCursor);
     }
+
+    setCursor(Qt::ArrowCursor);
 }
 
 void PageView::mousePressEvent(QMouseEvent *event)
@@ -531,7 +551,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
     // special case: end rubber band that has been created by context menu copy
     if (m_rubberBandOrigin.first >= 0) {
-        QRect displayRect = m_pageRects.value(m_rubberBandOrigin.first);
+        QRect displayRect = m_document->pageRect(m_rubberBandOrigin.first).toRect();
         slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().translated(-displayRect.topLeft()));
         m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
         m_rubberBand->hide();
@@ -539,6 +559,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
     }
 
     // first check for clicks on links and text selection
+    #if 0
     QHashIterator<int, QRect> it(m_pageRects);
     while (it.hasNext()) {
         it.next();
@@ -572,9 +593,10 @@ void PageView::mousePressEvent(QMouseEvent *event)
             }
         }
     }
+    #endif
 
     if (event->modifiers().testFlag(Qt::ShiftModifier)) {
-        int pageNumber = pageForPoint(event->pos() + m_offset);
+        int pageNumber = m_document->pageForPoint(event->pos() + offset());
         if (-1 != pageNumber) {
             m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
@@ -626,7 +648,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
     // reset rubber band if needed
     if (m_rubberBandOrigin.first >= 0) {
-        QRect displayRect = m_pageRects.value(m_rubberBandOrigin.first);
+        QRect displayRect = m_document->pageRect(m_rubberBandOrigin.first).toRect();
         if (!displayRect.isValid())
             return;
 
@@ -646,29 +668,21 @@ void PageView::gotoPage(int page, int offset)
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
-    if (page == m_currentPage && m_offset.y() == offset) {
-        viewport()->update();
-        return;
-    }
-
-    m_offset = QPoint(m_offset.x(), offset);
-    m_currentPage = page;
-    emit pageChanged(m_currentPage);
-
-    // misuse to go to page
-    updateViewSize(false /* goto mode, don't clear cache */);
+    QPoint newOffset = (m_document->pageRect(page).topLeft() + QPointF(0, offset)).toPoint();
+    //QScroller::scroller(viewport())->scrollTo(newOffset);
+    setOffset(newOffset);
 }
 
 void PageView::gotoPage(int page, const QRectF &rect)
 {
-    QRectF pageRect = m_pageRects.value(page);
+    QRectF pageRect = m_document->pageRect(page);
     if (pageRect.isNull()) {
         gotoPage(page, rect.top() / 72.0 * resY());
         return;
     }
-    pageRect.translate(m_offset);
+    pageRect.translate(offset());
 
-    QRectF visibleArea = QRectF(m_offset, viewport()->size());
+    QRectF visibleArea = QRectF(offset(), viewport()->size());
     QRectF r = fromPoints(rect).translated(pageRect.topLeft());
 
     if (visibleArea.contains(r)) {
@@ -756,7 +770,7 @@ void PageView::gotoDestination(const QString &destination, bool updateHistory)
     else if (m_document) {
         if (Poppler::LinkDestination *link = m_document->linkDestination(destination)) {
             int pageNumber = link->pageNumber() - 1;
-            gotoPage(pageNumber, (link->isChangeTop() ? link->top() * m_pageRects.value(pageNumber).height() : 0));
+            gotoPage(pageNumber, (link->isChangeTop() ? link->top() * m_document->pageRect(pageNumber).height() : 0));
             delete link;
 
             if (updateHistory)
@@ -833,35 +847,15 @@ void PageView::updateViewSize(bool invalidateCache)
     if (invalidateCache)
         m_imageCache.clear();
 
-    QScrollBar *vbar = verticalScrollBar();
-    int pageCount = m_document ? m_document->numPages() : 0;
-    int current = m_document ? m_currentPage : 0;
-    if (m_doubleSided) {
-        if (pageCount % 2)
-            pageCount = pageCount / 2 + 1;
-        else
-            pageCount /= 2;
-        if (current % 2)
-            current = current / 2 + 1;
-        else
-            current /= 2;
+    QSize size;
+    if (m_document) {
+        m_document->relayout();
+        size = m_document->layoutSize().toSize();
+        size -= viewport()->size();
     }
-    int pageSize = pageHeight();
-    vbar->setRange(0, (pageCount * 2) * spacing() + qMax(0, pageCount * pageSize - viewport()->height()));
-    vbar->blockSignals(true);
-    vbar->setValue(current * (pageSize + 2 * spacing()) + m_offset.y());
-    vbar->blockSignals(false);
 
-    QScrollBar *hbar = horizontalScrollBar();
-    pageSize = pageWidth();
-    if (m_doubleSided) {
-        pageSize *= 2;
-        pageSize += spacing();
-    }
-    hbar->setRange(0, qMax(0, (pageSize + 2 * spacing()) - viewport()->width()));
-    hbar->blockSignals(true);
-    hbar->setValue(m_offset.x());
-    hbar->blockSignals(false);
+    horizontalScrollBar()->setRange(0, qMax(0, size.width()));
+    verticalScrollBar()->setRange(0, qMax(0, size.height()));
 
     // update viewport
     viewport()->update();
@@ -886,17 +880,4 @@ FirstAidPage PageView::getPage(int pageNumber)
         return *cachedPage;
 
     return FirstAidPage(QImage());
-}
-
-int PageView::pageForPoint(const QPoint &point)
-{
-    QHashIterator<int, QRect> it(m_pageRects);
-    while (it.hasNext()) {
-        it.next();
-
-        if (it.value().contains(point))
-            return it.key();
-    }
-
-    return -1;
 }
