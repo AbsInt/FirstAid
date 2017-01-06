@@ -64,6 +64,11 @@
  * Helper class
  */
 
+int PageView::spacing()
+{
+    return 5;
+}
+
 QColor PageView::matchColor()
 {
     return QColor(255, 255, 0, 64);
@@ -189,6 +194,11 @@ int PageView::currentPage() const
     return m_currentPage;
 }
 
+bool PageView::doubleSided() const
+{
+    return m_doubleSided;
+}
+
 void PageView::setZoomMode(ZoomMode mode)
 {
     if (mode != m_zoomMode) {
@@ -252,10 +262,10 @@ void PageView::contextMenuEvent(QContextMenuEvent *event)
     }
 }
 
-void PageView::setDoubleSideMode(bool on)
+void PageView::setDoubleSided(bool on)
 {
-    if (on != m_doubleSideMode) {
-        m_doubleSideMode = on;
+    if (on != m_doubleSided) {
+        m_doubleSided = on;
 
         // fake resize event to recompute sizes, e.g. for fit width/page
         QResizeEvent e(size(), size());
@@ -272,14 +282,14 @@ void PageView::scrolled()
 
     // compute page
     int value = verticalScrollBar()->value();
-    int page = value / (pageSize + 2 * PAGEFRAME);
+    int page = value / (pageSize + 2 * spacing());
 
     // set page
-    value -= (page * (pageSize + 2 * PAGEFRAME));
+    value -= (page * (pageSize + 2 * spacing()));
     // scroll(page,value);
     m_offset = QPoint(horizontalScrollBar()->value(), value);
 
-    if (m_doubleSideMode)
+    if (m_doubleSided)
         page = page * 2 - 1;
     if (page < 0)
         page = 0;
@@ -367,18 +377,18 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     int currentPage = m_currentPage;
 
     // show previous page in doubleside mode
-    if (m_doubleSideMode && (currentPage > 1) && !(currentPage % 2))
+    if (m_doubleSided && (currentPage > 1) && !(currentPage % 2))
         --currentPage;
 
     int matchPage;
     QRectF matchRect;
     PdfViewer::searchEngine()->currentMatch(matchPage, matchRect);
 
-    QPoint pageStart = -m_offset + QPoint(0, PAGEFRAME);
+    QPoint pageStart = -m_offset + QPoint(0, spacing());
 
     p.setClipRect(paintEvent->rect());
 
-    while (pageStart.y() < 0 || vs.height() > (pageStart.y() + 2 * PAGEFRAME)) {
+    while (pageStart.y() < 0 || vs.height() > (pageStart.y() + 2 * spacing())) {
         // draw another page
         FirstAidPage cachedPage = getPage(currentPage);
 
@@ -386,7 +396,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
             break;
 
         int doubleSideOffset = 0;
-        if (m_doubleSideMode) {
+        if (m_doubleSided) {
             // special handling for first page and documents with only two pages
             if (0 != currentPage || 2 == m_document->numPages()) {
                 doubleSideOffset = cachedPage.m_image.width() / devicePixelRatio() / 2;
@@ -395,7 +405,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
             }
         }
 
-        pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width() / devicePixelRatio()) / 2 - m_offset.x() + doubleSideOffset + ((m_zoomMode == Absolute) ? PAGEFRAME : 0));
+        pageStart.setX(qMax(0, vs.width() - cachedPage.m_image.width() / devicePixelRatio()) / 2 - m_offset.x() + doubleSideOffset + ((m_zoomMode == Absolute) ? spacing() : 0));
         p.drawImage(pageStart, cachedPage.m_image);
 
         m_pageRects.insert(currentPage, QRect(pageStart, cachedPage.m_image.size()));
@@ -423,8 +433,8 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         // set next page
         ++currentPage;
 
-        if (!m_doubleSideMode || (currentPage % 2))
-            pageStart.setY(pageStart.y() + cachedPage.m_image.height() / devicePixelRatio() + 2 * PAGEFRAME);
+        if (!m_doubleSided || (currentPage % 2))
+            pageStart.setY(pageStart.y() + cachedPage.m_image.height() / devicePixelRatio() + 2 * spacing());
     }
     p.end();
 }
@@ -439,11 +449,11 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
         if (!page)
             return;
         QSizeF pageSize = page->pageSize();
-        pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
+        pageSize.setWidth(2 * spacing() + pageSize.width());
 
-        if (m_doubleSideMode) {
+        if (m_doubleSided) {
             if (Poppler::Page *page = m_document->page(m_currentPage + 1))
-                pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
+                pageSize.setWidth(pageSize.width() + page->pageSize().width() + spacing());
         }
 
         m_zoom = viewport()->size().width() / (m_dpiX * pageSize.width() / 72.0);
@@ -453,12 +463,12 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
         if (!page)
             return;
         QSizeF pageSize = page->pageSize();
-        pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
-        pageSize.setHeight(2 * PAGEFRAME + pageSize.height());
+        pageSize.setWidth(2 * spacing() + pageSize.width());
+        pageSize.setHeight(2 * spacing() + pageSize.height());
 
-        if (m_doubleSideMode) {
+        if (m_doubleSided) {
             if (Poppler::Page *page = m_document->page(m_currentPage + 1))
-                pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
+                pageSize.setWidth(pageSize.width() + page->pageSize().width() + spacing());
         }
 
         qreal zx = viewport()->size().width() / (m_dpiX * pageSize.width() / 72.0);
@@ -502,8 +512,8 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
         qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        for (auto &a : m_document->annotations(pageNumber)) {
-            if (a->boundary().contains(p)) {
+        for (auto &l : m_document->links(pageNumber)) {
+            if (l->boundary().contains(p)) {
                 setCursor(Qt::PointingHandCursor);
                 return;
             }
@@ -540,9 +550,9 @@ void PageView::mousePressEvent(QMouseEvent *event)
         qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        for (auto a : m_document->annotations(pageNumber)) {
-            if (a->boundary().contains(p)) {
-                Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(a)->linkDestination();
+        for (auto l : m_document->links(pageNumber)) {
+            if (l->boundary().contains(p)) {
+                Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l)->linkDestination();
                 switch (link->linkType()) {
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
@@ -678,13 +688,13 @@ void PageView::gotoPage(int page, const QRectF &rect)
 
 void PageView::gotoPreviousPage()
 {
-    int newPage = qMax(0, m_currentPage - (m_doubleSideMode ? 2 : 1));
+    int newPage = qMax(0, m_currentPage - (m_doubleSided ? 2 : 1));
     gotoPage(newPage, 0);
 }
 
 void PageView::gotoNextPage()
 {
-    int newPage = qMin(m_document->numPages() - 1, m_currentPage + (m_doubleSideMode ? 2 : 1));
+    int newPage = qMin(m_document->numPages() - 1, m_currentPage + (m_doubleSided ? 2 : 1));
     gotoPage(newPage, 0);
 }
 
@@ -826,7 +836,7 @@ void PageView::updateViewSize(bool invalidateCache)
     QScrollBar *vbar = verticalScrollBar();
     int pageCount = m_document ? m_document->numPages() : 0;
     int current = m_document ? m_currentPage : 0;
-    if (m_doubleSideMode) {
+    if (m_doubleSided) {
         if (pageCount % 2)
             pageCount = pageCount / 2 + 1;
         else
@@ -837,18 +847,18 @@ void PageView::updateViewSize(bool invalidateCache)
             current /= 2;
     }
     int pageSize = pageHeight();
-    vbar->setRange(0, (pageCount * 2) * PAGEFRAME + qMax(0, pageCount * pageSize - viewport()->height()));
+    vbar->setRange(0, (pageCount * 2) * spacing() + qMax(0, pageCount * pageSize - viewport()->height()));
     vbar->blockSignals(true);
-    vbar->setValue(current * (pageSize + 2 * PAGEFRAME) + m_offset.y());
+    vbar->setValue(current * (pageSize + 2 * spacing()) + m_offset.y());
     vbar->blockSignals(false);
 
     QScrollBar *hbar = horizontalScrollBar();
     pageSize = pageWidth();
-    if (m_doubleSideMode) {
+    if (m_doubleSided) {
         pageSize *= 2;
-        pageSize += PAGEFRAME;
+        pageSize += spacing();
     }
-    hbar->setRange(0, qMax(0, (pageSize + 2 * PAGEFRAME) - viewport()->width()));
+    hbar->setRange(0, qMax(0, (pageSize + 2 * spacing()) - viewport()->width()));
     hbar->blockSignals(true);
     hbar->setValue(m_offset.x());
     hbar->blockSignals(false);

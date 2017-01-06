@@ -32,22 +32,39 @@ public:
     Document();
     ~Document();
 
-    /*! Returns true if we are holding a valid Poppler document */
+    /*! Returns true if we are holding a valid Poppler document. */
     bool isValid() const;
 
     /*! Set Poppler document to use, any old data will be deleted. */
     void setDocument(Poppler::Document *document);
 
-    int numPages() const;
-    Poppler::Page *page(int page);
-    const QDomDocument *toc();
-    Poppler::LinkDestination *linkDestination(const QString &destination);
-    const QList<Poppler::Annotation *> &annotations(int page);
+    /*! Returns document title */
+    QString title() const;
 
-    QString title();
+    /*! Returns the table of contents of nullptr. */
+    const QDomDocument *toc() const;
+
+    /*! Returns the number of available pages. */
+    int numPages() const;
+
+    /*! Returns a rectangle descriping the page's position in the viewport. */
+    QRectF pageRect(int page) const;
+
+    /*! Returns a Poppler page for the given page number or nullptr. */
+    Poppler::Page *page(int page) const;
+
+    /*! Returns a list of links found on the given page number. */
+    const QList<Poppler::Annotation *> &links(int page) const;
+
+    /*! Returns a link destination for the given name or nullptr. */
+    Poppler::LinkDestination *linkDestination(const QString &destination) const;
+
+    /*! Performa a relayout of the current document. */
+    void relayout(bool emitSignal=true);
 
 signals:
     void documentChanged();
+    void layoutChanged();
 
 private:
     void reset();
@@ -64,12 +81,17 @@ private:
     int m_currentPage = -1;
 
     /**
-     * list of cached poppler pages, index == page
+     * vector of page rectangles in the viewport, index == page
      */
-    QList<Poppler::Page *> m_pages;
+    QVector<QRectF> m_pageRects;
 
     /**
-     * list of cached poppler annotations, index == page
+     * vector of cached poppler pages, index == page
      */
-    QList<QList<Poppler::Annotation *>> m_annotations;
+    QVector<Poppler::Page *> m_pages;
+
+    /**
+     * vector of cached poppler annotation of type link, index == page
+     */
+    QVector<QList<Poppler::Annotation *>> m_links;
 };

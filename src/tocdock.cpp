@@ -173,5 +173,5 @@ void TocDock::itemClicked(QTreeWidgetItem *item, int)
         return;
 
     QString dest = item->data(0, Qt::UserRole).toString();
-    emit gotoRequested(dest);
+    PdfViewer::view()->gotoDestination(dest);
 }

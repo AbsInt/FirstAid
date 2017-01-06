@@ -121,14 +121,6 @@ PdfViewer::PdfViewer(const QString &file)
 
     NavigationToolBar *navbar = new NavigationToolBar(tocDock->toggleViewAction(), menu, this);
     addToolBar(navbar);
-    connect(m_view, SIGNAL(zoomChanged(qreal)), navbar, SLOT(slotChangeZoom(qreal)));
-
-    connect(navbar, SIGNAL(gotoPage(int)), m_view, SLOT(gotoPage(int)));
-    connect(navbar, SIGNAL(zoomChanged(qreal)), m_view, SLOT(setZoom(qreal)));
-    connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), m_view, SLOT(setZoomMode(PageView::ZoomMode)));
-    connect(navbar, SIGNAL(toggleFacingPages(bool)), m_view, SLOT(setDoubleSideMode(bool)));
-
-    connect(tocDock, SIGNAL(gotoRequested(QString)), m_view, SLOT(gotoDestination(QString)));
 
     connect(&m_document, SIGNAL(documentChanged()), &m_searchEngine, SLOT(reset()));
 

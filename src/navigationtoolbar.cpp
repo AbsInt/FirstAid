@@ -169,6 +169,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
     connect(PdfViewer::view(), SIGNAL(pageChanged(int)), SLOT(slotPageChanged(int)));
+    connect(PdfViewer::view(), SIGNAL(zoomChanged(qreal)), SLOT(slotChangeZoom(qreal)));
 
     // init page label
     slotHideGoto();
@@ -222,27 +223,27 @@ void NavigationToolBar::slotPageChanged(int page)
 
 void NavigationToolBar::slotGoFirst()
 {
-    emit gotoPage(0);
+    PdfViewer::view()->gotoPage(0);
 }
 
 void NavigationToolBar::slotGoPrev()
 {
-    emit gotoPage(qMax(0, PdfViewer::view()->currentPage() - (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
+    PdfViewer::view()->gotoPage(qMax(0, PdfViewer::view()->currentPage() - (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
 }
 
 void NavigationToolBar::slotGoNext()
 {
-    emit gotoPage(qMin(PdfViewer::document()->numPages() - 1, PdfViewer::view()->currentPage() + (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
+    PdfViewer::view()->gotoPage(qMin(PdfViewer::document()->numPages() - 1, PdfViewer::view()->currentPage() + (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
 }
 
 void NavigationToolBar::slotGoLast()
 {
-    emit gotoPage(PdfViewer::document()->numPages() - 1);
+    PdfViewer::view()->gotoPage(PdfViewer::document()->numPages() - 1);
 }
 
 void NavigationToolBar::slotPageSet()
 {
-    emit gotoPage(m_pageEdit->text().toInt() - 1);
+    PdfViewer::view()->gotoPage(m_pageEdit->text().toInt() - 1);
 }
 
 void NavigationToolBar::slotGoto()
@@ -283,11 +284,11 @@ void NavigationToolBar::slotZoomChanged()
     if ("Fit width" == text) {
         m_zoomLabelAct->setVisible(false);
         m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-width.svg"));
-        emit zoomModeChanged(PageView::FitWidth);
+        PdfViewer::view()->setZoomMode(PageView::FitWidth);
     } else if ("Fit page" == text) {
         m_zoomLabelAct->setVisible(false);
         m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-best.svg"));
-        emit zoomModeChanged(PageView::FitPage);
+        PdfViewer::view()->setZoomMode(PageView::FitPage);
     } else {
         m_zoomLabelAct->setVisible(true);
         m_zoomLabel->setText(text);
@@ -298,13 +299,8 @@ void NavigationToolBar::slotZoomChanged()
         int value = text.toInt(&ok);
 
         if (ok && value >= 10 && value <= 400)
-            emit zoomChanged(qreal(value) / 100);
+            PdfViewer::view()->setZoom(qreal(value) / 100);
     }
-}
-
-void NavigationToolBar::slotToggleFacingPages()
-{
-    emit toggleFacingPages(m_toggleFacingPagesAct->isChecked());
 }
 
 void NavigationToolBar::slotChangeZoom(qreal currentZoom)
@@ -326,4 +322,9 @@ void NavigationToolBar::slotChangeZoom(qreal currentZoom)
             break;
         }
     }
+}
+
+void NavigationToolBar::slotToggleFacingPages()
+{
+    PdfViewer::view()->setDoubleSided(m_toggleFacingPagesAct->isChecked());
 }

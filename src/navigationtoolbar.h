@@ -42,11 +42,7 @@ public:
     bool eventFilter(QObject *object, QEvent *e) override;
 
 signals:
-    void gotoPage(int page);
     void showToc(bool on);
-    void zoomChanged(qreal value);
-    void zoomModeChanged(PageView::ZoomMode mode);
-    void toggleFacingPages(bool on);
 
 private slots:
     void slotDocumentChanged();
@@ -57,12 +53,13 @@ private slots:
     void slotGoPrev();
     void slotGoNext();
     void slotPageSet();
-    void slotZoomChanged();
     void slotGoto();
     void slotHideGoto();
-    void slotToggleFacingPages();
 
+    void slotZoomChanged();
     void slotChangeZoom(qreal currentZoom);
+
+    void slotToggleFacingPages();
 
 private:
     QAction *m_toggleFacingPagesAct = nullptr;

@@ -33,8 +33,6 @@
 #include "document.h"
 #include "historystack.h"
 
-#define PAGEFRAME 5
-
 class QRubberBand;
 
 class FirstAidPage
@@ -59,6 +57,7 @@ public:
 public:
     enum ZoomMode { FitWidth, FitPage, Absolute };
 
+    static int spacing();
     static QColor matchColor();
     static QColor highlightColor();
 
@@ -71,9 +70,10 @@ public:
     void setDocument(Document *document);
 
     int currentPage() const;
+    bool doubleSided() const;
 
 public slots:
-    void setDoubleSideMode(bool on);
+    void setDoubleSided(bool on);
     void setZoomMode(PageView::ZoomMode mode);
     void setZoom(qreal zoom);
 
@@ -141,7 +141,7 @@ private:
     int m_dpiY = 72;
     ZoomMode m_zoomMode = Absolute;
     qreal m_zoom = 1.0;
-    bool m_doubleSideMode = false;
+    bool m_doubleSided = false;
     int m_currentPage = -1;
 
     QCache<int, FirstAidPage> m_imageCache;
