@@ -25,7 +25,7 @@
 #include <QTreeWidget>
 
 TocDock::TocDock(QWidget *parent)
-       : QDockWidget(parent)
+    : QDockWidget(parent)
 {
     setWindowTitle(tr("Table of contents"));
 
@@ -74,17 +74,17 @@ void TocDock::pageChanged(int page)
         m_markedItem->setData(1, Qt::FontRole, QVariant());
 
         while (m_markedItem) {
-            if (m_markedItem->data(0, Qt::UserRole+1).isValid())
+            if (m_markedItem->data(0, Qt::UserRole + 1).isValid())
                 m_tree->setItemExpanded(m_markedItem, false);
             m_markedItem = m_markedItem->parent();
         }
     }
 
     while (!m_markedItem && page >= 0)
-        m_markedItem = m_pageToItemMap.value(1+page--);
+        m_markedItem = m_pageToItemMap.value(1 + page--);
 
     if (m_markedItem) {
-        QFont font=m_tree->font();
+        QFont font = m_tree->font();
         font.setBold(true);
         m_markedItem->setData(0, Qt::FontRole, font);
         m_markedItem->setData(1, Qt::FontRole, font);
@@ -93,7 +93,7 @@ void TocDock::pageChanged(int page)
         while (item) {
             if (!item->isExpanded()) {
                 m_tree->setItemExpanded(item, true);
-                item->setData(0, Qt::UserRole+1, true);
+                item->setData(0, Qt::UserRole + 1, true);
             }
 
             item = item->parent();
@@ -125,13 +125,13 @@ void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem
         else
             newitem = new QTreeWidgetItem(parentItem, newitem);
 
-        QString destination=e.attribute("DestinationName");
+        QString destination = e.attribute("DestinationName");
 
         newitem->setText(0, e.tagName());
         newitem->setData(0, Qt::UserRole, destination);
 
         if (Poppler::LinkDestination *link = document()->linkDestination(destination)) {
-            int pageNumber=link->pageNumber();
+            int pageNumber = link->pageNumber();
             delete link;
 
             newitem->setText(1, QString::number(pageNumber));

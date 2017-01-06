@@ -203,7 +203,7 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     closeDocument();
 
     QString errorMsg;
-    m_document.setDocument(file,&errorMsg);
+    m_document.setDocument(file, &errorMsg);
     m_view->setDocument(&m_document);
 
     // set file + watch
@@ -392,18 +392,18 @@ void PdfViewer::slotCurrentPageChanged(int page)
 
 void PdfViewer::dropEvent(QDropEvent *event)
 {
-    QList<QUrl> urls=event->mimeData()->urls();
+    QList<QUrl> urls = event->mimeData()->urls();
     if (!urls.isEmpty() && urls.first().isLocalFile())
-        loadDocument(urls.first().toLocalFile(), true/* force reload */);
+        loadDocument(urls.first().toLocalFile(), true /* force reload */);
 }
 
 void PdfViewer::dragEnterEvent(QDragEnterEvent *event)
 {
     if (Qt::CopyAction == event->proposedAction()) {
-        const QMimeData *mimeData=event->mimeData();
+        const QMimeData *mimeData = event->mimeData();
         if (mimeData->hasUrls()) {
-            QList<QUrl> urls=mimeData->urls();
-            if (1==urls.count() && urls.first().isLocalFile())
+            QList<QUrl> urls = mimeData->urls();
+            if (1 == urls.count() && urls.first().isLocalFile())
                 event->acceptProposedAction();
         }
     }
@@ -439,11 +439,10 @@ void PdfViewer::updateOnDocumentChange()
      */
     if (m_filePath.isEmpty())
         setWindowTitle(tr("FirstAid"));
+    else if (m_document.title().isEmpty())
+        setWindowTitle(QFileInfo(m_filePath).fileName());
     else
-        if (m_document.title().isEmpty())
-            setWindowTitle(QFileInfo(m_filePath).fileName());
-        else
-            setWindowTitle(m_document.title());
+        setWindowTitle(m_document.title());
 }
 
 QMenu *PdfViewer::createPopupMenu()

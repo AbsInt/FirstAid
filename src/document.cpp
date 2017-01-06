@@ -18,10 +18,8 @@
 
 #include "document.h"
 
-
 Document::Document()
 {
-
 }
 
 Document::~Document()
@@ -54,8 +52,7 @@ void Document::setDocument(const QString &fileName, QString *errorMessage)
 
     m_pages.reserve(newdoc->numPages());
     m_annotations.reserve(newdoc->numPages());
-    for (int i = 0; i < newdoc->numPages(); ++i)
-    {
+    for (int i = 0; i < newdoc->numPages(); ++i) {
         Poppler::Page *page = newdoc->page(i);
         m_pages.append(page);
         m_annotations.append(page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink));
@@ -64,7 +61,7 @@ void Document::setDocument(const QString &fileName, QString *errorMessage)
 
 Poppler::Page *Document::page(int page)
 {
-    return m_pages.value(page,nullptr);
+    return m_pages.value(page, nullptr);
 }
 
 const QDomDocument *Document::toc()
@@ -88,10 +85,9 @@ const QList<Poppler::Annotation *> &Document::annotations(int page)
 
 void Document::reset()
 {
-    for (int i = 0; i < m_annotations.length();++i)
-    {
-        const QList<Poppler::Annotation *> & list=  m_annotations.at(i);
-        for (int j = 0; j < list.length();++j)
+    for (int i = 0; i < m_annotations.length(); ++i) {
+        const QList<Poppler::Annotation *> &list = m_annotations.at(i);
+        for (int j = 0; j < list.length(); ++j)
             delete (list.at(j));
     }
     m_annotations.clear();
@@ -109,4 +105,3 @@ QString Document::title()
 
     return m_document->title();
 }
-

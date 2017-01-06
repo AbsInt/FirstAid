@@ -30,15 +30,21 @@ public:
     Document();
     ~Document();
 
-    void setDocument(const QString & fileName,QString *errorMessage);
+    void setDocument(const QString &fileName, QString *errorMessage);
 
-    int numPages() {return m_pages.size();}
-    Poppler::Page* page(int page);
+    int numPages()
+    {
+        return m_pages.size();
+    }
+    Poppler::Page *page(int page);
     const QDomDocument *toc();
     Poppler::LinkDestination *linkDestination(const QString &destination);
     const QList<Poppler::Annotation *> &annotations(int page);
 
-    bool isValid() {return m_document!=nullptr;}
+    bool isValid()
+    {
+        return m_document != nullptr;
+    }
 
     void reset();
 
@@ -58,7 +64,7 @@ private:
     /**
      * list of cached poppler pages, index == page
      */
-    QList<Poppler::Page*> m_pages;
+    QList<Poppler::Page *> m_pages;
 
     /**
      * list of cached poppler annotations, index == page

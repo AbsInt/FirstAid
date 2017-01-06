@@ -22,7 +22,8 @@
 #include <QList>
 #include <QString>
 
-class HistoryEntry {
+class HistoryEntry
+{
 public:
     enum Type { Unknown, PageWithOffset, Destination };
 
@@ -36,7 +37,8 @@ public:
     QString m_destination;
 };
 
-class HistoryStack {
+class HistoryStack
+{
 public:
     HistoryStack();
     ~HistoryStack();

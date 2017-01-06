@@ -336,7 +336,7 @@ bool PageView::event(QEvent *event)
     }
 
     if (event->type() == QEvent::ScrollPrepare) {
-        QScrollPrepareEvent *spe=static_cast<QScrollPrepareEvent *>(event);
+        QScrollPrepareEvent *spe = static_cast<QScrollPrepareEvent *>(event);
         spe->setViewportSize(viewport()->size());
         spe->setContentPosRange(QRect(0, 0, horizontalScrollBar()->maximum(), verticalScrollBar()->maximum()));
         spe->setContentPos(m_offset);
@@ -345,7 +345,7 @@ bool PageView::event(QEvent *event)
     }
 
     if (event->type() == QEvent::Scroll) {
-        QScrollEvent *se=static_cast<QScrollEvent *>(event);
+        QScrollEvent *se = static_cast<QScrollEvent *>(event);
         setOffset(se->contentPos().toPoint());
         se->accept();
         return true;
@@ -866,7 +866,6 @@ FirstAidPage PageView::getPage(int pageNumber)
 
     if (!cachedPage) {
         if (Poppler::Page *page = m_document->page(pageNumber)) {
-
             /**
              * we render in too high resolution and then set the right ratio
              */

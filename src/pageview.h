@@ -43,7 +43,6 @@ public:
     FirstAidPage(QImage image)
         : m_image(image)
     {
-
     }
 
     QImage m_image;
@@ -90,7 +89,7 @@ public slots:
     void historyPrev();
     void historyNext();
 
-    void gotoDestination(const QString &destination, bool updateHistory=true);
+    void gotoDestination(const QString &destination, bool updateHistory = true);
     void gotoHistoryEntry(const HistoryEntry &entry);
     void slotCopyRequested(int page, const QRectF &rect);
 

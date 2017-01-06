@@ -26,7 +26,7 @@ DocumentObserver::~DocumentObserver()
 
 Document *DocumentObserver::document() const
 {
-    return m_viewer ? &m_viewer->m_document: nullptr;
+    return m_viewer ? &m_viewer->m_document : nullptr;
 }
 
 void DocumentObserver::setPage(int page)

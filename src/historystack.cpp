@@ -22,28 +22,27 @@
 
 #include "historystack.h"
 
-
-
-/* 
+/*
  * helper class
  */
 
-HistoryEntry::HistoryEntry(): m_type(Unknown)
+HistoryEntry::HistoryEntry()
+    : m_type(Unknown)
 {
 }
 
-HistoryEntry::HistoryEntry(int page, int offset): m_type(PageWithOffset), 
-                                                  m_page(page), 
-                                                  m_offset(offset)
+HistoryEntry::HistoryEntry(int page, int offset)
+    : m_type(PageWithOffset)
+    , m_page(page)
+    , m_offset(offset)
 {
 }
 
-HistoryEntry::HistoryEntry(const QString &destination): m_type(Destination), 
-                                                        m_destination(destination)
+HistoryEntry::HistoryEntry(const QString &destination)
+    : m_type(Destination)
+    , m_destination(destination)
 {
 }
-
-
 
 /*
  * constructors / destructor
@@ -56,7 +55,6 @@ HistoryStack::HistoryStack()
 HistoryStack::~HistoryStack()
 {
 }
-
 
 /*
  * public methods
@@ -71,33 +69,32 @@ void HistoryStack::clear()
 void HistoryStack::add(int page, int offset)
 {
     // pop entries after current index
-    while (m_index >= 0 && m_index+1 < m_stack.count())
+    while (m_index >= 0 && m_index + 1 < m_stack.count())
         m_stack.takeLast();
 
     // add new location
     m_stack << HistoryEntry(page, offset);
-    m_index = m_stack.count()-1;
+    m_index = m_stack.count() - 1;
 }
 
 void HistoryStack::add(const QString &destination)
 {
     // pop entries after current index
-    while (m_index >= 0 && m_index+1 < m_stack.count())
+    while (m_index >= 0 && m_index + 1 < m_stack.count())
         m_stack.takeLast();
 
     // add new location
     m_stack << HistoryEntry(destination);
-    m_index = m_stack.count()-1;
+    m_index = m_stack.count() - 1;
 }
 
 bool HistoryStack::HistoryStack::previous(HistoryEntry &entry)
 {
     if (m_index > 0) {
         m_index--;
-        entry=m_stack.at(m_index);
+        entry = m_stack.at(m_index);
         return true;
-    }
-    else
+    } else
         return false;
 }
 
@@ -105,10 +102,9 @@ bool HistoryStack::HistoryStack::next(HistoryEntry &entry)
 {
     if (m_index < m_stack.count() - 1) {
         m_index++;
-        entry=m_stack.at(m_index);
+        entry = m_stack.at(m_index);
         return true;
-    }
-    else
+    } else
         return false;
 }
 
