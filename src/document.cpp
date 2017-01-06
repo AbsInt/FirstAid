@@ -1,5 +1,7 @@
 /*
  * Copyright (C) 2016, Jan Pohland <pohland@absint.com>
+ * Copyright (C) 2016, Christoph Cullmann <cullmann@absint.com>
+ * Copyright (C) 2016, Marc Langenbach <mlangen@absint.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +64,7 @@ void Document::setDocument(Poppler::Document *document)
 
 void Document::setCurrentPage(int page)
 {
-    if (m_currentPage != page) {
+    if (isValid() && m_currentPage != page && page >= 0 && page < numPages()) {
         m_currentPage = page;
         emit pageChanged(m_currentPage);
     }

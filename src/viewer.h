@@ -114,9 +114,6 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
 
 private:
-    void setPage(int page);
-    int page() const;
-
     /**
      * Update e.g. actions on document change
      */
