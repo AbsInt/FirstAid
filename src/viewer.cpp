@@ -113,7 +113,6 @@ PdfViewer::PdfViewer(const QString &file)
     setFocusProxy(m_view);
 
     FindBar *fb = new FindBar(w);
-    m_observers.append(fb);
     vbl->addWidget(fb);
 
     setCentralWidget(w);

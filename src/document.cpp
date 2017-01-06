@@ -110,4 +110,3 @@ void Document::reset()
     delete m_document;
     m_document = nullptr;
 }
-

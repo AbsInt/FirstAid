@@ -20,12 +20,10 @@
 
 #include <QWidget>
 
-#include "documentobserver.h"
-
 class QLineEdit;
 class QToolButton;
 
-class FindBar : public QWidget, public DocumentObserver
+class FindBar : public QWidget
 {
     Q_OBJECT
 
@@ -33,14 +31,12 @@ public:
     FindBar(QWidget *parent = nullptr);
     ~FindBar();
 
-    void documentLoaded();
-    void documentClosed();
-    void pageChanged(int page);
-
 signals:
     void markerRequested(const QRectF &rect);
 
 private slots:
+    void slotDocumentChanged();
+
     void slotFind();
     void slotHide();
 

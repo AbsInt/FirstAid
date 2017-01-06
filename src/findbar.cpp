@@ -73,31 +73,24 @@ FindBar::FindBar(QWidget *parent)
     connect(m_prevMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(previousMatch()));
     connect(m_nextMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(nextMatch()));
 
-    documentClosed();
+    connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
+
+    slotDocumentChanged();
 }
 
 FindBar::~FindBar()
 {
 }
 
-void FindBar::documentLoaded()
-{
-    m_findEdit->setEnabled(true);
-    m_nextMatch->setEnabled(true);
-    m_prevMatch->setEnabled(true);
-}
-
-void FindBar::documentClosed()
+void FindBar::slotDocumentChanged()
 {
     slotHide();
     m_findEdit->clear();
-    m_findEdit->setEnabled(false);
-    m_nextMatch->setEnabled(false);
-    m_prevMatch->setEnabled(false);
-}
 
-void FindBar::pageChanged(int)
-{
+    bool on = PdfViewer::document()->isValid();
+    m_findEdit->setEnabled(on);
+    m_nextMatch->setEnabled(on);
+    m_prevMatch->setEnabled(on);
 }
 
 void FindBar::slotFind()
