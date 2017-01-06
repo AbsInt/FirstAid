@@ -18,13 +18,11 @@
 
 #pragma once
 
-#include "documentobserver.h"
-
 #include <QHash>
 #include <QList>
 #include <QObject>
 
-class SearchEngine : public QObject, public DocumentObserver
+class SearchEngine : public QObject
 {
     Q_OBJECT
 
@@ -32,17 +30,13 @@ public:
     SearchEngine();
     ~SearchEngine();
 
-    void documentLoaded();
-    void documentClosed();
-    void pageChanged(int page);
-
-    void reset();
-
     void currentMatch(int &page, QRectF &match) const;
     QHash<int, QList<QRectF>> matches() const;
     QList<QRectF> matchesFor(int page) const;
 
 public slots:
+    void reset();
+
     void find(const QString &text);
     void nextMatch();
     void previousMatch();

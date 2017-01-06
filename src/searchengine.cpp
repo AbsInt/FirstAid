@@ -21,6 +21,7 @@
  */
 
 #include "searchengine.h"
+#include "viewer.h"
 
 #include <poppler-qt5.h>
 
@@ -38,7 +39,7 @@
  */
 
 SearchEngine::SearchEngine()
-    : DocumentObserver()
+    : QObject()
 {
     reset();
 }
@@ -50,21 +51,6 @@ SearchEngine::~SearchEngine()
 /*
  * public methods
  */
-
-void SearchEngine::documentLoaded()
-{
-    reset();
-}
-
-void SearchEngine::documentClosed()
-{
-    reset();
-}
-
-void SearchEngine::pageChanged(int page)
-{
-    Q_UNUSED(page)
-}
 
 void SearchEngine::currentMatch(int &page, QRectF &match) const
 {
@@ -122,11 +108,11 @@ void SearchEngine::find(const QString &text)
         return;
     }
 
-    m_findCurrentPage = page();
+    m_findCurrentPage = PdfViewer::document()->currentPage();
 
     m_findStopAfterPage = m_findCurrentPage - 1;
     if (m_findStopAfterPage < 0)
-        m_findStopAfterPage = document()->numPages() - 1;
+        m_findStopAfterPage = PdfViewer::document()->numPages() - 1;
 
     find();
 }
@@ -145,7 +131,7 @@ void SearchEngine::nextMatch()
     }
 
     // find next match
-    for (int page = m_currentMatchPage + 1; page < document()->numPages(); page++) {
+    for (int page = m_currentMatchPage + 1; page < PdfViewer::document()->numPages(); page++) {
         QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
             m_currentMatchPage = page;
@@ -190,7 +176,7 @@ void SearchEngine::previousMatch()
         }
     }
 
-    for (int page = document()->numPages() - 1; page > m_currentMatchPage; page--) {
+    for (int page = PdfViewer::document()->numPages() - 1; page > m_currentMatchPage; page--) {
         QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
             m_currentMatchPage = page;
@@ -214,7 +200,9 @@ void SearchEngine::find()
 
     for (int count = 0; count < PagePileSize; count++) {
         // find our text on the current search page
-        Poppler::Page *p = document()->page(m_findCurrentPage);
+        Poppler::Page *p = PdfViewer::document()->page(m_findCurrentPage);
+        if (!p)
+            qWarning("no page for %d", m_findCurrentPage);
         QList<QRectF> matches = p->search(m_findText, Poppler::Page::IgnoreCase);
 
         // signal matches and remember them
@@ -239,7 +227,7 @@ void SearchEngine::find()
 
         // no? proceed with next page or wrap around
         m_findCurrentPage++;
-        if (m_findCurrentPage >= document()->numPages())
+        if (m_findCurrentPage >= PdfViewer::document()->numPages())
             m_findCurrentPage = 0;
 
         if (delayAfterFirstMatch)

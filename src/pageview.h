@@ -100,7 +100,6 @@ public slots:
     void setOffset(const QPoint &point);
 
 signals:
-    void currentPageChanged(int page);
     void copyRequested(const QRectF &area);
 
 protected:
@@ -130,9 +129,6 @@ private:
     FirstAidPage getPage(int page);
     int pageForPoint(const QPoint &point);
 
-public:
-    int currentPage() const;
-
 signals:
     void zoomChanged(qreal CurrentZoom);
 
@@ -140,7 +136,6 @@ private:
     Document *m_document = nullptr;
     int m_dpiX = 72;
     int m_dpiY = 72;
-    int m_currentPage = 0;
     ZoomMode m_zoomMode = Absolute;
     qreal m_zoom = 1.0;
     bool m_doubleSideMode = false;

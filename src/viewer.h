@@ -109,8 +109,6 @@ private slots:
     void slotPrint();
     void slotAbout();
 
-    void slotCurrentPageChanged(int page);
-
 protected:
     void dropEvent(QDropEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;

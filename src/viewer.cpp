@@ -108,7 +108,6 @@ PdfViewer::PdfViewer(const QString &file)
 
     m_view = new PageView(this);
     vbl->addWidget(m_view);
-    connect(m_view, SIGNAL(currentPageChanged(int)), SLOT(slotCurrentPageChanged(int)));
 
     setFocusProxy(m_view);
 
@@ -122,20 +121,16 @@ PdfViewer::PdfViewer(const QString &file)
 
     NavigationToolBar *navbar = new NavigationToolBar(tocDock->toggleViewAction(), menu, this);
     addToolBar(navbar);
-    m_observers.append(navbar);
     connect(m_view, SIGNAL(zoomChanged(qreal)), navbar, SLOT(slotChangeZoom(qreal)));
 
-    // register our own search engine
-    m_observers << &m_searchEngine;
-
-    foreach (DocumentObserver *obs, m_observers)
-        obs->m_viewer = this;
-
+    connect(navbar, SIGNAL(gotoPage(int)), m_view, SLOT(gotoPage(int)));
     connect(navbar, SIGNAL(zoomChanged(qreal)), m_view, SLOT(setZoom(qreal)));
     connect(navbar, SIGNAL(zoomModeChanged(PageView::ZoomMode)), m_view, SLOT(setZoomMode(PageView::ZoomMode)));
     connect(navbar, SIGNAL(toggleFacingPages(bool)), m_view, SLOT(setDoubleSideMode(bool)));
 
     connect(tocDock, SIGNAL(gotoRequested(QString)), m_view, SLOT(gotoDestination(QString)));
+
+    connect(&m_document, SIGNAL(documentChanged()), &m_searchEngine, SLOT(reset()));
 
     /**
      * auto-reload
@@ -225,11 +220,6 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     settings.beginGroup("Files");
     setPage(settings.value(m_filePath, 0).toInt());
     settings.endGroup();
-
-    foreach (DocumentObserver *obs, m_observers) {
-        obs->documentLoaded();
-        obs->pageChanged(page());
-    }
 }
 
 void PdfViewer::closeDocument()
@@ -243,9 +233,6 @@ void PdfViewer::closeDocument()
     settings.endGroup();
 
     m_view->setDocument(nullptr);
-
-    foreach (DocumentObserver *obs, m_observers)
-        obs->documentClosed();
 
     m_document.setDocument(nullptr);
 
@@ -392,12 +379,6 @@ void PdfViewer::slotAbout()
                            .arg(releaseInfo));
 }
 
-void PdfViewer::slotCurrentPageChanged(int page)
-{
-    foreach (DocumentObserver *obs, m_observers)
-        obs->pageChanged(page);
-}
-
 void PdfViewer::dropEvent(QDropEvent *event)
 {
     QList<QUrl> urls = event->mimeData()->urls();
@@ -425,12 +406,13 @@ void PdfViewer::setPage(int page)
     if (page == this->page())
         return;
 
+    m_document.setCurrentPage(page);
     m_view->gotoPage(page);
 }
 
 int PdfViewer::page() const
 {
-    return m_view->currentPage();
+    return m_document.currentPage();
 }
 
 void PdfViewer::updateOnDocumentChange()

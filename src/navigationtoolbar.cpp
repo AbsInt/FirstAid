@@ -19,7 +19,9 @@
  */
 
 #include "navigationtoolbar.h"
+#include "document.h"
 #include "searchengine.h"
+#include "viewer.h"
 
 #include <poppler-qt5.h>
 
@@ -164,8 +166,9 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QList<QAction *> zoomActions = zoomMenu->actions();
     if (index >= 0 && index < zoomActions.count())
         QTimer::singleShot(0, zoomActions.at(index), SLOT(trigger()));
-    else
-        qDebug("%d/%d", index, zoomActions.count());
+
+    connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
+    connect(PdfViewer::document(), SIGNAL(pageChanged(int)), SLOT(slotPageChanged(int)));
 
     // init page label
     slotHideGoto();
@@ -178,92 +181,88 @@ NavigationToolBar::~NavigationToolBar()
     s.setValue("MainWindow/facingPages", m_toggleFacingPagesAct->isChecked());
 }
 
-void NavigationToolBar::documentLoaded()
-{
-    const int pageCount = document()->numPages();
-
-    m_pageEdit->setText("1");
-    m_pageEdit->setEnabled(true);
-    m_pageEdit->selectAll();
-
-    m_intValidator->setRange(1, 1 + pageCount);
-}
-
-void NavigationToolBar::documentClosed()
-{
-    slotHideGoto();
-
-    m_prevAct->setEnabled(false);
-    m_nextAct->setEnabled(false);
-    m_pageEdit->clear();
-    m_pageEdit->setEnabled(false);
-}
-
-void NavigationToolBar::pageChanged(int page)
-{
-    slotHideGoto();
-
-    const int pageCount = document()->numPages();
-    m_prevAct->setEnabled(page > 0);
-    m_nextAct->setEnabled(page < (pageCount - 1));
-}
-
 bool NavigationToolBar::eventFilter(QObject *object, QEvent *event)
 {
-    // clicking on the status label displaying the current page number will trigger goto action
-    if (object == m_pageLabel && QEvent::MouseButtonPress == event->type())
-        QTimer::singleShot(0, this, SLOT(slotGoto()));
+    if (PdfViewer::document()->isValid()) {
+        // clicking on the status label displaying the current page number will trigger goto action
+        if (object == m_pageLabel && QEvent::MouseButtonPress == event->type())
+            QTimer::singleShot(0, this, SLOT(slotGoto()));
 
-    // clicking on the zoom label displaying the current scale factor will trigger zoom menu
-    else if (object == m_zoomLabel && QEvent::MouseButtonPress == event->type())
-        QTimer::singleShot(0, m_zoomButton, SLOT(showMenu()));
+        // clicking on the zoom label displaying the current scale factor will trigger zoom menu
+        else if (object == m_zoomLabel && QEvent::MouseButtonPress == event->type())
+            QTimer::singleShot(0, m_zoomButton, SLOT(showMenu()));
+    }
 
     return QToolBar::eventFilter(object, event);
 }
 
+void NavigationToolBar::slotDocumentChanged()
+{
+    slotHideGoto();
+
+    bool valid = PdfViewer::document()->isValid();
+
+    if (valid)
+        m_intValidator->setRange(1, PdfViewer::document()->numPages());
+
+    m_prevAct->setEnabled(valid);
+    m_nextAct->setEnabled(valid);
+    m_pageEdit->clear();
+    m_pageEdit->setEnabled(valid);
+}
+
+void NavigationToolBar::slotPageChanged(int page)
+{
+    slotHideGoto();
+
+    const int pageCount = PdfViewer::document()->numPages();
+    m_prevAct->setEnabled(page > 0);
+    m_nextAct->setEnabled(page < (pageCount - 1));
+}
+
 void NavigationToolBar::slotGoFirst()
 {
-    setPage(0);
+    emit gotoPage(0);
 }
 
 void NavigationToolBar::slotGoPrev()
 {
-    setPage(qMax(0, page() - (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
+    emit gotoPage(qMax(0, PdfViewer::document()->currentPage() - (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
 }
 
 void NavigationToolBar::slotGoNext()
 {
-    setPage(qMin(document()->numPages() - 1, page() + (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
+    emit gotoPage(qMin(PdfViewer::document()->numPages() - 1, PdfViewer::document()->currentPage() + (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
 }
 
 void NavigationToolBar::slotGoLast()
 {
-    setPage(document()->numPages() - 1);
+    emit gotoPage(PdfViewer::document()->numPages() - 1);
 }
 
 void NavigationToolBar::slotPageSet()
 {
-    setPage(m_pageEdit->text().toInt() - 1);
+    emit gotoPage(m_pageEdit->text().toInt() - 1);
 }
 
 void NavigationToolBar::slotGoto()
 {
-    if (!document())
+    if (!PdfViewer::document())
         return;
 
-    m_pageLabel->setText(QString(" / %2").arg(document()->numPages()));
+    m_pageLabel->setText(QString(" / %2").arg(PdfViewer::document()->numPages()));
 
     m_pageEditAct->setVisible(true);
 
-    m_pageEdit->setText(QString::number(1 + page()));
+    m_pageEdit->setText(QString::number(1 + PdfViewer::document()->currentPage()));
     m_pageEdit->selectAll();
     m_pageEdit->setFocus();
 }
 
 void NavigationToolBar::slotHideGoto()
 {
-    if (document())
-        m_pageLabel->setText(QString("%1 / %2").arg(1 + page()).arg(document()->numPages()));
+    if (PdfViewer::document())
+        m_pageLabel->setText(QString("%1 / %2").arg(1 + PdfViewer::document()->currentPage()).arg(PdfViewer::document()->numPages()));
     else
         m_pageLabel->setText("n/a");
 

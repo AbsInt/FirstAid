@@ -22,7 +22,6 @@
 
 #include <QToolBar>
 
-#include "documentobserver.h"
 #include "pageview.h"
 
 class QAction;
@@ -32,7 +31,7 @@ class QLabel;
 class QLineEdit;
 class QToolButton;
 
-class NavigationToolBar : public QToolBar, public DocumentObserver
+class NavigationToolBar : public QToolBar
 {
     Q_OBJECT
 
@@ -40,19 +39,19 @@ public:
     NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent = nullptr);
     ~NavigationToolBar();
 
-    void documentLoaded() override;
-    void documentClosed() override;
-    void pageChanged(int page) override;
-
     bool eventFilter(QObject *object, QEvent *e) override;
 
 signals:
+    void gotoPage(int page);
     void showToc(bool on);
     void zoomChanged(qreal value);
     void zoomModeChanged(PageView::ZoomMode mode);
     void toggleFacingPages(bool on);
 
 private slots:
+    void slotDocumentChanged();
+    void slotPageChanged(int page);
+
     void slotGoFirst();
     void slotGoLast();
     void slotGoPrev();
