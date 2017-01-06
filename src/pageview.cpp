@@ -504,9 +504,7 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
         qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        FirstAidPage cachedPage = getPage(pageNumber);
-
-        for (auto &a : *cachedPage.m_annotations) {
+        for (auto &a : m_document->annotations(pageNumber)) {
             if (a->boundary().contains(p)) {
                 setCursor(Qt::PointingHandCursor);
                 return;
@@ -539,15 +537,14 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
         int pageNumber = it.key();
         QRect displayRect = it.value();
-        FirstAidPage cachedPage = getPage(pageNumber);
 
         qreal xPos = (event->x() - displayRect.x()) / (qreal)displayRect.width();
         qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        for (auto &a : *cachedPage.m_annotations) {
+        for (auto a : m_document->annotations(pageNumber)) {
             if (a->boundary().contains(p)) {
-                Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(a.get())->linkDestination();
+                Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(a)->linkDestination();
                 switch (link->linkType()) {
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
@@ -869,12 +866,11 @@ FirstAidPage PageView::getPage(int pageNumber)
 
     if (!cachedPage) {
         if (Poppler::Page *page = m_document->page(pageNumber)) {
-            QList<Poppler::Annotation *> annots = page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink);
 
             /**
              * we render in too high resolution and then set the right ratio
              */
-            cachedPage = new FirstAidPage(page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0), annots);
+            cachedPage = new FirstAidPage(page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0));
             cachedPage->m_image.setDevicePixelRatio(devicePixelRatio());
 
             m_imageCache.insert(pageNumber, cachedPage);
@@ -883,7 +879,7 @@ FirstAidPage PageView::getPage(int pageNumber)
     } else
         return *cachedPage;
 
-    return FirstAidPage(QImage(), QList<Poppler::Annotation *>());
+    return FirstAidPage(QImage());
 }
 
 int PageView::pageForPoint(const QPoint &point)

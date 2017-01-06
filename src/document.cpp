@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2016, Jan Pohland <pohland@absint.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+
 #include "document.h"
 
 
@@ -8,8 +26,7 @@ Document::Document()
 
 Document::~Document()
 {
-    qDeleteAll(m_pages);
-    delete m_document;
+    reset();
 }
 
 void Document::setDocument(const QString &fileName, QString *errorMessage)
@@ -35,18 +52,20 @@ void Document::setDocument(const QString &fileName, QString *errorMessage)
 
     m_pages = QList<Poppler::Page*>();
     m_pages.reserve(m_numPages);
+    m_annotations.clear();
+    m_annotations.reserve(m_numPages);
+
     for (int i = 0; i < m_numPages; ++i)
     {
-        m_pages.append(newdoc->page(i));
-
+        Poppler::Page *page = newdoc->page(i);
+        m_pages.append(page);
+        m_annotations.append(page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink));
     }
 }
 
 Poppler::Page *Document::page(int page)
 {
-    if (page>=m_pages.length())
-        return nullptr;
-    return m_pages.at(page);
+    return m_pages.value(page,nullptr);
 }
 
 const QDomDocument *Document::toc()
@@ -60,6 +79,29 @@ const QDomDocument *Document::toc()
 Poppler::LinkDestination *Document::linkDestination(const QString &destination)
 {
     return m_document->linkDestination(destination);
+}
+
+const QList<Poppler::Annotation *> &Document::annotations(int page)
+{
+    Q_ASSERT(page <= m_annotations.length());
+    return m_annotations.at(page);
+}
+
+void Document::reset()
+{
+    for (int i = 0; i < m_annotations.length();++i)
+    {
+        const QList<Poppler::Annotation *> & list=  m_annotations.at(i);
+        for (int j = 0; j < list.length();++j)
+            delete (list.at(j));
+    }
+    m_annotations.clear();
+    qDeleteAll(m_pages);
+    m_pages.clear();
+    m_fileName = QString();
+    delete m_document;
+    m_document = nullptr;
+    m_numPages = 0;
 }
 
 QString Document::title()

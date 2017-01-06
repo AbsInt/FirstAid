@@ -239,7 +239,7 @@ void PdfViewer::closeDocument()
     foreach (DocumentObserver *obs, m_observers)
         obs->documentClosed();
 
-    m_document = Document();
+    m_document.reset();
 
     // remove path
     m_fileWatcher.removePath(m_filePath);

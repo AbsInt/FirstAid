@@ -40,16 +40,13 @@ class QRubberBand;
 class FirstAidPage
 {
 public:
-    FirstAidPage(QImage image, const QList<Poppler::Annotation *> &annotations)
+    FirstAidPage(QImage image)
         : m_image(image)
-        , m_annotations(new std::vector<std::unique_ptr<Poppler::Annotation>>())
     {
-        foreach (auto *a, annotations)
-            m_annotations->push_back(std::unique_ptr<Poppler::Annotation>(a));
+
     }
 
     QImage m_image;
-    std::shared_ptr<std::vector<std::unique_ptr<Poppler::Annotation>>> m_annotations;
 };
 
 class PageView : public QAbstractScrollArea
