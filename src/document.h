@@ -38,10 +38,6 @@ public:
     /*! Set Poppler document to use, any old data will be deleted. */
     void setDocument(Poppler::Document *document);
 
-    /*! Set current page. */
-    void setCurrentPage(int page);
-
-    int currentPage() const;
     int numPages() const;
     Poppler::Page *page(int page);
     const QDomDocument *toc();
@@ -52,7 +48,6 @@ public:
 
 signals:
     void documentChanged();
-    void pageChanged(int page);
 
 private:
     void reset();

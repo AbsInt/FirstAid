@@ -48,7 +48,7 @@ TocDock::TocDock(QWidget *parent)
     connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), SLOT(itemClicked(QTreeWidgetItem *, int)));
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(documentChanged()));
-    connect(PdfViewer::document(), SIGNAL(pageChanged(int)), SLOT(pageChanged(int)));
+    connect(PdfViewer::view(), SIGNAL(pageChanged(int)), SLOT(pageChanged(int)));
 }
 
 TocDock::~TocDock()

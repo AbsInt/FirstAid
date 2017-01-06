@@ -86,6 +86,16 @@ public:
         return &s_instance->m_document;
     }
 
+    /**
+     * Access to global view.
+     * @return view instance
+     */
+    static PageView *view()
+    {
+        Q_ASSERT(s_instance);
+        return s_instance->m_view;
+    }
+
     QSize sizeHint() const override;
 
     void loadDocument(QString file, bool forceReload = false);

@@ -108,7 +108,7 @@ void SearchEngine::find(const QString &text)
         return;
     }
 
-    m_findCurrentPage = PdfViewer::document()->currentPage();
+    m_findCurrentPage = PdfViewer::view()->currentPage();
 
     m_findStopAfterPage = m_findCurrentPage - 1;
     if (m_findStopAfterPage < 0)

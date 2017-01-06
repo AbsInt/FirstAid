@@ -176,11 +176,17 @@ QRectF PageView::toPoints(const QRectF &rect) const
 void PageView::setDocument(Document *document)
 {
     m_document = document;
+    m_currentPage = -1;
 
     m_historyStack.clear();
 
     // visual size of document might change now!
     updateViewSize();
+}
+
+int PageView::currentPage() const
+{
+    return m_currentPage;
 }
 
 void PageView::setZoomMode(ZoomMode mode)
@@ -278,8 +284,10 @@ void PageView::scrolled()
     if (page < 0)
         page = 0;
 
-    if (page < (m_document ? m_document->numPages() : 0))
-        m_document->setCurrentPage(page);
+    if (page < (m_document ? m_document->numPages() : 0)) {
+        m_currentPage = page;
+        emit pageChanged(m_currentPage);
+    }
 }
 
 void PageView::setOffset(const QPoint &offset)
@@ -356,7 +364,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         return;
 
     m_pageRects.clear();
-    int currentPage = m_document->currentPage();
+    int currentPage = m_currentPage;
 
     // show previous page in doubleside mode
     if (m_doubleSideMode && (currentPage > 1) && !(currentPage % 2))
@@ -427,21 +435,21 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
         return;
 
     if (FitWidth == m_zoomMode) {
-        Poppler::Page *page = m_document->page(m_document->currentPage());
+        Poppler::Page *page = m_document->page(m_currentPage);
         if (!page)
             return;
         QSizeF pageSize = page->pageSize();
         pageSize.setWidth(2 * PAGEFRAME + pageSize.width());
 
         if (m_doubleSideMode) {
-            if (Poppler::Page *page = m_document->page(m_document->currentPage() + 1))
+            if (Poppler::Page *page = m_document->page(m_currentPage + 1))
                 pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
         }
 
         m_zoom = viewport()->size().width() / (m_dpiX * pageSize.width() / 72.0);
         updateViewSize();
     } else if (FitPage == m_zoomMode) {
-        Poppler::Page *page = m_document->page(m_document->currentPage());
+        Poppler::Page *page = m_document->page(m_currentPage);
         if (!page)
             return;
         QSizeF pageSize = page->pageSize();
@@ -449,7 +457,7 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
         pageSize.setHeight(2 * PAGEFRAME + pageSize.height());
 
         if (m_doubleSideMode) {
-            if (Poppler::Page *page = m_document->page(m_document->currentPage() + 1))
+            if (Poppler::Page *page = m_document->page(m_currentPage + 1))
                 pageSize.setWidth(pageSize.width() + page->pageSize().width() + PAGEFRAME);
         }
 
@@ -628,13 +636,14 @@ void PageView::gotoPage(int page, int offset)
     if (!m_document || page < 0 || page >= m_document->numPages())
         return;
 
-    if (page == m_document->currentPage() && m_offset.y() == offset) {
+    if (page == m_currentPage && m_offset.y() == offset) {
         viewport()->update();
         return;
     }
 
     m_offset = QPoint(m_offset.x(), offset);
-    m_document->setCurrentPage(page);
+    m_currentPage = page;
+    emit pageChanged(m_currentPage);
 
     // misuse to go to page
     updateViewSize(false /* goto mode, don't clear cache */);
@@ -669,13 +678,13 @@ void PageView::gotoPage(int page, const QRectF &rect)
 
 void PageView::gotoPreviousPage()
 {
-    int newPage = qMax(0, m_document->currentPage() - (m_doubleSideMode ? 2 : 1));
+    int newPage = qMax(0, m_currentPage - (m_doubleSideMode ? 2 : 1));
     gotoPage(newPage, 0);
 }
 
 void PageView::gotoNextPage()
 {
-    int newPage = qMin(m_document->numPages() - 1, m_document->currentPage() + (m_doubleSideMode ? 2 : 1));
+    int newPage = qMin(m_document->numPages() - 1, m_currentPage + (m_doubleSideMode ? 2 : 1));
     gotoPage(newPage, 0);
 }
 
@@ -777,7 +786,7 @@ void PageView::slotFindStarted()
 
 void PageView::slotMatchesFound(int page, const QList<QRectF> &)
 {
-    if (page == m_document->currentPage())
+    if (page == m_currentPage)
         viewport()->update();
 }
 
@@ -791,7 +800,7 @@ int PageView::pageHeight()
         return 0;
 
     int pageSize = 0;
-    if (Poppler::Page *popplerPage = m_document->page(m_document->currentPage()))
+    if (Poppler::Page *popplerPage = m_document->page(m_currentPage))
         pageSize = popplerPage->pageSize().height();
     return (pageSize * resY()) / 72.0;
 }
@@ -802,7 +811,7 @@ int PageView::pageWidth()
         return 0;
 
     int pageSize = 0;
-    if (Poppler::Page *popplerPage = m_document->page(m_document->currentPage()))
+    if (Poppler::Page *popplerPage = m_document->page(m_currentPage))
         pageSize = popplerPage->pageSize().width();
     return (pageSize * resX()) / 72.0;
     ;
@@ -816,7 +825,7 @@ void PageView::updateViewSize(bool invalidateCache)
 
     QScrollBar *vbar = verticalScrollBar();
     int pageCount = m_document ? m_document->numPages() : 0;
-    int current = m_document ? m_document->currentPage() : 0;
+    int current = m_document ? m_currentPage : 0;
     if (m_doubleSideMode) {
         if (pageCount % 2)
             pageCount = pageCount / 2 + 1;

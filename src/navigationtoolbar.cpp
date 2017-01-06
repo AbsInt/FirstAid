@@ -168,7 +168,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
         QTimer::singleShot(0, zoomActions.at(index), SLOT(trigger()));
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
-    connect(PdfViewer::document(), SIGNAL(pageChanged(int)), SLOT(slotPageChanged(int)));
+    connect(PdfViewer::view(), SIGNAL(pageChanged(int)), SLOT(slotPageChanged(int)));
 
     // init page label
     slotHideGoto();
@@ -227,12 +227,12 @@ void NavigationToolBar::slotGoFirst()
 
 void NavigationToolBar::slotGoPrev()
 {
-    emit gotoPage(qMax(0, PdfViewer::document()->currentPage() - (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
+    emit gotoPage(qMax(0, PdfViewer::view()->currentPage() - (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
 }
 
 void NavigationToolBar::slotGoNext()
 {
-    emit gotoPage(qMin(PdfViewer::document()->numPages() - 1, PdfViewer::document()->currentPage() + (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
+    emit gotoPage(qMin(PdfViewer::document()->numPages() - 1, PdfViewer::view()->currentPage() + (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
 }
 
 void NavigationToolBar::slotGoLast()
@@ -254,7 +254,7 @@ void NavigationToolBar::slotGoto()
 
     m_pageEditAct->setVisible(true);
 
-    m_pageEdit->setText(QString::number(1 + PdfViewer::document()->currentPage()));
+    m_pageEdit->setText(QString::number(1 + PdfViewer::view()->currentPage()));
     m_pageEdit->selectAll();
     m_pageEdit->setFocus();
 }
@@ -262,7 +262,7 @@ void NavigationToolBar::slotGoto()
 void NavigationToolBar::slotHideGoto()
 {
     if (PdfViewer::document())
-        m_pageLabel->setText(QString("%1 / %2").arg(1 + PdfViewer::document()->currentPage()).arg(PdfViewer::document()->numPages()));
+        m_pageLabel->setText(QString("%1 / %2").arg(1 + PdfViewer::view()->currentPage()).arg(PdfViewer::document()->numPages()));
     else
         m_pageLabel->setText("n/a");
 

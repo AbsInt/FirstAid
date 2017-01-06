@@ -62,19 +62,6 @@ void Document::setDocument(Poppler::Document *document)
     emit documentChanged();
 }
 
-void Document::setCurrentPage(int page)
-{
-    if (isValid() && m_currentPage != page && page >= 0 && page < numPages()) {
-        m_currentPage = page;
-        emit pageChanged(m_currentPage);
-    }
-}
-
-int Document::currentPage() const
-{
-    return m_currentPage;
-}
-
 int Document::numPages() const
 {
     return m_pages.size();

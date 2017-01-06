@@ -229,7 +229,7 @@ void PdfViewer::closeDocument()
 
     QSettings settings;
     settings.beginGroup("Files");
-    settings.setValue(m_filePath, m_document.currentPage());
+    settings.setValue(m_filePath, m_view->currentPage());
     settings.endGroup();
 
     m_view->setDocument(nullptr);

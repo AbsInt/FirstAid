@@ -70,6 +70,8 @@ public:
 
     void setDocument(Document *document);
 
+    int currentPage() const;
+
 public slots:
     void setDoubleSideMode(bool on);
     void setZoomMode(PageView::ZoomMode mode);
@@ -130,6 +132,7 @@ private:
     int pageForPoint(const QPoint &point);
 
 signals:
+    void pageChanged(int page);
     void zoomChanged(qreal CurrentZoom);
 
 private:
@@ -139,6 +142,7 @@ private:
     ZoomMode m_zoomMode = Absolute;
     qreal m_zoom = 1.0;
     bool m_doubleSideMode = false;
+    int m_currentPage = -1;
 
     QCache<int, FirstAidPage> m_imageCache;
 
