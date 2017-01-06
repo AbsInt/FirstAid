@@ -263,6 +263,9 @@ void PageView::setDoubleSided(bool on)
     if (on != m_doubleSided) {
         m_doubleSided = on;
 
+        if (m_document)
+            m_document->relayout();
+
         // fake resize event to recompute sizes, e.g. for fit width/page
         QResizeEvent e(size(), size());
         resizeEvent(&e);
@@ -758,15 +761,14 @@ void PageView::updateViewSize(bool invalidateCache)
     if (invalidateCache)
         m_imageCache.clear();
 
-    QSize size;
+    QSizeF size;
     if (m_document) {
-        m_document->relayout();
-        size = m_document->layoutSize().toSize();
+        size = m_document->layoutSize() / 72.0 * resX();
         size -= viewport()->size();
     }
 
-    horizontalScrollBar()->setRange(0, qMax(0, size.width()));
-    verticalScrollBar()->setRange(0, qMax(0, size.height()));
+    horizontalScrollBar()->setRange(0, qMax(0, int(size.width())));
+    verticalScrollBar()->setRange(0, qMax(0, int(size.height())));
 
     // update viewport
     viewport()->update();
