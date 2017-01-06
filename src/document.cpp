@@ -101,7 +101,7 @@ QSizeF Document::layoutSize() const
     if (numPages() > 2)
         boundingRect = boundingRect.united(m_pageRects.at(1));
 
-    return boundingRect.adjusted(0, 0, spacing, spacing).size();
+    return boundingRect.adjusted(0, 0, 2 * spacing, 2 * spacing).size();
 }
 
 int Document::numPages() const
@@ -116,7 +116,7 @@ QList<int> Document::visiblePages(const QRectF &rect) const
     for (int c = 0; c < m_pageRects.size(); c++)
         if (m_pageRects.at(c).intersects(rect))
             pages << c;
-    
+
     return pages;
 }
 
@@ -171,17 +171,16 @@ void Document::relayout(bool emitSignal)
             QRectF pageRect = QRectF(QPointF(), p->pageSizeF());
 
             // special handling for first page in documents with more than 2 pages
-            if (currentPage == 0 && numPages() >2) {
+            if (currentPage == 0 && numPages() > 2) {
                 pageRect.translate(pageRect.width() / 2, 0);
                 m_pageRects << pageRect.translated(offset);
-            }
-            else {
+            } else {
                 m_pageRects << pageRect.translated(offset);
                 currentPage++;
 
                 if (currentPage < numPages()) {
                     p = page(currentPage);
-                    pageRect = QRectF(QPointF(), p->pageSizeF()).translated(offset+QPointF(pageRect.width(), 0));
+                    pageRect = QRectF(QPointF(), p->pageSizeF()).translated(offset + QPointF(pageRect.width(), 0));
                     m_pageRects << pageRect;
                 }
             }
@@ -189,8 +188,7 @@ void Document::relayout(bool emitSignal)
             currentPage++;
             offset += QPointF(0, pageRect.height() + spacing);
         }
-    }
-    else {
+    } else {
         for (int i = 0; i < numPages(); ++i) {
             Poppler::Page *p = page(i);
 

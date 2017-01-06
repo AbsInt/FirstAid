@@ -368,8 +368,8 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     PdfViewer::searchEngine()->currentMatch(matchPage, matchRect);
 
     foreach (int page, m_document->visiblePages(toPoints(paintEvent->rect().translated(offset())))) {
-        QRectF pageRect=m_document->pageRect(page);
-        QRectF displayRect=fromPoints(pageRect);
+        QRectF pageRect = m_document->pageRect(page);
+        QRectF displayRect = fromPoints(pageRect);
 
         FirstAidPage cachedPage = getPage(page);
         p.drawImage(displayRect.topLeft(), cachedPage.m_image);
@@ -402,7 +402,6 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
 
     // trigger delayed update
     QTimer::singleShot(0, this, SLOT(updateViewSize()));
-
 }
 
 void PageView::mouseMoveEvent(QMouseEvent *event)
@@ -458,8 +457,8 @@ void PageView::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    // first check for clicks on links and text selection
-    #if 0
+// first check for clicks on links and text selection
+#if 0
     QHashIterator<int, QRect> it(m_pageRects);
     while (it.hasNext()) {
         it.next();
@@ -493,7 +492,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
             }
         }
     }
-    #endif
+#endif
 
     if (event->modifiers().testFlag(Qt::ShiftModifier)) {
         int pageNumber = m_document->pageForPoint(event->pos() + offset());
@@ -569,7 +568,7 @@ void PageView::gotoPage(int page, int offset)
         return;
 
     QPoint newOffset = (fromPoints(m_document->pageRect(page)).topLeft() + QPointF(0, offset)).toPoint();
-    //QScroller::scroller(viewport())->scrollTo(newOffset);
+    // QScroller::scroller(viewport())->scrollTo(newOffset);
     setOffset(newOffset);
 }
 
@@ -752,8 +751,7 @@ void PageView::updateViewSize(bool invalidateCache)
 
     if (FitWidth == m_zoomMode) {
         m_zoom = qreal(viewport()->width()) / (m_document->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
-    }
-    else if (FitPage == m_zoomMode) {
+    } else if (FitPage == m_zoomMode) {
         const qreal zx = qreal(viewport()->width()) / (m_document->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
         const qreal zy = qreal(viewport()->height()) / (m_document->pageRect(0).height() / 72.0 * m_dpiY * devicePixelRatio());
         m_zoom = qMin(zx, zy);
