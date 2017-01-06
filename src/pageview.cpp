@@ -143,6 +143,14 @@ PageView::PageView(QWidget *parent)
     new QShortcut(QKeySequence::ZoomOut, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::Back, this, SLOT(historyPrev()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::Forward, this, SLOT(historyNext()), nullptr, Qt::ApplicationShortcut);
+
+    /**
+     * delays updateViewSize
+     * delay it by 10 mseconds e.g. during resizing
+     */
+    m_updateViewSizeTimer.setSingleShot(true);
+    m_updateViewSizeTimer.setInterval(10);
+    connect(&m_updateViewSizeTimer, &QTimer::timeout, this, &PageView::updateViewSize);
 }
 
 PageView::~PageView()
@@ -403,8 +411,8 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
 {
     QAbstractScrollArea::resizeEvent(resizeEvent);
 
-    // trigger delayed update
-    QTimer::singleShot(0, this, SLOT(updateViewSize()));
+    // trigger delayed update, will restart if already running to collapse events
+    m_updateViewSizeTimer.start();
 }
 
 void PageView::mouseMoveEvent(QMouseEvent *event)
@@ -744,11 +752,10 @@ int PageView::pageWidth()
     ;
 }
 
-void PageView::updateViewSize(bool invalidateCache)
+void PageView::updateViewSize()
 {
     // invalidate cache
-    if (invalidateCache)
-        m_imageCache.clear();
+    m_imageCache.clear();
 
     if (!m_document || m_document->numPages() == 0)
         return;

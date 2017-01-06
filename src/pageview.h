@@ -27,6 +27,7 @@
 #include <QAbstractScrollArea>
 #include <QCache>
 #include <QImage>
+#include <QTimer>
 
 #include <poppler-qt5.h>
 
@@ -124,10 +125,8 @@ private slots:
      *  - document change
      *  - change of zoom variant/factor
      *  - change of single/double page mode
-     *
-     * @param invalidateCache invalidate page cache? default true, only use that for position setting with false
      */
-    void updateViewSize(bool invalidateCache = true);
+    void updateViewSize();
 
 private:
     FirstAidPage getPage(int page);
@@ -162,4 +161,9 @@ private:
     QString m_mousePressUrl;        //! url at mouse press
 
     HistoryStack m_historyStack;
+
+    /**
+     * delayed updating of view size
+     */
+    QTimer m_updateViewSizeTimer;
 };
