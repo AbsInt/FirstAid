@@ -468,36 +468,16 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
 
 void PageView::resizeEvent(QResizeEvent *resizeEvent)
 {
-    if (!m_document)
+    if (!m_document || m_document->numPages() == 0)
         return;
 
     if (FitWidth == m_zoomMode) {
-        QSizeF pageSize = m_document->pageRect(m_currentPage).size();
-        pageSize.setWidth(2 * spacing() + pageSize.width());
-
-        if (m_doubleSided) {
-            // TODO not sure if the m_currentPage +1 always exists
-            QSizeF rightPageSize = m_document->pageRect(m_currentPage + 1).size();
-            pageSize.setWidth(pageSize.width() + rightPageSize.width());
-        }
-
-        m_zoom = viewport()->width() / (qreal)pageSize.width();
+        m_zoom = qreal(viewport()->width()) / m_document->layoutSize().width();
         updateViewSize();
-    } 
+    }
     else if (FitPage == m_zoomMode) {
-        QSizeF pageSize = m_document->pageRect(m_currentPage).size();
-        pageSize.setWidth(2 * spacing() + pageSize.width());
-        pageSize.setHeight(2 * spacing() + pageSize.height());
-
-        if (m_doubleSided) {
-            // TODO not sure if the m_currentPage +1 always exists
-            QSizeF rightPageSize = m_document->pageRect(m_currentPage + 1).size();
-            pageSize.setWidth(pageSize.width() + rightPageSize.width());
-        }
-
-        qreal zx = viewport()->size().width() / (qreal)pageSize.width();
-        qreal zy = viewport()->size().height() / (qreal)pageSize.height();
-
+        const qreal zx = qreal(viewport()->width()) / m_document->layoutSize().width();
+        const qreal zy = qreal(viewport()->height()) / m_document->pageRect(0).height();
         m_zoom = qMin(zx, zy);
         updateViewSize();
     }
