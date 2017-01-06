@@ -210,7 +210,6 @@ void Document::reset()
     m_links.clear();
     qDeleteAll(m_pages);
     m_pages.clear();
-    m_currentPage = -1;
     delete m_document;
     m_document = nullptr;
 }

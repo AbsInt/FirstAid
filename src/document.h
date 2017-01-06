@@ -85,11 +85,6 @@ private:
     Poppler::Document *m_document = nullptr;
 
     /**
-     * the current page - needed for synchronization with other views
-     */
-    int m_currentPage = -1;
-
-    /**
      * vector of page rectangles in the viewport, index == page
      */
     QVector<QRectF> m_pageRects;
