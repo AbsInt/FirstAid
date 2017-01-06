@@ -218,7 +218,7 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
 
     QSettings settings;
     settings.beginGroup("Files");
-    setPage(settings.value(m_filePath, 0).toInt());
+    m_view->gotoPage(settings.value(m_filePath, 0).toInt());
     settings.endGroup();
 }
 
@@ -229,7 +229,7 @@ void PdfViewer::closeDocument()
 
     QSettings settings;
     settings.beginGroup("Files");
-    settings.setValue(m_filePath, page());
+    settings.setValue(m_filePath, m_document.currentPage());
     settings.endGroup();
 
     m_view->setDocument(nullptr);
@@ -396,23 +396,6 @@ void PdfViewer::dragEnterEvent(QDragEnterEvent *event)
                 event->acceptProposedAction();
         }
     }
-}
-
-void PdfViewer::setPage(int page)
-{
-    if (!m_document.isValid() || 0 > page || page >= m_document.numPages())
-        return;
-
-    if (page == this->page())
-        return;
-
-    m_document.setCurrentPage(page);
-    m_view->gotoPage(page);
-}
-
-int PdfViewer::page() const
-{
-    return m_document.currentPage();
 }
 
 void PdfViewer::updateOnDocumentChange()
