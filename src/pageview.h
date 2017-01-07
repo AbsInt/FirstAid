@@ -86,8 +86,6 @@ public:
     }
 
 
-    void setDocument(Document *document);
-
     QPoint offset() const;
     int currentPage() const;
     bool doubleSided() const;
@@ -96,6 +94,7 @@ public slots:
     void setDoubleSided(bool on);
     void setZoomMode(PageView::ZoomMode mode);
     void setZoom(qreal zoom);
+    void slotDocumentChanged();
 
 public slots:
     void gotoPage(int page, int offset = -1);
@@ -156,7 +155,6 @@ signals:
     void zoomChanged(qreal CurrentZoom);
 
 private:
-    Document *m_document = nullptr;
     int m_dpiX = 72;
     int m_dpiY = 72;
     ZoomMode m_zoomMode = Absolute;

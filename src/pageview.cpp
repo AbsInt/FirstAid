@@ -103,6 +103,9 @@ PageView::PageView(QWidget *parent)
     connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(gotoPage(int, QRectF)));
     connect(PdfViewer::searchEngine(), SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotMatchesFound(int, QList<QRectF>)));
 
+
+    connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
+    
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(updateCurrentPage()));
 
     // we have static content that can be scrolled like an image
@@ -152,9 +155,9 @@ PageView::PageView(QWidget *parent)
     connect(&m_updateViewSizeTimer, &QTimer::timeout, this, &PageView::updateViewSize);
     
     /**
-     * init view size
+     * initial inits
      */
-    updateViewSize();
+    slotDocumentChanged();
 }
 
 PageView::~PageView()
@@ -179,15 +182,17 @@ qreal PageView::resY() const
  * public methods
  */
 
-void PageView::setDocument(Document *document)
+void PageView::slotDocumentChanged()
 {
-    m_document = document;
-    m_currentPage = 0;
+    m_currentPage = -1;
 
     m_historyStack.clear();
 
     // visual size of document might change now!
     updateViewSize();
+    
+    // update page
+    updateCurrentPage();
 }
 
 int PageView::currentPage() const
@@ -247,13 +252,13 @@ void PageView::contextMenuEvent(QContextMenuEvent *event)
     if (!m.exec(event->globalPos()))
         return;
 
-    int pageNumber = m_document->pageForPoint(event->pos() + offset());
+    int pageNumber = PdfViewer::document()->pageForPoint(event->pos() + offset());
     if (-1 != pageNumber) {
         m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
 
         // TODO CHECK
-        QRect r = QRect(m_rubberBandOrigin.second, offset() + viewport()->mapFromGlobal(QCursor::pos())).intersected(fromPoints(m_document->pageRect(m_rubberBandOrigin.first)).toRect());
+        QRect r = QRect(m_rubberBandOrigin.second, offset() + viewport()->mapFromGlobal(QCursor::pos())).intersected(fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect());
         m_rubberBand->setGeometry(r.normalized());
 
         m_rubberBand->show();
@@ -265,8 +270,7 @@ void PageView::setDoubleSided(bool on)
     if (on != m_doubleSided) {
         m_doubleSided = on;
 
-        if (m_document)
-            m_document->relayout();
+        PdfViewer::document()->relayout();
 
         // visual size of document might change now!
         updateViewSize();
@@ -275,14 +279,10 @@ void PageView::setDoubleSided(bool on)
 
 void PageView::updateCurrentPage()
 {
-    if (m_document) {
-        int page = m_document->pageForPoint(toPoints(QPointF(0,offset().y())));
-
-        if (page != m_currentPage) {
-            m_currentPage = qMax(0, page);
-
-            emit pageChanged(m_currentPage);
-        }
+    const int page = qMax(0, PdfViewer::document()->pageForPoint(toPoints(QPointF(0,offset().y()))));
+    if (page != m_currentPage) {
+        m_currentPage = page;
+        emit pageChanged(m_currentPage);
     }
 }
 
@@ -293,7 +293,7 @@ QPoint PageView::offset() const
      *   - scrollbar position
      *   - centered position of pages if smaller than viewport
      */
-    return QPoint(horizontalScrollBar()->value() + qMin(0, (int(fromPoints(m_document->layoutSize()).width()) - viewport()->width()) / 2), verticalScrollBar()->value());
+    return QPoint(horizontalScrollBar()->value() + qMin(0, (int(fromPoints(PdfViewer::document()->layoutSize()).width()) - viewport()->width()) / 2), verticalScrollBar()->value());
 }
 
 void PageView::setOffset(const QPoint &offset)
@@ -370,8 +370,8 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     QRectF matchRect;
     PdfViewer::searchEngine()->currentMatch(matchPage, matchRect);
 
-    foreach (int page, m_document->visiblePages(toPoints(paintEvent->rect().translated(offset())))) {
-        QRectF pageRect = m_document->pageRect(page);
+    foreach (int page, PdfViewer::document()->visiblePages(toPoints(paintEvent->rect().translated(offset())))) {
+        QRectF pageRect = PdfViewer::document()->pageRect(page);
         QRectF displayRect = fromPoints(pageRect);
 
         QImage cachedPage = getPage(page);
@@ -409,10 +409,6 @@ void PageView::resizeEvent(QResizeEvent *resizeEvent)
 
 void PageView::mouseMoveEvent(QMouseEvent *event)
 {
-    // nothing to do if there is no document at all
-    if (!m_document)
-        return;
-
     // handle panning first
     if (!m_panStartPoint.isNull()) {
         setCursor(Qt::ClosedHandCursor);
@@ -422,19 +418,19 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
 
     // update rubber band?
     if (m_rubberBandOrigin.first >= 0) {
-        QRect r = QRect(m_rubberBandOrigin.second, event->pos()).intersected(fromPoints(m_document->pageRect(m_rubberBandOrigin.first)).toRect());
+        QRect r = QRect(m_rubberBandOrigin.second, event->pos()).intersected(fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect());
         m_rubberBand->setGeometry(r.normalized());
     }
 
     // now check if we want to highlight a link location
-    int page = m_document->pageForPoint(toPoints(offset() + event->pos()));
+    int page = PdfViewer::document()->pageForPoint(toPoints(offset() + event->pos()));
     if (-1 != page) {
-        QRectF pageRect = fromPoints(m_document->pageRect(page));
+        QRectF pageRect = fromPoints(PdfViewer::document()->pageRect(page));
         qreal xPos = (offset().x() + event->x() - pageRect.x()) / (qreal)pageRect.width();
         qreal yPos = (offset().y() + event->y() - pageRect.y()) / (qreal)pageRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        for (auto &l : m_document->links(page)) {
+        for (auto &l : PdfViewer::document()->links(page)) {
             if (l->boundary().contains(p)) {
                 setCursor(Qt::PointingHandCursor);
                 return;
@@ -447,13 +443,9 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
 
 void PageView::mousePressEvent(QMouseEvent *event)
 {
-    // nothing to do if there is no document at all
-    if (!m_document)
-        return;
-
     // special case: end rubber band that has been created by context menu copy
     if (m_rubberBandOrigin.first >= 0) {
-        QRect displayRect = fromPoints(m_document->pageRect(m_rubberBandOrigin.first)).toRect();
+        QRect displayRect = fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect();
         slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().translated(-displayRect.topLeft()));
         m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
         m_rubberBand->hide();
@@ -461,21 +453,21 @@ void PageView::mousePressEvent(QMouseEvent *event)
     }
 
     // now check if we want to highlight a link location
-    int page = m_document->pageForPoint(toPoints(offset() + event->pos()));
+    int page = PdfViewer::document()->pageForPoint(toPoints(offset() + event->pos()));
     if (-1 != page) {
-        QRectF pageRect = fromPoints(m_document->pageRect(page));
+        QRectF pageRect = fromPoints(PdfViewer::document()->pageRect(page));
         qreal xPos = (offset().x() + event->x() - pageRect.x()) / (qreal)pageRect.width();
         qreal yPos = (offset().y() + event->y() - pageRect.y()) / (qreal)pageRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        for (auto &l : m_document->links(page)) {
+        for (auto &l : PdfViewer::document()->links(page)) {
             if (l->boundary().contains(p)) {
                 Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l)->linkDestination();
                 switch (link->linkType()) {
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
                         m_mousePressPage = gotoLink.pageNumber() - 1;
-                        QRect displayRect = fromPoints(m_document->pageRect(m_mousePressPage)).toRect();
+                        QRect displayRect = fromPoints(PdfViewer::document()->pageRect(m_mousePressPage)).toRect();
                         m_mousePressPageOffset = gotoLink.isChangeTop() ? gotoLink.top() * displayRect.height() : 0;
                     } break;
 
@@ -494,7 +486,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
 
     if (event->modifiers().testFlag(Qt::ShiftModifier)) {
-        int pageNumber = m_document->pageForPoint(event->pos() + offset());
+        int pageNumber = PdfViewer::document()->pageForPoint(event->pos() + offset());
         if (-1 != pageNumber) {
             m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
             m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
@@ -514,10 +506,6 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
 void PageView::mouseReleaseEvent(QMouseEvent *event)
 {
-    // nothing to do if there is no document at all
-    if (!m_document)
-        return;
-
     // restore mouse cursor
     setCursor(Qt::ArrowCursor);
 
@@ -546,7 +534,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
     // reset rubber band if needed
     if (m_rubberBandOrigin.first >= 0) {
-        QRect displayRect = fromPoints(m_document->pageRect(m_rubberBandOrigin.first)).toRect();
+        QRect displayRect = fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect();
         if (!displayRect.isValid())
             return;
 
@@ -563,17 +551,17 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
 void PageView::gotoPage(int page, int offset)
 {
-    if (!m_document || page < 0 || page >= m_document->numPages())
+    if (page < 0 || page >= PdfViewer::document()->numPages())
         return;
 
-    QPoint newOffset = (fromPoints(m_document->pageRect(page)).topLeft() + QPointF(0, offset)).toPoint();
+    QPoint newOffset = (fromPoints(PdfViewer::document()->pageRect(page)).topLeft() + QPointF(0, offset)).toPoint();
     // QScroller::scroller(viewport())->scrollTo(newOffset);
     setOffset(QPoint(0, newOffset.y()));
 }
 
 void PageView::gotoPage(int page, const QRectF &rect)
 {
-    QRectF pageRect = fromPoints(m_document->pageRect(page));
+    QRectF pageRect = fromPoints(PdfViewer::document()->pageRect(page));
     if (pageRect.isNull()) {
         gotoPage(page, rect.top() / 72.0 * resY());
         return;
@@ -606,7 +594,7 @@ void PageView::gotoPreviousPage()
 
 void PageView::gotoNextPage()
 {
-    int newPage = qMin(m_document->numPages() - 1, m_currentPage + (m_doubleSided ? 2 : 1));
+    int newPage = qMin(PdfViewer::document()->numPages() - 1, m_currentPage + (m_doubleSided ? 2 : 1));
     gotoPage(newPage, 0);
 }
 
@@ -665,10 +653,10 @@ void PageView::gotoDestination(const QString &destination, bool updateHistory)
 
     if (ok)
         gotoPage(pageNumber - 1);
-    else if (m_document) {
-        if (Poppler::LinkDestination *link = m_document->linkDestination(destination)) {
+    else {
+        if (Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(destination)) {
             int pageNumber = link->pageNumber() - 1;
-            gotoPage(pageNumber, (link->isChangeTop() ? link->top() * fromPoints(m_document->pageRect(pageNumber)).height() : 0));
+            gotoPage(pageNumber, (link->isChangeTop() ? link->top() * fromPoints(PdfViewer::document()->pageRect(pageNumber)).height() : 0));
             delete link;
 
             if (updateHistory)
@@ -691,7 +679,7 @@ void PageView::slotCopyRequested(int page, const QRectF &rect)
     if (rect.isNull())
         return;
 
-    if (Poppler::Page *p = m_document->page(page)) {
+    if (Poppler::Page *p = PdfViewer::document()->page(page)) {
         QRectF r = toPoints(rect);
         QString text = p->text(r);
 
@@ -718,25 +706,18 @@ void PageView::slotMatchesFound(int page, const QList<QRectF> &)
 
 int PageView::pageHeight()
 {
-    if (!m_document)
-        return 0;
-
     int pageSize = 0;
-    if (Poppler::Page *popplerPage = m_document->page(m_currentPage))
+    if (Poppler::Page *popplerPage = PdfViewer::document()->page(m_currentPage))
         pageSize = popplerPage->pageSize().height();
     return (pageSize * resY()) / 72.0;
 }
 
 int PageView::pageWidth()
 {
-    if (!m_document)
-        return 0;
-
     int pageSize = 0;
-    if (Poppler::Page *popplerPage = m_document->page(m_currentPage))
+    if (Poppler::Page *popplerPage = PdfViewer::document()->page(m_currentPage))
         pageSize = popplerPage->pageSize().width();
     return (pageSize * resX()) / 72.0;
-    ;
 }
 
 void PageView::updateViewSize()
@@ -744,21 +725,18 @@ void PageView::updateViewSize()
     // invalidate cache
     m_imageCache.clear();
 
-    if (!m_document || m_document->numPages() == 0)
+    if (PdfViewer::document()->numPages() == 0)
         return;
 
     if (FitWidth == m_zoomMode) {
-        m_zoom = qreal(viewport()->width()) / (m_document->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
+        m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
     } else if (FitPage == m_zoomMode) {
-        const qreal zx = qreal(viewport()->width()) / (m_document->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
-        const qreal zy = qreal(viewport()->height()) / (m_document->pageRect(0).height() / 72.0 * m_dpiY * devicePixelRatio());
+        const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
+        const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * m_dpiY * devicePixelRatio());
         m_zoom = qMin(zx, zy);
     }
 
-    QSizeF size;
-    if (m_document) {
-        size = m_document->layoutSize() / 72.0 * resX();
-    }
+    QSizeF size = PdfViewer::document()->layoutSize() / 72.0 * resX();
 
     horizontalScrollBar()->setRange(0, qMax(0, int(size.width() - viewport()->width())));
     verticalScrollBar()->setRange(0, qMax(0, int(size.height() - viewport()->height())));
@@ -775,7 +753,7 @@ QImage PageView::getPage(int pageNumber)
     QImage *cachedPage = m_imageCache.object(pageNumber);
 
     if (!cachedPage) {
-        if (Poppler::Page *page = m_document->page(pageNumber)) {
+        if (Poppler::Page *page = PdfViewer::document()->page(pageNumber)) {
             /**
              * we render in too high resolution and then set the right ratio
              */

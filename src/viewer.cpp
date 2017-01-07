@@ -199,7 +199,6 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
 
     // pass loaded poppler document to our internal one
     m_document.setDocument(newdoc);
-    m_view->setDocument(&m_document);
 
     // set file + watch
     m_filePath = file;
@@ -223,8 +222,6 @@ void PdfViewer::closeDocument()
     settings.beginGroup("Files");
     settings.setValue(m_filePath, m_view->currentPage());
     settings.endGroup();
-
-    m_view->setDocument(nullptr);
 
     m_document.setDocument(nullptr);
 
