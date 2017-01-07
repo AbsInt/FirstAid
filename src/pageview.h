@@ -133,10 +133,6 @@ protected:
     void wheelEvent(QWheelEvent *wheelEvent) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
 
-private:
-    int pageHeight();
-    int pageWidth();
-
 private slots:
     /**
      * Update viewport dimensions after:
@@ -148,7 +144,6 @@ private slots:
 
 private:
     QImage getPage(int page);
-    int pageForPoint(const QPoint &point);
 
 signals:
     void pageChanged(int page);

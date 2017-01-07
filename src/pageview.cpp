@@ -704,22 +704,6 @@ void PageView::slotMatchesFound(int page, const QList<QRectF> &)
  * private methods
  */
 
-int PageView::pageHeight()
-{
-    int pageSize = 0;
-    if (Poppler::Page *popplerPage = PdfViewer::document()->page(m_currentPage))
-        pageSize = popplerPage->pageSize().height();
-    return (pageSize * resY()) / 72.0;
-}
-
-int PageView::pageWidth()
-{
-    int pageSize = 0;
-    if (Poppler::Page *popplerPage = PdfViewer::document()->page(m_currentPage))
-        pageSize = popplerPage->pageSize().width();
-    return (pageSize * resX()) / 72.0;
-}
-
 void PageView::updateViewSize()
 {
     // invalidate cache
