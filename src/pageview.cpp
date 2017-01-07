@@ -170,12 +170,12 @@ PageView::~PageView()
 
 qreal PageView::resX() const
 {
-    return m_dpiX * m_zoom * devicePixelRatio();
+    return m_dpiX * m_zoom;
 }
 
 qreal PageView::resY() const
 {
-    return m_dpiY * m_zoom * devicePixelRatio();
+    return m_dpiY * m_zoom;
 }
 
 /*
@@ -375,11 +375,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         QRectF displayRect = fromPoints(pageRect);
 
         QImage cachedPage = getPage(page);
-        p.drawImage(displayRect.topLeft(), cachedPage);
-
-        // draw matches on page
-        double sx = resX() / 72.0;
-        double sy = resY() / 72.0;
+        p.drawImage(displayRect, cachedPage);
 
         p.setPen(Qt::NoPen);
 
@@ -388,7 +384,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
             if (page == matchPage && rect == matchRect)
                 matchColor = QColor(255, 128, 0, 128);
 
-            QRectF r = QRectF(rect.left() * sx, rect.top() * sy, rect.width() * sx, rect.height() * sy);
+            QRectF r = fromPoints(rect);
             r.adjust(-3, -5, 3, 2);
             p.fillRect(r.translated(displayRect.topLeft()), matchColor);
         }
@@ -698,29 +694,41 @@ void PageView::slotMatchesFound(int page, const QList<QRectF> &)
 
 void PageView::updateViewSize()
 {
-    // invalidate cache
+    /**
+     * invalidate cache
+     * we might alter sizes
+     */
     m_imageCache.clear();
 
-    if (PdfViewer::document()->numPages() == 0)
-        return;
-
-    if (FitWidth == m_zoomMode) {
-        m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
-    } else if (FitPage == m_zoomMode) {
-        const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX * devicePixelRatio());
-        const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * m_dpiY * devicePixelRatio());
-        m_zoom = qMin(zx, zy);
+    /**
+     * adjust zoom level
+     * HACK: we just use first page for some things
+     */
+    if (PdfViewer::document()->numPages() > 0) {
+        if (FitWidth == m_zoomMode) {
+            m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
+        } else if (FitPage == m_zoomMode) {
+            const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
+            const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * m_dpiY);
+            m_zoom = qMin(zx, zy);
+        }
     }
 
-    QSizeF size = PdfViewer::document()->layoutSize() / 72.0 * resX();
-
+    /**
+     * update ranges of scrollbars, after zoom is adjusted if needed
+     */
+    const QSizeF size = fromPoints(PdfViewer::document()->layoutSize());
     horizontalScrollBar()->setRange(0, qMax(0, int(size.width() - viewport()->width())));
     verticalScrollBar()->setRange(0, qMax(0, int(size.height() - viewport()->height())));
 
-    // update page, perhaps
+    /**
+     * update page, perhaps
+     */
     updateCurrentPage();
     
-    // update viewport
+    /**
+     * repaint
+     */
     viewport()->update();
 }
 
@@ -733,7 +741,7 @@ QImage PageView::getPage(int pageNumber)
             /**
              * we render in too high resolution and then set the right ratio
              */
-            cachedPage = new QImage(page->renderToImage(resX(), resY(), -1, -1, -1, -1, Poppler::Page::Rotate0));
+            cachedPage = new QImage(page->renderToImage(resX() * devicePixelRatio(), resY() * devicePixelRatio(), -1, -1, -1, -1, Poppler::Page::Rotate0));
             cachedPage->setDevicePixelRatio(devicePixelRatio());
 
             m_imageCache.insert(pageNumber, cachedPage);
