@@ -97,8 +97,13 @@ public slots:
     void slotDocumentChanged();
 
 public slots:
-    void gotoPage(int page, int offset = -1);
-    void gotoPage(int page, const QRectF &rect);
+    /**
+     * goto the given page and try to make the wanted rectange visible
+     * @param page page to show
+     * @param rectToBeVisibleInPoints rectangle to make visible
+     */
+    void gotoPage(int page, const QRectF &rectToBeVisibleInPoints = QRectF());
+
     void gotoPreviousPage();
     void gotoNextPage();
     void stepBack();

@@ -520,7 +520,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
     // was there a page to goto?
     if (m_mousePressPage != -1) {
         m_historyStack.add(m_mousePressPage, m_mousePressPageOffset);
-        gotoPage(m_mousePressPage, m_mousePressPageOffset);
+        gotoPage(m_mousePressPage, toPoints(QRectF(0, m_mousePressPageOffset, 0, 0)));
         m_mousePressPage = -1;
         return;
     }
@@ -549,53 +549,57 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
  * public slots
  */
 
-void PageView::gotoPage(int page, int offset)
+void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
 {
+    /**
+     * filter out invalid pages
+     */
     if (page < 0 || page >= PdfViewer::document()->numPages())
         return;
+    
+    /**
+     * get page rect for the requested page, converted to pixels
+     */
+    const QRectF pageRectInPixel = fromPoints(PdfViewer::document()->pageRect(page));
+    
+    /**
+     * get current visible area of the document
+     */
+    const QRectF visibleAreaInPixel = QRectF(offset(), viewport()->size());
+    
+    /**
+     * translate the rectange we want to show from points and move it to the page
+     */
+    const QRectF toBeVisibleInPixel = fromPoints(rectToBeVisibleInPoints).translated(pageRectInPixel.topLeft());
 
-    QPoint newOffset = (fromPoints(PdfViewer::document()->pageRect(page)).topLeft() + QPointF(0, offset)).toPoint();
-    // QScroller::scroller(viewport())->scrollTo(newOffset);
-    setOffset(QPoint(0, newOffset.y()));
-}
-
-void PageView::gotoPage(int page, const QRectF &rect)
-{
-    QRectF pageRect = fromPoints(PdfViewer::document()->pageRect(page));
-    if (pageRect.isNull()) {
-        gotoPage(page, rect.top() / 72.0 * resY());
-        return;
-    }
-    pageRect.translate(offset());
-
-    QRectF visibleArea = QRectF(offset(), viewport()->size());
-    QRectF r = fromPoints(rect).translated(pageRect.topLeft());
-
-    if (visibleArea.contains(r)) {
+    /**
+     * the area is already visible?
+     * just repaint (e.g. because we did do some highlight for search)
+     */
+    if (visibleAreaInPixel.contains(toBeVisibleInPixel)) {
         viewport()->update();
         return;
     }
 
-    if (r.width() < visibleArea.width() && r.height() < visibleArea.height()) {
-        int voff = r.center().y() - visibleArea.height() / 2;
-        gotoPage(page, voff);
-        return;
-    }
-
-    // last action: move rect on top of view
-    gotoPage(page, rect.top() / 72.0 * resY());
+    /**
+     * else: scroll to rect and repaint
+     */
+    QPoint newOffset = (pageRectInPixel.topLeft() + QPointF(0, fromPoints(rectToBeVisibleInPoints).y())).toPoint();
+    // QScroller::scroller(viewport())->scrollTo(newOffset);
+    setOffset(QPoint(0, newOffset.y()));
+    viewport()->update();
 }
 
 void PageView::gotoPreviousPage()
 {
     int newPage = qMax(0, m_currentPage - (m_doubleSided ? 2 : 1));
-    gotoPage(newPage, 0);
+    gotoPage(newPage);
 }
 
 void PageView::gotoNextPage()
 {
     int newPage = qMin(PdfViewer::document()->numPages() - 1, m_currentPage + (m_doubleSided ? 2 : 1));
-    gotoPage(newPage, 0);
+    gotoPage(newPage);
 }
 
 void PageView::stepBack()
@@ -656,7 +660,7 @@ void PageView::gotoDestination(const QString &destination, bool updateHistory)
     else {
         if (Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(destination)) {
             int pageNumber = link->pageNumber() - 1;
-            gotoPage(pageNumber, (link->isChangeTop() ? link->top() * fromPoints(PdfViewer::document()->pageRect(pageNumber)).height() : 0));
+            gotoPage(pageNumber, QRectF(0, (link->isChangeTop() ? link->top() * PdfViewer::document()->pageRect(pageNumber).height() : 0), 0, 0));
             delete link;
 
             if (updateHistory)
@@ -668,7 +672,7 @@ void PageView::gotoDestination(const QString &destination, bool updateHistory)
 void PageView::gotoHistoryEntry(const HistoryEntry &entry)
 {
     if (HistoryEntry::PageWithOffset == entry.m_type)
-        gotoPage(entry.m_page, entry.m_offset);
+        gotoPage(entry.m_page, QRectF(0, entry.m_offset, 0, 0));
 
     else if (HistoryEntry::Destination == entry.m_type)
         gotoDestination(entry.m_destination, false);
