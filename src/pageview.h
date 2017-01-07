@@ -53,8 +53,38 @@ public:
     qreal resX() const;
     qreal resY() const;
 
-    QRectF fromPoints(const QRectF &rect) const;
-    QRectF toPoints(const QRectF &rect) const;
+    
+    QRectF fromPoints(const QRectF &rect) const
+    {
+        return QRectF(rect.left() / 72.0 * resX(), rect.top() / 72.0 * resY(), rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
+    }
+
+    QRectF toPoints(const QRectF &rect) const
+    {
+        return QRectF(rect.left() * 72.0 / resX(), rect.top() * 72.0 / resY(), rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
+    }
+
+    
+    QSizeF fromPoints(const QSizeF &rect) const
+    {
+        return QSizeF(rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
+    }
+
+    QSizeF toPoints(const QSizeF &rect) const
+    {
+        return QSizeF(rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
+    }
+
+    QPointF fromPoints(const QPointF &rect) const
+    {
+        return QPointF(rect.x() / 72.0 * resX(), rect.y() / 72.0 * resY());
+    }
+
+    QPointF toPoints(const QPointF &rect) const
+    {
+        return QPointF(rect.x() * 72.0 / resX(), rect.y() * 72.0 / resY());
+    }
+
 
     void setDocument(Document *document);
 

@@ -171,16 +171,6 @@ qreal PageView::resY() const
     return m_dpiY * m_zoom * devicePixelRatio();
 }
 
-QRectF PageView::fromPoints(const QRectF &rect) const
-{
-    return QRectF(rect.left() / 72.0 * resX(), rect.top() / 72.0 * resY(), rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
-}
-
-QRectF PageView::toPoints(const QRectF &rect) const
-{
-    return QRectF(rect.left() * 72.0 / resX(), rect.top() * 72.0 / resY(), rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
-}
-
 /*
  * public methods
  */
@@ -297,7 +287,12 @@ void PageView::scrolled()
 
 QPoint PageView::offset() const
 {
-    return QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+    /**
+     * we need to adjust for:
+     *   - scrollbar position
+     *   - centered position of pages if smaller than viewport
+     */
+    return QPoint(horizontalScrollBar()->value() + qMin(0, (int(fromPoints(m_document->layoutSize()).width()) - viewport()->width()) / 2), verticalScrollBar()->value());
 }
 
 void PageView::setOffset(const QPoint &offset)
@@ -370,10 +365,6 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     p.fillRect(paintEvent->rect(), Qt::gray);
     p.translate(-offset());
 
-    const int layoutWidth = (int)(m_document->layoutSize().width() / 72.0 * resX());
-    if (viewport()->width() > layoutWidth)
-        p.translate((viewport()->width() - layoutWidth) / 2, 0);
-
     int matchPage;
     QRectF matchRect;
     PdfViewer::searchEngine()->currentMatch(matchPage, matchRect);
@@ -435,11 +426,11 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // now check if we want to highlight a link location
-    int page = m_document->pageForPoint(offset() + event->pos());
+    int page = m_document->pageForPoint(toPoints(offset() + event->pos()));
     if (-1 != page) {
         QRectF pageRect = fromPoints(m_document->pageRect(page));
-        qreal xPos = (event->x() - pageRect.x()) / (qreal)pageRect.width();
-        qreal yPos = (event->y() - pageRect.y()) / (qreal)pageRect.height();
+        qreal xPos = (offset().x() + event->x() - pageRect.x()) / (qreal)pageRect.width();
+        qreal yPos = (offset().y() + event->y() - pageRect.y()) / (qreal)pageRect.height();
         QPointF p = QPointF(xPos, yPos);
 
         for (auto &l : m_document->links(page)) {
@@ -468,26 +459,22 @@ void PageView::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-// first check for clicks on links and text selection
-#if 0
-    QHashIterator<int, QRect> it(m_pageRects);
-    while (it.hasNext()) {
-        it.next();
-
-        int pageNumber = it.key();
-        QRect displayRect = it.value();
-
-        qreal xPos = (event->x() - displayRect.x()) / (qreal)displayRect.width();
-        qreal yPos = (event->y() - displayRect.y()) / (qreal)displayRect.height();
+    // now check if we want to highlight a link location
+    int page = m_document->pageForPoint(toPoints(offset() + event->pos()));
+    if (-1 != page) {
+        QRectF pageRect = fromPoints(m_document->pageRect(page));
+        qreal xPos = (offset().x() + event->x() - pageRect.x()) / (qreal)pageRect.width();
+        qreal yPos = (offset().y() + event->y() - pageRect.y()) / (qreal)pageRect.height();
         QPointF p = QPointF(xPos, yPos);
 
-        for (auto l : m_document->links(pageNumber)) {
+        for (auto &l : m_document->links(page)) {
             if (l->boundary().contains(p)) {
                 Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l)->linkDestination();
                 switch (link->linkType()) {
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
                         m_mousePressPage = gotoLink.pageNumber() - 1;
+                        QRect displayRect = fromPoints(m_document->pageRect(m_mousePressPage)).toRect();
                         m_mousePressPageOffset = gotoLink.isChangeTop() ? gotoLink.top() * displayRect.height() : 0;
                     } break;
 
@@ -503,7 +490,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
             }
         }
     }
-#endif
+
 
     if (event->modifiers().testFlag(Qt::ShiftModifier)) {
         int pageNumber = m_document->pageForPoint(event->pos() + offset());
