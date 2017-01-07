@@ -563,30 +563,18 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
     const QRectF pageRectInPixel = fromPoints(PdfViewer::document()->pageRect(page));
     
     /**
-     * get current visible area of the document
-     */
-    const QRectF visibleAreaInPixel = QRectF(offset(), viewport()->size());
-    
-    /**
      * translate the rectange we want to show from points and move it to the page
      */
     const QRectF toBeVisibleInPixel = fromPoints(rectToBeVisibleInPoints).translated(pageRectInPixel.topLeft());
 
     /**
-     * the area is already visible?
-     * just repaint (e.g. because we did do some highlight for search)
+     * make visible
      */
-    if (visibleAreaInPixel.contains(toBeVisibleInPixel)) {
-        viewport()->update();
-        return;
-    }
-
+    QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 100, 100);
+    
     /**
-     * else: scroll to rect and repaint
+     * trigger repaint in any case
      */
-    QPoint newOffset = (pageRectInPixel.topLeft() + QPointF(0, fromPoints(rectToBeVisibleInPoints).y())).toPoint();
-    // QScroller::scroller(viewport())->scrollTo(newOffset);
-    setOffset(QPoint(0, newOffset.y()));
     viewport()->update();
 }
 
