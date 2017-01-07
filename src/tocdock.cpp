@@ -132,8 +132,8 @@ void TocDock::pageChanged(int page)
         m_markedItem->setData(1, Qt::FontRole, QVariant());
 
         while (m_markedItem) {
-            if (m_markedItem->data(0, Qt::UserRole + 1).isValid())
-                m_tree->setItemExpanded(m_markedItem, false);
+            m_markedItem->setData(0, Qt::FontRole, QVariant());
+            m_markedItem->setData(1, Qt::FontRole, QVariant());
             m_markedItem = m_markedItem->parent();
         }
     }
@@ -149,11 +149,8 @@ void TocDock::pageChanged(int page)
 
         QTreeWidgetItem *item = m_markedItem;
         while (item) {
-            if (!item->isExpanded()) {
-                m_tree->setItemExpanded(item, true);
-                item->setData(0, Qt::UserRole + 1, true);
-            }
-
+            item->setData(0, Qt::FontRole, font);
+            item->setData(1, Qt::FontRole, font);
             item = item->parent();
         }
     }
