@@ -45,6 +45,9 @@ void Document::setDocument(Poppler::Document *document)
 
     // passing a nullptr is valid as it only resets the object
     if (m_document) {
+        // remember title
+        m_title = m_document->title();
+        
         // set render hints
         m_document->setRenderHint(Poppler::Document::TextAntialiasing, true);
         m_document->setRenderHint(Poppler::Document::Antialiasing, true);
@@ -74,10 +77,7 @@ void Document::setDocument(Poppler::Document *document)
 
 QString Document::title() const
 {
-    if (!m_document)
-        return QString();
-
-    return m_document->title();
+    return m_title;
 }
 
 const QDomDocument *Document::toc() const
@@ -209,4 +209,5 @@ void Document::reset()
     m_pages.clear();
     delete m_document;
     m_document = nullptr;
+    m_title.clear();
 }

@@ -83,6 +83,11 @@ private:
      * current open poppler document
      */
     Poppler::Document *m_document = nullptr;
+    
+    /**
+     * document title
+     */
+    QString m_title;
 
     /**
      * vector of page rectangles in the viewport, index == page
