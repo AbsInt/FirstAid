@@ -103,8 +103,7 @@ PageView::PageView(QWidget *parent)
     connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(gotoPage(int, QRectF)));
     connect(PdfViewer::searchEngine(), SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotMatchesFound(int, QList<QRectF>)));
 
-    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(scrolled()));
-    connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(scrolled()));
+    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(updateCurrentPage()));
 
     // we have static content that can be scrolled like an image
     setAttribute(Qt::WA_StaticContents);
@@ -151,6 +150,11 @@ PageView::PageView(QWidget *parent)
     m_updateViewSizeTimer.setSingleShot(true);
     m_updateViewSizeTimer.setInterval(10);
     connect(&m_updateViewSizeTimer, &QTimer::timeout, this, &PageView::updateViewSize);
+    
+    /**
+     * init view size
+     */
+    updateViewSize();
 }
 
 PageView::~PageView()
@@ -269,13 +273,10 @@ void PageView::setDoubleSided(bool on)
     }
 }
 
-void PageView::scrolled()
+void PageView::updateCurrentPage()
 {
     if (m_document) {
-        // TODO
-        qreal x = (offset().x() / resX() * 72.0 + 5);
-        qreal y = (offset().y() / resY() * 72.0 + 5);
-        int page = m_document->pageForPoint(QPointF(x, y));
+        int page = m_document->pageForPoint(toPoints(QPointF(0,offset().y())));
 
         if (page != m_currentPage) {
             m_currentPage = qMax(0, page);
@@ -762,6 +763,9 @@ void PageView::updateViewSize()
     horizontalScrollBar()->setRange(0, qMax(0, int(size.width() - viewport()->width())));
     verticalScrollBar()->setRange(0, qMax(0, int(size.height() - viewport()->height())));
 
+    // update page, perhaps
+    updateCurrentPage();
+    
     // update viewport
     viewport()->update();
 }

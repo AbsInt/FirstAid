@@ -93,15 +93,13 @@ QSizeF Document::layoutSize() const
     if (m_pageRects.isEmpty())
         return QSizeF();
 
-    const int spacing = 5;
-
     QRectF boundingRect = m_pageRects.first();
     boundingRect = boundingRect.united(m_pageRects.last());
 
     if (numPages() > 2)
         boundingRect = boundingRect.united(m_pageRects.at(1));
 
-    return boundingRect.adjusted(0, 0, 2 * spacing, 2 * spacing).size();
+    return boundingRect.adjusted(0, 0, 2 * m_spacing, 2 * m_spacing).size();
 }
 
 int Document::numPages() const
@@ -129,7 +127,7 @@ QRectF Document::pageRect(int page) const
 int Document::pageForPoint(const QPointF &point) const
 {
     for (int c = 0; c < m_pageRects.size(); c++)
-        if (m_pageRects.at(c).contains(point))
+        if (m_pageRects.at(c).marginsAdded(QMarginsF(m_spacing, m_spacing, m_spacing, 0)).contains(point))
             return c;
 
     return -1;
@@ -160,9 +158,8 @@ void Document::relayout(bool emitSignal)
 
     // TODO: for now we assume all pages have the same size
     PageView *view = PdfViewer::view();
-    qreal spacing = 5;
 
-    QPointF offset(spacing, spacing);
+    QPointF offset(m_spacing, m_spacing);
 
     if (view->doubleSided()) {
         int currentPage = 0;
@@ -186,7 +183,7 @@ void Document::relayout(bool emitSignal)
             }
 
             currentPage++;
-            offset += QPointF(0, pageRect.height() + spacing);
+            offset += QPointF(0, pageRect.height() + m_spacing);
         }
     } else {
         for (int i = 0; i < numPages(); ++i) {
@@ -195,7 +192,7 @@ void Document::relayout(bool emitSignal)
             QRectF pageRect = QRectF(QPointF(), p->pageSizeF()).translated(offset);
             m_pageRects << pageRect;
 
-            offset += QPointF(0, pageRect.height() + spacing);
+            offset += QPointF(0, pageRect.height() + m_spacing);
         }
     }
 

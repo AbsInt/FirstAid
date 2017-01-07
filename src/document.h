@@ -98,4 +98,9 @@ private:
      * vector of cached poppler annotation of type link, index == page
      */
     QVector<QList<Poppler::Annotation *>> m_links;
+
+    /**
+     * spacing between pages and the margin around the document
+     */
+    const qreal m_spacing = 5;
 };

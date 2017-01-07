@@ -117,7 +117,7 @@ public slots:
 
     void slotFindStarted();
     void slotMatchesFound(int page, const QList<QRectF> &matches);
-    void scrolled();
+    void updateCurrentPage();
 
     void setOffset(const QPoint &point);
 
