@@ -27,7 +27,7 @@ Document::Document()
 
 Document::~Document()
 {
-    reset();
+    setDocument(nullptr);
 }
 
 bool Document::isValid() const
@@ -38,9 +38,15 @@ bool Document::isValid() const
 void Document::setDocument(Poppler::Document *document)
 {
     // reset old content
-    reset();
+    for (int i = 0; i < m_links.length(); ++i)
+        qDeleteAll(m_links.at(i));
+    m_links.clear();
+    qDeleteAll(m_pages);
+    m_pages.clear();
+    m_title.clear();
 
-    // remember poppler document
+    // remember poppler document, free old one
+    delete m_document;
     m_document = document;
 
     // passing a nullptr is valid as it only resets the object
@@ -70,8 +76,14 @@ void Document::setDocument(Poppler::Document *document)
         }
     }
 
-    relayout(false);
+    /**
+     * trigger relayout
+     */
+    relayout();
 
+    /**
+     * document changed for good
+     */
     emit documentChanged();
 }
 
@@ -140,7 +152,23 @@ Poppler::LinkDestination *Document::linkDestination(const QString &destination) 
     return m_document->linkDestination(destination);
 }
 
-void Document::relayout(bool emitSignal)
+bool Document::doubleSided() const
+{
+    return m_doubleSided;
+}
+
+void Document::setDoubleSided(bool on)
+{
+    /**
+     * if value changed => relaout
+     */
+    if (on != m_doubleSided) {
+        m_doubleSided = on;
+        relayout();
+    }
+}
+
+void Document::relayout()
 {
     m_pageRects.clear();
     m_layoutSize = QSizeF();
@@ -148,12 +176,9 @@ void Document::relayout(bool emitSignal)
     if (m_document == nullptr)
         return;
 
-    // TODO: for now we assume all pages have the same size
-    PageView *view = PdfViewer::view();
-
     QPointF offset(m_spacing, m_spacing);
 
-    if (view->doubleSided()) {
+    if (doubleSided()) {
         int currentPage = 0;
         while (currentPage < numPages()) {
             Poppler::Page *p = page(currentPage);
@@ -196,18 +221,8 @@ void Document::relayout(bool emitSignal)
         boundingRect = boundingRect.united(m_pageRects.at(c));
     m_layoutSize = boundingRect.adjusted(0, 0, 2 * m_spacing, 2 * m_spacing).size();
 
-    if (emitSignal)
-        emit layoutChanged();
-}
-
-void Document::reset()
-{
-    for (int i = 0; i < m_links.length(); ++i)
-        qDeleteAll(m_links.at(i));
-    m_links.clear();
-    qDeleteAll(m_pages);
-    m_pages.clear();
-    delete m_document;
-    m_document = nullptr;
-    m_title.clear();
+    /**
+     * e.g. view needs to update
+     */
+    emit layoutChanged();
 }

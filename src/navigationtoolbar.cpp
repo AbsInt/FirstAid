@@ -326,5 +326,5 @@ void NavigationToolBar::slotChangeZoom(qreal currentZoom)
 
 void NavigationToolBar::slotToggleFacingPages()
 {
-    PdfViewer::view()->setDoubleSided(m_toggleFacingPagesAct->isChecked());
+    PdfViewer::document()->setDoubleSided(m_toggleFacingPagesAct->isChecked());
 }

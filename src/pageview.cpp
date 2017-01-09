@@ -105,6 +105,7 @@ PageView::PageView(QWidget *parent)
 
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
+    connect(PdfViewer::document(), SIGNAL(layoutChanged()), SLOT(slotLayoutChanged()));
 
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(updateCurrentPage()));
 
@@ -195,14 +196,18 @@ void PageView::slotDocumentChanged()
     updateCurrentPage();
 }
 
+void PageView::slotLayoutChanged()
+{
+    // visual size of document might change now!
+    updateViewSize();
+
+    // update page
+    updateCurrentPage();
+}
+
 int PageView::currentPage() const
 {
     return m_currentPage;
-}
-
-bool PageView::doubleSided() const
-{
-    return m_doubleSided;
 }
 
 void PageView::setZoomMode(ZoomMode mode)
@@ -262,18 +267,6 @@ void PageView::contextMenuEvent(QContextMenuEvent *event)
         m_rubberBand->setGeometry(r.normalized());
 
         m_rubberBand->show();
-    }
-}
-
-void PageView::setDoubleSided(bool on)
-{
-    if (on != m_doubleSided) {
-        m_doubleSided = on;
-
-        PdfViewer::document()->relayout();
-
-        // visual size of document might change now!
-        updateViewSize();
     }
 }
 
@@ -583,13 +576,13 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
 
 void PageView::gotoPreviousPage()
 {
-    int newPage = qMax(0, m_currentPage - (m_doubleSided ? 2 : 1));
+    int newPage = qMax(0, m_currentPage - (PdfViewer::document()->doubleSided() ? 2 : 1));
     gotoPage(newPage);
 }
 
 void PageView::gotoNextPage()
 {
-    int newPage = qMin(PdfViewer::document()->numPages() - 1, m_currentPage + (m_doubleSided ? 2 : 1));
+    int newPage = qMin(PdfViewer::document()->numPages() - 1, m_currentPage + (PdfViewer::document()->doubleSided() ? 2 : 1));
     gotoPage(newPage);
 }
 

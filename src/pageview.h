@@ -53,7 +53,7 @@ public:
     qreal resX() const;
     qreal resY() const;
 
-    
+
     QRectF fromPoints(const QRectF &rect) const
     {
         return QRectF(rect.left() / 72.0 * resX(), rect.top() / 72.0 * resY(), rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
@@ -64,7 +64,7 @@ public:
         return QRectF(rect.left() * 72.0 / resX(), rect.top() * 72.0 / resY(), rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
     }
 
-    
+
     QSizeF fromPoints(const QSizeF &rect) const
     {
         return QSizeF(rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
@@ -88,13 +88,12 @@ public:
 
     QPoint offset() const;
     int currentPage() const;
-    bool doubleSided() const;
 
 public slots:
-    void setDoubleSided(bool on);
     void setZoomMode(PageView::ZoomMode mode);
     void setZoom(qreal zoom);
     void slotDocumentChanged();
+    void slotLayoutChanged();
 
 public slots:
     /**
@@ -159,7 +158,6 @@ private:
     int m_dpiY = 72;
     ZoomMode m_zoomMode = Absolute;
     qreal m_zoom = 1.0;
-    bool m_doubleSided = false;
     int m_currentPage = -1;
 
     QCache<int, QImage> m_imageCache;

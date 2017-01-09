@@ -69,14 +69,14 @@ public:
     Poppler::LinkDestination *linkDestination(const QString &destination) const;
 
     /*! Performa a relayout of the current document. */
-    void relayout(bool emitSignal = true);
+    void relayout();
+
+    bool doubleSided() const;
+    void setDoubleSided(bool on);
 
 signals:
     void documentChanged();
     void layoutChanged();
-
-private:
-    void reset();
 
 private:
     /**
@@ -88,6 +88,11 @@ private:
      * document title
      */
     QString m_title;
+
+    /**
+     * double sided layout?
+     */
+    bool m_doubleSided = false;
 
     /**
      * vector of page rectangles in the viewport, index == page
