@@ -118,10 +118,6 @@ PageView::PageView(QWidget *parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
-    // behave like QScrollArea => 20
-    verticalScrollBar()->setSingleStep(20);
-    horizontalScrollBar()->setSingleStep(20);
-
     // add some shortcuts
     new QShortcut(Qt::Key_Backspace, this, SLOT(stepBack()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(Qt::Key_Space, this, SLOT(advance()), nullptr, Qt::ApplicationShortcut);
@@ -689,9 +685,15 @@ void PageView::updateViewSize()
     horizontalScrollBar()->setRange(0, qMax(0, int(size.width() - viewport()->width())));
     verticalScrollBar()->setRange(0, qMax(0, int(size.height() - viewport()->height())));
 
-    // set page step depending on page size (with margin)
-    verticalScrollBar()->setPageStep(fromPoints(PdfViewer::document()->pageRect(0, true)).height());
-    horizontalScrollBar()->setPageStep(fromPoints(PdfViewer::document()->pageRect(0, true)).width());
+    /**
+     * set single & page step depending on page size (with margin)
+     * fallback to dummy values if no pages
+     */
+    const QSize pageSizeInPixel = (PdfViewer::document()->numPages() > 0) ? fromPoints(PdfViewer::document()->pageRect(0, true)).size().toSize() : QSize(100, 100);
+    verticalScrollBar()->setSingleStep(pageSizeInPixel.height() / 10);
+    horizontalScrollBar()->setSingleStep(pageSizeInPixel.width() / 10);
+    verticalScrollBar()->setPageStep(pageSizeInPixel.height());
+    horizontalScrollBar()->setPageStep(pageSizeInPixel.width());
 
     /**
      * update page, perhaps
