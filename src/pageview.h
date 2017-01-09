@@ -77,7 +77,7 @@ public slots:
 
     void gotoDestination(const QString &destination, bool updateHistory = true);
     void gotoHistoryEntry(const HistoryEntry &entry);
-    void slotCopyRequested(int page, const QRectF &rect);
+    void slotCopyRequested(int page, const QRect &viewportRect);
 
     void slotFindStarted();
     void slotMatchesFound(int page, const QList<QRectF> &matches);

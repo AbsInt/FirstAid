@@ -374,7 +374,7 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
 
     // update rubber band?
     if (m_rubberBandOrigin.first >= 0) {
-        QRect r = QRect(m_rubberBandOrigin.second, event->pos()).intersected(fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect());
+        QRect r = QRect(m_rubberBandOrigin.second, event->pos()).intersected(fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect().translated(-offset()));
         m_rubberBand->setGeometry(r.normalized());
     }
 
@@ -401,8 +401,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
 {
     // special case: end rubber band that has been created by context menu copy
     if (m_rubberBandOrigin.first >= 0) {
-        QRect displayRect = fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect();
-        slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().translated(-displayRect.topLeft()));
+        slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry());
         m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
         m_rubberBand->hide();
         return;
@@ -440,13 +439,10 @@ void PageView::mousePressEvent(QMouseEvent *event)
         }
     }
 
-    if (event->modifiers().testFlag(Qt::ShiftModifier)) {
-        int pageNumber = PdfViewer::document()->pageForPoint(event->pos() + offset());
-        if (-1 != pageNumber) {
-            m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
-            m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
-            m_rubberBand->show();
-        }
+    if (event->modifiers().testFlag(Qt::ShiftModifier) && -1 != page) {
+        m_rubberBandOrigin = qMakePair(page, event->pos());
+        m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
+        m_rubberBand->show();
     }
 
     // if there is no Shift pressed we start panning
@@ -489,11 +485,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
     // reset rubber band if needed
     if (m_rubberBandOrigin.first >= 0) {
-        QRect displayRect = fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect();
-        if (!displayRect.isValid())
-            return;
-
-        slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry().intersected(displayRect).translated(-displayRect.topLeft()));
+        slotCopyRequested(m_rubberBandOrigin.first, m_rubberBand->geometry());
 
         m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
         m_rubberBand->hide();
@@ -637,13 +629,14 @@ void PageView::gotoHistoryEntry(const HistoryEntry &entry)
         gotoDestination(entry.m_destination, false);
 }
 
-void PageView::slotCopyRequested(int page, const QRectF &rect)
+void PageView::slotCopyRequested(int page, const QRect &viewportRect)
 {
-    if (rect.isNull())
+    if (-1 == page || viewportRect.isNull())
         return;
 
     if (Poppler::Page *p = PdfViewer::document()->page(page)) {
-        QRectF r = toPoints(rect);
+        QRectF pageRect = PdfViewer::document()->pageRect(page);
+        QRectF r = toPoints(viewportRect.translated(offset())).translated(-pageRect.topLeft());
         QString text = p->text(r);
 
         QClipboard *clipboard = QGuiApplication::clipboard();
