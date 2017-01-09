@@ -33,22 +33,34 @@ public:
     ~Document();
 
     /*! Returns true if we are holding a valid Poppler document. */
-    bool isValid() const;
+    bool isValid() const
+    {
+        return m_document;
+    }
 
     /*! Set Poppler document to use, any old data will be deleted. */
     void setDocument(Poppler::Document *document);
 
     /*! Returns document title */
-    QString title() const;
+    QString title() const
+    {
+        return m_title;
+    }
 
     /*! Returns the table of contents of nullptr. */
     const QDomDocument *toc() const;
 
     /*! Returns the required size of a viewport. */
-    QSizeF layoutSize() const;
+    QSizeF layoutSize() const
+    {
+        return m_layoutSize;
+    }
 
     /*! Returns the number of available pages. */
-    int numPages() const;
+    int numPages() const
+    {
+        return m_pages.size();
+    }
 
     /*! Returns page numbers visible in given rectangle. */
     QList<int> visiblePages(const QRectF &rect) const;
@@ -68,11 +80,24 @@ public:
     /*! Returns a link destination for the given name or nullptr. */
     Poppler::LinkDestination *linkDestination(const QString &destination) const;
 
-    /*! Performa a relayout of the current document. */
-    void relayout();
+    /**
+     * double sided mode on?
+     * @return double sided mode on?
+     */
+    bool doubleSided() const
+    {
+        return m_doubleSided;
+    }
 
-    bool doubleSided() const;
+    /**
+     * Set double sided mode.
+     * @param on should double sided mode be on?
+     */
     void setDoubleSided(bool on);
+
+private:
+    /*! Perform a relayout of the current document. */
+    void relayout();
 
 signals:
     void documentChanged();

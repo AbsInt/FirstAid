@@ -53,7 +53,6 @@ public:
     qreal resX() const;
     qreal resY() const;
 
-
     QRectF fromPoints(const QRectF &rect) const
     {
         return QRectF(rect.left() / 72.0 * resX(), rect.top() / 72.0 * resY(), rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
@@ -63,7 +62,6 @@ public:
     {
         return QRectF(rect.left() * 72.0 / resX(), rect.top() * 72.0 / resY(), rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
     }
-
 
     QSizeF fromPoints(const QSizeF &rect) const
     {
@@ -84,7 +82,6 @@ public:
     {
         return QPointF(rect.x() * 72.0 / resX(), rect.y() * 72.0 / resY());
     }
-
 
     QPoint offset() const;
     int currentPage() const;

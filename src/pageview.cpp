@@ -103,7 +103,6 @@ PageView::PageView(QWidget *parent)
     connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(gotoPage(int, QRectF)));
     connect(PdfViewer::searchEngine(), SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotMatchesFound(int, QList<QRectF>)));
 
-
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
     connect(PdfViewer::document(), SIGNAL(layoutChanged()), SLOT(slotLayoutChanged()));
 
@@ -272,7 +271,7 @@ void PageView::contextMenuEvent(QContextMenuEvent *event)
 
 void PageView::updateCurrentPage()
 {
-    const int page = qMax(0, PdfViewer::document()->pageForPoint(toPoints(QPointF(0,offset().y()))));
+    const int page = qMax(0, PdfViewer::document()->pageForPoint(toPoints(QPointF(0, offset().y()))));
     if (page != m_currentPage) {
         m_currentPage = page;
         emit pageChanged(m_currentPage);
@@ -473,7 +472,6 @@ void PageView::mousePressEvent(QMouseEvent *event)
         }
     }
 
-
     if (event->modifiers().testFlag(Qt::ShiftModifier)) {
         int pageNumber = PdfViewer::document()->pageForPoint(event->pos() + offset());
         if (-1 != pageNumber) {
@@ -562,7 +560,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
     /**
      * if the page difference is large, just jump there, else smooth scroll
      */
-    if (qAbs(m_currentPage-page) > 4) {
+    if (qAbs(m_currentPage - page) > 4) {
         setOffset(toBeVisibleInPixel.topLeft().toPoint());
     } else {
         QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);

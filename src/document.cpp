@@ -27,12 +27,8 @@ Document::Document()
 
 Document::~Document()
 {
+    // free data by setting no document
     setDocument(nullptr);
-}
-
-bool Document::isValid() const
-{
-    return m_document != nullptr;
 }
 
 void Document::setDocument(Poppler::Document *document)
@@ -87,27 +83,12 @@ void Document::setDocument(Poppler::Document *document)
     emit documentChanged();
 }
 
-QString Document::title() const
-{
-    return m_title;
-}
-
 const QDomDocument *Document::toc() const
 {
     if (!m_document)
         return nullptr;
 
     return m_document->toc();
-}
-
-QSizeF Document::layoutSize() const
-{
-    return m_layoutSize;
-}
-
-int Document::numPages() const
-{
-    return m_pages.size();
 }
 
 QList<int> Document::visiblePages(const QRectF &rect) const
@@ -150,11 +131,6 @@ const QList<Poppler::Annotation *> &Document::links(int page) const
 Poppler::LinkDestination *Document::linkDestination(const QString &destination) const
 {
     return m_document->linkDestination(destination);
-}
-
-bool Document::doubleSided() const
-{
-    return m_doubleSided;
 }
 
 void Document::setDoubleSided(bool on)
