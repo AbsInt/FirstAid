@@ -83,7 +83,7 @@ private:
      * current open poppler document
      */
     Poppler::Document *m_document = nullptr;
-    
+
     /**
      * document title
      */
@@ -108,4 +108,9 @@ private:
      * spacing between pages and the margin around the document
      */
     const qreal m_spacing = 5;
+
+    /**
+     * layout size of complete document
+     */
+    QSizeF m_layoutSize;
 };

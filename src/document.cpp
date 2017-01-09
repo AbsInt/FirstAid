@@ -47,7 +47,7 @@ void Document::setDocument(Poppler::Document *document)
     if (m_document) {
         // remember title
         m_title = m_document->title();
-        
+
         // set render hints
         m_document->setRenderHint(Poppler::Document::TextAntialiasing, true);
         m_document->setRenderHint(Poppler::Document::Antialiasing, true);
@@ -90,16 +90,7 @@ const QDomDocument *Document::toc() const
 
 QSizeF Document::layoutSize() const
 {
-    if (m_pageRects.isEmpty())
-        return QSizeF();
-
-    QRectF boundingRect = m_pageRects.first();
-    boundingRect = boundingRect.united(m_pageRects.last());
-
-    if (numPages() > 2)
-        boundingRect = boundingRect.united(m_pageRects.at(1));
-
-    return boundingRect.adjusted(0, 0, 2 * m_spacing, 2 * m_spacing).size();
+    return m_layoutSize;
 }
 
 int Document::numPages() const
@@ -152,6 +143,7 @@ Poppler::LinkDestination *Document::linkDestination(const QString &destination) 
 void Document::relayout(bool emitSignal)
 {
     m_pageRects.clear();
+    m_layoutSize = QSizeF();
 
     if (m_document == nullptr)
         return;
@@ -195,6 +187,14 @@ void Document::relayout(bool emitSignal)
             offset += QPointF(0, pageRect.height() + m_spacing);
         }
     }
+
+    /**
+     * compute full layout size
+     */
+    QRectF boundingRect;
+    for (int c = 0; c < m_pageRects.size(); c++)
+        boundingRect = boundingRect.united(m_pageRects.at(c));
+    m_layoutSize = boundingRect.adjusted(0, 0, 2 * m_spacing, 2 * m_spacing).size();
 
     if (emitSignal)
         emit layoutChanged();
