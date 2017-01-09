@@ -237,8 +237,15 @@ void PdfViewer::processCommand(const QString &command)
     if (command.startsWith("open "))
         loadDocument(command.mid(5));
 
-    else if (command.startsWith("goto "))
-        m_view->gotoDestination(command.mid(5));
+    else if (command.startsWith("goto ")) {
+        const QString target = command.mid(5);
+        bool ok = false;
+        const int pageNumber = target.toInt(&ok);
+        if (ok)
+            m_view->gotoPage(pageNumber);
+        else
+            m_view->gotoDestinationName(target);
+    }
 
     else if (command.startsWith("close"))
         qApp->quit();

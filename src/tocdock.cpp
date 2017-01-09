@@ -22,6 +22,7 @@
 
 #include <poppler-qt5.h>
 
+#include <QDebug>
 #include <QHeaderView>
 #include <QTreeWidget>
 
@@ -57,18 +58,21 @@ TocDock::~TocDock()
 
 void TocDock::fillInfo()
 {
-    if (const QDomDocument *toc = PdfViewer::document()->toc())
+    if (const QDomDocument *toc = PdfViewer::document()->toc()) {
         fillToc(*toc, m_tree, 0);
-    else {
-        QTreeWidgetItem *item = new QTreeWidgetItem();
-        item->setText(0, tr("No table of contents available."));
-        item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-        m_tree->addTopLevelItem(item);
+        return;
     }
+    
+    // tell we found no toc
+    QTreeWidgetItem *item = new QTreeWidgetItem();
+    item->setText(0, tr("No table of contents available."));
+    item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+    m_tree->addTopLevelItem(item);
 }
 
 void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
 {
+    
     QTreeWidgetItem *newitem = nullptr;
     for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
         QDomElement e = node.toElement();
@@ -78,21 +82,31 @@ void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem
         else
             newitem = new QTreeWidgetItem(parentItem, newitem);
 
-        QString destination = e.attribute("DestinationName");
-
+        // tag name == link name, strange enough
         newitem->setText(0, e.tagName());
-        newitem->setData(0, Qt::UserRole, destination);
-
-        if (Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(destination)) {
-            int pageNumber = link->pageNumber();
+        
+        /**
+         * use raw string for destination or convert the named one
+         */
+        QString destination = e.attribute("Destination");
+        if (!e.attribute("DestinationName").isNull()) {
+            Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(e.attribute("DestinationName"));
+            if (link && link->pageNumber() > 0)
+                destination = link->toString();
             delete link;
-
-            newitem->setText(1, QString::number(pageNumber));
-            newitem->setData(1, Qt::TextAlignmentRole, Qt::AlignRight);
-
-            if (!m_pageToItemMap.contains(pageNumber))
-                m_pageToItemMap.insert(pageNumber, newitem);
         }
+
+        Poppler::LinkDestination link(destination);
+        int pageNumber = link.pageNumber();
+        
+        // remember link string representation
+        newitem->setData(0, Qt::UserRole, link.toString());
+
+        newitem->setText(1, QString::number(pageNumber));
+        newitem->setData(1, Qt::TextAlignmentRole, Qt::AlignRight);
+
+        if (!m_pageToItemMap.contains(pageNumber))
+            m_pageToItemMap.insert(pageNumber, newitem);
 
         bool isOpen = false;
         if (e.hasAttribute(QString::fromLatin1("Open")))

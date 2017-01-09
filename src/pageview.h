@@ -75,7 +75,20 @@ public slots:
     void historyPrev();
     void historyNext();
 
+    /**
+     * Go to given destination name (named destination)
+     * @param destination named destination to go to
+     * @param updateHistory update jump history?
+     */
+    void gotoDestinationName(const QString &destination, bool updateHistory = true);
+
+    /**
+     * Go to given destination (raw string representation parsable by LinkDestination constructor)
+     * @param destination string representation of destination to go to
+     * @param updateHistory update jump history?
+     */
     void gotoDestination(const QString &destination, bool updateHistory = true);
+    
     void gotoHistoryEntry(const HistoryEntry &entry);
     void slotCopyRequested(int page, const QRect &viewportRect);
 
