@@ -99,6 +99,9 @@ private:
     /*! Perform a relayout of the current document. */
     void relayout();
 
+    /*! Free memory used. */
+    void reset();
+
 signals:
     void documentChanged();
     void layoutChanged();

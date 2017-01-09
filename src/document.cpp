@@ -27,22 +27,16 @@ Document::Document()
 
 Document::~Document()
 {
-    // free data by setting no document
-    setDocument(nullptr);
+    // free data
+    reset();
 }
 
 void Document::setDocument(Poppler::Document *document)
 {
     // reset old content
-    for (int i = 0; i < m_links.length(); ++i)
-        qDeleteAll(m_links.at(i));
-    m_links.clear();
-    qDeleteAll(m_pages);
-    m_pages.clear();
-    m_title.clear();
+    reset();
 
-    // remember poppler document, free old one
-    delete m_document;
+    // remember new poppler document
     m_document = document;
 
     // passing a nullptr is valid as it only resets the object
@@ -201,4 +195,19 @@ void Document::relayout()
      * e.g. view needs to update
      */
     emit layoutChanged();
+}
+
+void Document::reset()
+{
+    // free memory
+    for (int i = 0; i < m_links.length(); ++i)
+        qDeleteAll(m_links.at(i));
+    m_links.clear();
+    qDeleteAll(m_pages);
+    m_pages.clear();
+    m_title.clear();
+
+    // free old one
+    delete m_document;
+    m_document = nullptr;
 }
