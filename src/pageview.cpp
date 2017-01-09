@@ -423,7 +423,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
                         m_mousePressPage = gotoLink.pageNumber() - 1;
                         QRect displayRect = fromPoints(PdfViewer::document()->pageRect(m_mousePressPage)).toRect();
-                        m_mousePressPageOffset = gotoLink.isChangeTop() ? gotoLink.top() * displayRect.height() : 0;
+                        m_mousePressPageOffset = (gotoLink.isChangeTop() && gotoLink.top() >= 0 ) ? gotoLink.top() * displayRect.height() : 0;
                     } break;
 
                     case Poppler::Link::Browse:
