@@ -105,7 +105,7 @@ PageView::PageView(QWidget *parent)
 
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
-    
+
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(updateCurrentPage()));
 
     // we have static content that can be scrolled like an image
@@ -153,7 +153,7 @@ PageView::PageView(QWidget *parent)
     m_updateViewSizeTimer.setSingleShot(true);
     m_updateViewSizeTimer.setInterval(10);
     connect(&m_updateViewSizeTimer, &QTimer::timeout, this, &PageView::updateViewSize);
-    
+
     /**
      * initial inits
      */
@@ -190,7 +190,7 @@ void PageView::slotDocumentChanged()
 
     // visual size of document might change now!
     updateViewSize();
-    
+
     // update page
     updateCurrentPage();
 }
@@ -552,22 +552,29 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
      */
     if (page < 0 || page >= PdfViewer::document()->numPages())
         return;
-    
+
     /**
      * get page rect for the requested page, converted to pixels
      */
     const QRectF pageRectInPixel = fromPoints(PdfViewer::document()->pageRect(page));
-    
-    /**
-     * translate the rectange we want to show from points and move it to the page
-     */
-    const QRectF toBeVisibleInPixel = fromPoints(rectToBeVisibleInPoints).translated(pageRectInPixel.topLeft());
 
     /**
-     * make visible
+     * translate the rectange we want to show from points and move it to the page
+     * we transform the rectToBeVisibleInPoints first to pixel, move it to the page and then add some margin
+     * finally it is clipped with page rectangle to not end in the void
      */
-    QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 100, 100);
-    
+    const int marginToBeSeen = 100;
+    const QRectF toBeVisibleInPixel = fromPoints(rectToBeVisibleInPoints).translated(pageRectInPixel.topLeft()).marginsAdded(QMarginsF(marginToBeSeen, marginToBeSeen, marginToBeSeen, marginToBeSeen)).intersected(pageRectInPixel);
+
+    /**
+     * if the page difference is large, just jump there, else smooth scroll
+     */
+    if (abs(m_currentPage-page) > 2) {
+        setOffset(toBeVisibleInPixel.topLeft().toPoint());
+    } else {
+        QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);
+    }
+
     /**
      * trigger repaint in any case
      */
@@ -725,7 +732,7 @@ void PageView::updateViewSize()
      * update page, perhaps
      */
     updateCurrentPage();
-    
+
     /**
      * repaint
      */
