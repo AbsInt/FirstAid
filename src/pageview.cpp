@@ -43,6 +43,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QCursor>
+#include <QDebug>
 #include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QGestureEvent>
@@ -57,22 +58,6 @@
 #include <QScrollBar>
 #include <QScroller>
 #include <QShortcut>
-
-#include <QDebug>
-
-/*
- * Helper class
- */
-
-QColor PageView::matchColor()
-{
-    return QColor(255, 255, 0, 64);
-}
-
-QColor PageView::highlightColor()
-{
-    return QColor(255, 128, 0, 128);
-}
 
 /*
  * constructors / destructor
@@ -163,24 +148,6 @@ PageView::PageView(QWidget *parent)
 PageView::~PageView()
 {
 }
-
-/*
- * public methods
- */
-
-qreal PageView::resX() const
-{
-    return m_dpiX * m_zoom;
-}
-
-qreal PageView::resY() const
-{
-    return m_dpiY * m_zoom;
-}
-
-/*
- * public methods
- */
 
 void PageView::slotDocumentChanged()
 {

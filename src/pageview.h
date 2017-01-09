@@ -47,42 +47,6 @@ public:
 public:
     enum ZoomMode { FitWidth, FitPage, Absolute };
 
-    static QColor matchColor();
-    static QColor highlightColor();
-
-    qreal resX() const;
-    qreal resY() const;
-
-    QRectF fromPoints(const QRectF &rect) const
-    {
-        return QRectF(rect.left() / 72.0 * resX(), rect.top() / 72.0 * resY(), rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
-    }
-
-    QRectF toPoints(const QRectF &rect) const
-    {
-        return QRectF(rect.left() * 72.0 / resX(), rect.top() * 72.0 / resY(), rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
-    }
-
-    QSizeF fromPoints(const QSizeF &rect) const
-    {
-        return QSizeF(rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
-    }
-
-    QSizeF toPoints(const QSizeF &rect) const
-    {
-        return QSizeF(rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
-    }
-
-    QPointF fromPoints(const QPointF &rect) const
-    {
-        return QPointF(rect.x() / 72.0 * resX(), rect.y() / 72.0 * resY());
-    }
-
-    QPointF toPoints(const QPointF &rect) const
-    {
-        return QPointF(rect.x() * 72.0 / resX(), rect.y() * 72.0 / resY());
-    }
-
     QPoint offset() const;
     int currentPage() const;
 
@@ -144,6 +108,102 @@ private slots:
     void updateViewSize();
 
 private:
+    /**
+     * Color for search matches.
+     * @return search match color
+     */
+    static QColor matchColor()
+    {
+        return QColor(255, 255, 0, 64);
+    }
+
+    /**
+     * Color for currently highlighted search match.
+     * @return highlighed search match color
+     */
+    static QColor highlightColor()
+    {
+        return QColor(255, 128, 0, 128);
+    }
+
+    /**
+     * Current resolution for X axis, using right DPI + zoom.
+     * @return X axis resolution
+     */
+    qreal resX() const
+    {
+        return m_dpiX * m_zoom;
+    }
+
+    /**
+     * Current resolution for Y axis, using right DPI + zoom.
+     * @return Y axis resolution
+     */
+    qreal resY() const
+    {
+        return m_dpiY * m_zoom;
+    }
+
+    /**
+     * Convert from points to pixels using the current DPI and zoom.
+     * @param rect input in points to convert
+     * @return result in pixel
+     */
+    QRectF fromPoints(const QRectF &rect) const
+    {
+        return QRectF(rect.left() / 72.0 * resX(), rect.top() / 72.0 * resY(), rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
+    }
+
+    /**
+     * Convert from pixels to points using the current DPI and zoom.
+     * @param rect input in pixel to convert
+     * @return result in point
+     */
+    QRectF toPoints(const QRectF &rect) const
+    {
+        return QRectF(rect.left() * 72.0 / resX(), rect.top() * 72.0 / resY(), rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
+    }
+
+    /**
+     * Convert from points to pixels using the current DPI and zoom.
+     * @param rect input in points to convert
+     * @return result in pixel
+     */
+    QSizeF fromPoints(const QSizeF &rect) const
+    {
+        return QSizeF(rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
+    }
+
+    /**
+     * Convert from pixels to points using the current DPI and zoom.
+     * @param rect input in pixel to convert
+     * @return result in point
+     */
+    QSizeF toPoints(const QSizeF &rect) const
+    {
+        return QSizeF(rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
+    }
+
+    /**
+     * Convert from points to pixels using the current DPI and zoom.
+     * @param rect input in points to convert
+     * @return result in pixel
+     */
+    QPointF fromPoints(const QPointF &rect) const
+    {
+        return QPointF(rect.x() / 72.0 * resX(), rect.y() / 72.0 * resY());
+    }
+
+    /**
+     * Convert from pixels to points using the current DPI and zoom.
+     * @param rect input in pixel to convert
+     * @return result in point
+     */
+    QPointF toPoints(const QPointF &rect) const
+    {
+        return QPointF(rect.x() * 72.0 / resX(), rect.y() * 72.0 / resY());
+    }
+
     QImage getPage(int page);
 
 signals:
