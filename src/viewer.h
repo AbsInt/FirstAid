@@ -95,8 +95,6 @@ public:
         return s_instance->m_view;
     }
 
-    QSize sizeHint() const override;
-
     void loadDocument(QString file, bool forceReload = false);
     void closeDocument();
 

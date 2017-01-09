@@ -163,11 +163,6 @@ PdfViewer::~PdfViewer()
     s_instance = nullptr;
 }
 
-QSize PdfViewer::sizeHint() const
-{
-    return QSize(500, 600);
-}
-
 void PdfViewer::loadDocument(QString file, bool forceReload)
 {
     // absolute path in any case, to have full url for later external open!

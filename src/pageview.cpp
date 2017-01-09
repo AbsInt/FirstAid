@@ -729,3 +729,18 @@ QImage PageView::getPage(int pageNumber)
      */
     return QImage();
 }
+
+QSize PageView::sizeHint() const
+{
+    /**
+     * adjust size hint to document
+     * HACK: we just use first page for some things
+     */
+    if (PdfViewer::document()->numPages() > 0)
+        return (1.1 * fromPoints(PdfViewer::document()->pageRect(0, true)).size()).toSize();
+
+    /**
+     * else: normal hint
+     */
+    return QWidget::sizeHint();
+}

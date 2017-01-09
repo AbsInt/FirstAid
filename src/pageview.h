@@ -85,6 +85,8 @@ public slots:
 
     void setOffset(const QPoint &point);
 
+    QSize sizeHint() const override;
+
 signals:
     void copyRequested(const QRectF &area);
 
