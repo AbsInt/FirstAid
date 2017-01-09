@@ -96,10 +96,10 @@ QList<int> Document::visiblePages(const QRectF &rect) const
     return pages;
 }
 
-QRectF Document::pageRect(int page,bool addMargins) const
+QRectF Document::pageRect(int page, bool addMargins) const
 {
     Q_ASSERT(page >= 0 && page < m_pageRects.size());
-    return addMargins?m_pageRects.at(page).marginsAdded(QMarginsF(m_spacing, m_spacing, 0, 0)):m_pageRects.at(page);
+    return addMargins ? m_pageRects.at(page).marginsAdded(QMarginsF(m_spacing, m_spacing, 0, 0)) : m_pageRects.at(page);
 }
 
 int Document::pageForPoint(const QPointF &point) const
@@ -109,6 +109,22 @@ int Document::pageForPoint(const QPointF &point) const
             return c;
 
     return -1;
+}
+
+int Document::pageForRect(const QRectF &rect) const
+{
+    int foundPage = -1;
+    qreal currentArea = 0;
+
+    for (int page = 0; page < numPages(); page++) {
+        QRectF r = rect.intersected(pageRect(page));
+        if (currentArea < r.width() * r.height()) {
+            currentArea = r.width() * r.height();
+            foundPage = page;
+        }
+    }
+
+    return foundPage;
 }
 
 Poppler::Page *Document::page(int page) const

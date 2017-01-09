@@ -71,6 +71,9 @@ public:
     /*! Returns the page for the given point in the layout. */
     int pageForPoint(const QPointF &point) const;
 
+    /*! Returns the page that occupies most of the space in the given rectangle.*/
+    int pageForRect(const QRectF &rect) const;
+
     /*! Returns a Poppler page for the given page number or nullptr. */
     Poppler::Page *page(int page) const;
 

@@ -91,6 +91,7 @@ PageView::PageView(QWidget *parent)
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
     connect(PdfViewer::document(), SIGNAL(layoutChanged()), SLOT(slotLayoutChanged()));
 
+    connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(updateCurrentPage()));
     connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(updateCurrentPage()));
 
     // we have static content that can be scrolled like an image
@@ -238,7 +239,7 @@ void PageView::contextMenuEvent(QContextMenuEvent *event)
 
 void PageView::updateCurrentPage()
 {
-    const int page = qMax(0, PdfViewer::document()->pageForPoint(toPoints(QPointF(0, offset().y()))));
+    const int page = qMax(0, PdfViewer::document()->pageForRect(toPoints(QRectF(offset(), viewport()->size()))));
     if (page != m_currentPage) {
         m_currentPage = page;
         emit pageChanged(m_currentPage);
@@ -423,7 +424,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
                         m_mousePressPage = gotoLink.pageNumber() - 1;
                         QRect displayRect = fromPoints(PdfViewer::document()->pageRect(m_mousePressPage)).toRect();
-                        m_mousePressPageOffset = (gotoLink.isChangeTop() && gotoLink.top() >= 0 ) ? gotoLink.top() * displayRect.height() : 0;
+                        m_mousePressPageOffset = (gotoLink.isChangeTop() && gotoLink.top() >= 0) ? gotoLink.top() * displayRect.height() : 0;
                     } break;
 
                     case Poppler::Link::Browse:
@@ -531,7 +532,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
         setOffset(toBeVisibleInPixel.topLeft().toPoint());
     } else {
         setOffset(toBeVisibleInPixel.topLeft().toPoint());
-        //QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);
+        // QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);
     }
 
     /**
@@ -542,14 +543,22 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
 
 void PageView::gotoPreviousPage()
 {
-    int newPage = qMax(0, m_currentPage - (PdfViewer::document()->doubleSided() ? 2 : 1));
-    gotoPage(newPage);
+    if (!PdfViewer::document()->doubleSided())
+        gotoPage(qMax(0, m_currentPage - 1));
+    else
+        gotoPage(qMax(0, m_currentPage - (0 == horizontalScrollBar()->maximum() ? 2 : 1)));
 }
 
 void PageView::gotoNextPage()
 {
-    int newPage = qMin(PdfViewer::document()->numPages() - 1, m_currentPage + (PdfViewer::document()->doubleSided() ? 2 : 1));
-    gotoPage(newPage);
+    if (!PdfViewer::document()->doubleSided())
+        gotoPage(qMin(PdfViewer::document()->numPages() - 1, m_currentPage + 1));
+    else {
+        if (0 == m_currentPage)
+            gotoPage(1);
+        else
+            gotoPage(qMin(PdfViewer::document()->numPages() - 1, m_currentPage + (0 == horizontalScrollBar()->maximum() ? 2 : 1)));
+    }
 }
 
 void PageView::stepBack()
@@ -687,10 +696,9 @@ void PageView::updateViewSize()
     horizontalScrollBar()->setRange(0, qMax(0, int(size.width() - viewport()->width())));
     verticalScrollBar()->setRange(0, qMax(0, int(size.height() - viewport()->height())));
 
-
     // set page step depending on page size (with margin)
-    verticalScrollBar()->setPageStep(fromPoints(PdfViewer::document()->pageRect(0,true)).height());
-    horizontalScrollBar()->setPageStep(fromPoints(PdfViewer::document()->pageRect(0,true)).width());
+    verticalScrollBar()->setPageStep(fromPoints(PdfViewer::document()->pageRect(0, true)).height());
+    horizontalScrollBar()->setPageStep(fromPoints(PdfViewer::document()->pageRect(0, true)).width());
 
     /**
      * update page, perhaps
