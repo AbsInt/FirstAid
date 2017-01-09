@@ -228,12 +228,12 @@ void NavigationToolBar::slotGoFirst()
 
 void NavigationToolBar::slotGoPrev()
 {
-    PdfViewer::view()->gotoPage(qMax(0, PdfViewer::view()->currentPage() - (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
+    PdfViewer::view()->gotoPreviousPage();
 }
 
 void NavigationToolBar::slotGoNext()
 {
-    PdfViewer::view()->gotoPage(qMin(PdfViewer::document()->numPages() - 1, PdfViewer::view()->currentPage() + (m_toggleFacingPagesAct->isChecked() ? 2 : 1)));
+    PdfViewer::view()->gotoNextPage();
 }
 
 void NavigationToolBar::slotGoLast()

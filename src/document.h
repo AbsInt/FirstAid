@@ -66,7 +66,7 @@ public:
     QList<int> visiblePages(const QRectF &rect) const;
 
     /*! Returns a rectangle descriping the page's position in the viewport. */
-    QRectF pageRect(int page) const;
+    QRectF pageRect(int page, bool addMargins = false) const;
 
     /*! Returns the page for the given point in the layout. */
     int pageForPoint(const QPointF &point) const;

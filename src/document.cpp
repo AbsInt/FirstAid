@@ -96,10 +96,10 @@ QList<int> Document::visiblePages(const QRectF &rect) const
     return pages;
 }
 
-QRectF Document::pageRect(int page) const
+QRectF Document::pageRect(int page,bool addMargins) const
 {
     Q_ASSERT(page >= 0 && page < m_pageRects.size());
-    return m_pageRects.at(page);
+    return addMargins?m_pageRects.at(page).marginsAdded(QMarginsF(m_spacing, m_spacing, 0, 0)):m_pageRects.at(page);
 }
 
 int Document::pageForPoint(const QPointF &point) const

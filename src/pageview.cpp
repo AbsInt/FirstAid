@@ -686,6 +686,11 @@ void PageView::updateViewSize()
     horizontalScrollBar()->setRange(0, qMax(0, int(size.width() - viewport()->width())));
     verticalScrollBar()->setRange(0, qMax(0, int(size.height() - viewport()->height())));
 
+
+    // set page step depending on page size (with margin)
+    verticalScrollBar()->setPageStep(fromPoints(PdfViewer::document()->pageRect(0,true)).height());
+    horizontalScrollBar()->setPageStep(fromPoints(PdfViewer::document()->pageRect(0,true)).width());
+
     /**
      * update page, perhaps
      */
