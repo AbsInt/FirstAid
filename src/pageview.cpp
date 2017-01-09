@@ -149,10 +149,10 @@ PageView::PageView(QWidget *parent)
 
     /**
      * delays updateViewSize
-     * delay it by 10 mseconds e.g. during resizing
+     * delay it by 100 mseconds e.g. during resizing
      */
     m_updateViewSizeTimer.setSingleShot(true);
-    m_updateViewSizeTimer.setInterval(10);
+    m_updateViewSizeTimer.setInterval(100);
     connect(&m_updateViewSizeTimer, &QTimer::timeout, this, &PageView::updateViewSize);
 
     /**
