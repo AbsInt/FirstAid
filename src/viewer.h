@@ -28,7 +28,6 @@
 #include <QMainWindow>
 #include <QTimer>
 
-class DocumentObserver;
 class QAction;
 class QActionGroup;
 class QLabel;
@@ -149,11 +148,6 @@ private:
      * timer to trigger reload delayed for file watcher
      */
     QTimer m_fileWatcherReloadTimer;
-
-    /**
-     * registered observers for the document
-     */
-    QList<DocumentObserver *> m_observers;
 
     /**
      * action: open file in external PDF viewer
