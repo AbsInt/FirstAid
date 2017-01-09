@@ -562,7 +562,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
     /**
      * if the page difference is large, just jump there, else smooth scroll
      */
-    if (abs(m_currentPage-page) > 2) {
+    if (qAbs(m_currentPage-page) > 4) {
         setOffset(toBeVisibleInPixel.topLeft().toPoint());
     } else {
         QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);
