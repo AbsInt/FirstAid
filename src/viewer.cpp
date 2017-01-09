@@ -153,11 +153,11 @@ PdfViewer::PdfViewer(const QString &file)
 
 PdfViewer::~PdfViewer()
 {
+    // close document, doesn't delete the m_document and we need m_view here
+    closeDocument();
+
     // close view early so no strange signals are handled
     delete m_view;
-
-    // close document
-    closeDocument();
 
     // unregister singleton
     s_instance = nullptr;
