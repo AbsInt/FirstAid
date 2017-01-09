@@ -699,21 +699,27 @@ void PageView::updateViewSize()
 
 QImage PageView::getPage(int pageNumber)
 {
-    QImage *cachedPage = m_imageCache.object(pageNumber);
-
-    if (!cachedPage) {
-        if (Poppler::Page *page = PdfViewer::document()->page(pageNumber)) {
-            /**
-             * we render in too high resolution and then set the right ratio
-             */
-            cachedPage = new QImage(page->renderToImage(resX() * devicePixelRatio(), resY() * devicePixelRatio(), -1, -1, -1, -1, Poppler::Page::Rotate0));
-            cachedPage->setDevicePixelRatio(devicePixelRatio());
-
-            m_imageCache.insert(pageNumber, cachedPage);
-            return *cachedPage;
-        }
-    } else
+    /**
+     * prefer cached image
+     */
+    if (QImage *cachedPage = m_imageCache.object(pageNumber))
         return *cachedPage;
 
+    /**
+     * try to get poppler page => render
+     */
+    if (Poppler::Page *page = PdfViewer::document()->page(pageNumber)) {
+        /**
+         * we render in too high resolution and then set the right ratio
+         */
+        QImage *cachedPage = new QImage(page->renderToImage(resX() * devicePixelRatio(), resY() * devicePixelRatio(), -1, -1, -1, -1, Poppler::Page::Rotate0));
+        cachedPage->setDevicePixelRatio(devicePixelRatio());
+        m_imageCache.insert(pageNumber, cachedPage);
+        return *cachedPage;
+    }
+
+    /**
+     * else: empty image, if no page there
+     */
     return QImage();
 }

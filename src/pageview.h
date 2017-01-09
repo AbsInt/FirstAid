@@ -204,6 +204,12 @@ private:
         return QPointF(rect.x() * 72.0 / resX(), rect.y() * 72.0 / resY());
     }
 
+    /**
+     * Get prerendered image for given page.
+     * Uses some cache to not render the last X pages again and again.
+     * @param page requested page
+     * @return rendered page as image, HiDPI aware
+     */
     QImage getPage(int page);
 
 signals:

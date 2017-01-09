@@ -104,7 +104,7 @@ QList<int> Document::visiblePages(const QRectF &rect) const
 
 QRectF Document::pageRect(int page) const
 {
-    Q_ASSERT(page >= 0 && page < m_pageRects.length());
+    Q_ASSERT(page >= 0 && page < m_pageRects.size());
     return m_pageRects.at(page);
 }
 
