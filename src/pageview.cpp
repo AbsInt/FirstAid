@@ -224,7 +224,7 @@ void PageView::contextMenuEvent(QContextMenuEvent *event)
     if (!m.exec(event->globalPos()))
         return;
 
-    int pageNumber = PdfViewer::document()->pageForPoint(event->pos() + offset());
+    int pageNumber = PdfViewer::document()->pageForPoint(toPoints(event->pos() + offset()));
     if (-1 != pageNumber) {
         m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
