@@ -530,7 +530,8 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
     if (qAbs(m_currentPage - page) > 4) {
         setOffset(toBeVisibleInPixel.topLeft().toPoint());
     } else {
-        QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);
+        setOffset(toBeVisibleInPixel.topLeft().toPoint());
+        //QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);
     }
 
     /**

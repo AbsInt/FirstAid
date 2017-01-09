@@ -221,7 +221,8 @@ private:
     int m_dpiY = 72;
     ZoomMode m_zoomMode = Absolute;
     qreal m_zoom = 1.0;
-    int m_currentPage = -1;
+
+    int m_currentPage = -1; //! the current page in the range from 0 to numpages-1
 
     QCache<int, QImage> m_imageCache;
 
