@@ -99,8 +99,15 @@ int main(int argc, char *argv[])
      */
     StdinReaderThread *stdinThread = nullptr;
     if (parser.isSet("stdin")) {
+        /**
+         * create our own thread for blocking read stdin, tell it to send the events to the viewer instance
+         */
         stdinThread = new StdinReaderThread(&viewer);
-        stdinThread->start();
+
+        /**
+         * delay start until even loop runs, we otherwise miss things like first goto command
+         */
+        QTimer::singleShot(0, stdinThread, SLOT(start()));
     }
 
     /**
