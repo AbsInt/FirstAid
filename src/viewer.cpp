@@ -153,9 +153,13 @@ PdfViewer::PdfViewer(const QString &file)
 
 PdfViewer::~PdfViewer()
 {
+    // close view early so no strange signals are handled
+    delete m_view;
+
+    // close document
     closeDocument();
 
-    // register singleton
+    // unregister singleton
     s_instance = nullptr;
 }
 

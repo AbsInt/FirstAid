@@ -136,11 +136,6 @@ private:
     static PdfViewer *s_instance;
 
     /**
-     * PDF view, renders the pages
-     */
-    PageView *m_view = nullptr;
-
-    /**
      * full path to current open document, else empty
      */
     QString m_filePath;
@@ -176,12 +171,17 @@ private:
     QAction *m_filePrintAct = nullptr;
 
     /**
+     * document
+     */
+    Document m_document;
+
+    /**
      * search engine
      */
     SearchEngine m_searchEngine;
 
     /**
-     * document
+     * PDF view, renders the pages
      */
-    Document m_document;
+    PageView *m_view = nullptr;
 };
