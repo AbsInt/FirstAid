@@ -601,8 +601,9 @@ void PageView::gotoDestinationName(const QString &destination, bool updateHistor
 {
     // try to lookup
     if (Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(destination)) {
-        // call function that takes description
-        gotoDestination(link->toString(), updateHistory);
+        // call function that takes description, skip that if page is already bogus
+        if (link->pageNumber() > 0)
+            gotoDestination(link->toString(), updateHistory);
         delete link;
     }
 }
@@ -610,11 +611,13 @@ void PageView::gotoDestination(const QString &destination, bool updateHistory)
 {
     // directly construct from description
     Poppler::LinkDestination link(destination);
-    const int pageNumber = link.pageNumber() - 1;
-    gotoPage(pageNumber, QRectF(0, (link.isChangeTop() ? link.top() * PdfViewer::document()->pageRect(pageNumber).height() : 0), 0, 0));
+    if (link.pageNumber() > 0) {
+        const int pageNumber = link.pageNumber() - 1;
+        gotoPage(pageNumber, QRectF(0, (link.isChangeTop() ? link.top() * PdfViewer::document()->pageRect(pageNumber).height() : 0), 0, 0));
 
-    if (updateHistory)
-        m_historyStack.add(destination);
+        if (updateHistory)
+            m_historyStack.add(destination);
+    }
 }
 
 void PageView::gotoHistoryEntry(const HistoryEntry &entry)
