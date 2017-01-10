@@ -114,13 +114,11 @@ protected:
     void contextMenuEvent(QContextMenuEvent *event) override;
 
 private slots:
+
     /**
-     * Update viewport dimensions after:
-     *  - document change
-     *  - change of zoom variant/factor
-     *  - change of single/double page mode
+     * slot to trigger viewsize update
      */
-    void updateViewSize();
+    void slotUpdateViewSize();
 
 private:
     /**
@@ -140,6 +138,15 @@ private:
     {
         return QColor(255, 128, 0, 128);
     }
+
+    /**
+     * Update viewport dimensions after:
+     *  - document change
+     *  - change of zoom variant/factor
+     *  - change of single/double page mode
+     * @param zoom new fixed zoom value if any
+     */
+    void updateViewSize(qreal zoom = -1.0);
 
     /**
      * Current resolution for X axis, using right DPI + zoom.

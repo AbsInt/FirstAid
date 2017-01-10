@@ -134,7 +134,7 @@ PageView::PageView(QWidget *parent)
      */
     m_updateViewSizeTimer.setSingleShot(true);
     m_updateViewSizeTimer.setInterval(100);
-    connect(&m_updateViewSizeTimer, &QTimer::timeout, this, &PageView::updateViewSize);
+    connect(&m_updateViewSizeTimer, &QTimer::timeout, this, &PageView::slotUpdateViewSize);
 
     /**
      * initial inits
@@ -188,10 +188,9 @@ void PageView::setZoom(qreal zoom)
     setZoomMode(Absolute);
 
     if (zoom != m_zoom && zoom >= 0.1 && zoom <= 4.0) {
-        m_zoom = zoom;
 
         // visual size of document might change now!
-        updateViewSize();
+        updateViewSize(zoom);
     }
 }
 
@@ -202,7 +201,6 @@ void PageView::wheelEvent(QWheelEvent *wheelEvent)
             setZoom(m_zoom + 0.1);
         else
             setZoom(m_zoom - 0.1);
-        emit zoomChanged(m_zoom);
         return;
     }
 
@@ -211,6 +209,11 @@ void PageView::wheelEvent(QWheelEvent *wheelEvent)
 
 void PageView::contextMenuEvent(QContextMenuEvent *)
 {
+}
+
+void PageView::slotUpdateViewSize()
+{
+    updateViewSize();
 }
 
 void PageView::updateCurrentPage()
@@ -267,7 +270,6 @@ bool PageView::event(QEvent *event)
                 pinchStartZoom = m_zoom;
 
             setZoom(pinchStartZoom * pinch->totalScaleFactor());
-            emit zoomChanged(m_zoom);
 
             ge->accept(pinch);
             return true;
@@ -543,19 +545,16 @@ void PageView::advance()
 void PageView::zoomIn()
 {
     setZoom(m_zoom + 0.1);
-    emit zoomChanged(m_zoom);
 }
 
 void PageView::zoomOut()
 {
     setZoom(m_zoom - 0.1);
-    emit zoomChanged(m_zoom);
 }
 
 void PageView::zoomOriginal()
 {
     setZoom(1.0);
-    emit zoomChanged(m_zoom);
 }
 
 void PageView::historyPrev()
@@ -639,7 +638,7 @@ void PageView::slotMatchesFound(int page, const QList<QRectF> &)
  * private methods
  */
 
-void PageView::updateViewSize()
+void PageView::updateViewSize(qreal zoom)
 {
     /**
      * invalidate cache
@@ -653,6 +652,11 @@ void PageView::updateViewSize()
      * adjust zoom level
      * HACK: we just use first page for some things
      */
+    if (zoom >= 0.0)
+    {
+        m_zoom = zoom;
+        emit zoomChanged(m_zoom);
+    } else
     if (PdfViewer::document()->numPages() > 0) {
         if (FitWidth == m_zoomMode) {
             m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
@@ -660,6 +664,7 @@ void PageView::updateViewSize()
             const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
             const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * m_dpiY);
             m_zoom = qMin(zx, zy);
+            emit zoomChanged(m_zoom);
         }
     }
 
