@@ -587,6 +587,9 @@ void PageView::gotoDestinationName(const QString &destination, bool updateHistor
 }
 void PageView::gotoDestination(const QString &destination, bool updateHistory)
 {
+    if (destination.isEmpty())
+        return;
+
     // directly construct from description
     Poppler::LinkDestination link(destination);
     if (link.pageNumber() > 0) {
