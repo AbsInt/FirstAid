@@ -664,7 +664,6 @@ void PageView::updateViewSize(qreal zoom)
             const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
             const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * m_dpiY);
             m_zoom = qMin(zx, zy);
-            emit zoomChanged(m_zoom);
         }
     }
 
