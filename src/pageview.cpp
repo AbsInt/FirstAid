@@ -385,6 +385,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
     int page = PdfViewer::document()->pageForPoint(toPoints(offset() + event->pos()));
 
+    //start rubber band with right click or shift+left click
     if ((event->button() == Qt::RightButton || event->modifiers().testFlag(Qt::ShiftModifier)) && -1 != page) {
         m_rubberBandOrigin = qMakePair(page, event->pos());
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
@@ -676,8 +677,8 @@ void PageView::updateViewSize()
      * fallback to dummy values if no pages
      */
     const QSize pageSizeInPixel = (PdfViewer::document()->numPages() > 0) ? fromPoints(PdfViewer::document()->pageRect(0, true)).size().toSize() : QSize(100, 100);
-    verticalScrollBar()->setSingleStep(pageSizeInPixel.height() / 10);
-    horizontalScrollBar()->setSingleStep(pageSizeInPixel.width() / 10);
+    verticalScrollBar()->setSingleStep(pageSizeInPixel.height() / 30);
+    horizontalScrollBar()->setSingleStep(pageSizeInPixel.width() / 30);
     verticalScrollBar()->setPageStep(pageSizeInPixel.height());
     horizontalScrollBar()->setPageStep(pageSizeInPixel.width());
 
