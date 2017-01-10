@@ -413,9 +413,8 @@ void PageView::mousePressEvent(QMouseEvent *event)
                         break;
 
                     default:
-                        qDebug("Not yet handled link type %d.", link->linkType());
+                        break;
                 }
-
                 break;
             }
         }
