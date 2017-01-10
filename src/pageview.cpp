@@ -651,6 +651,8 @@ void PageView::updateViewSize()
      */
     m_imageCache.clear();
 
+    QPointF currentScrollPosition = toPoints(offset());
+
     /**
      * adjust zoom level
      * HACK: we just use first page for some things
@@ -681,6 +683,8 @@ void PageView::updateViewSize()
     horizontalScrollBar()->setSingleStep(pageSizeInPixel.width() / 30);
     verticalScrollBar()->setPageStep(pageSizeInPixel.height());
     horizontalScrollBar()->setPageStep(pageSizeInPixel.width());
+
+    verticalScrollBar()->setValue(fromPoints(currentScrollPosition).y());
 
     /**
      * update page, perhaps
