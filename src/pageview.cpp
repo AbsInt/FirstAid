@@ -248,15 +248,12 @@ bool PageView::event(QEvent *event)
         QGestureEvent *ge = static_cast<QGestureEvent *>(event);
 
         if (QSwipeGesture *swipe = static_cast<QSwipeGesture *>(ge->gesture(Qt::SwipeGesture))) {
-            printf("SWIPE\n");
             if (QSwipeGesture::Up == swipe->verticalDirection()) {
-                printf("Swipe up detected\n");
                 gotoNextPage();
                 ge->accept(swipe);
                 return true;
             }
             if (QSwipeGesture::Down == swipe->verticalDirection()) {
-                printf("Swipe down detected\n");
                 gotoPreviousPage();
                 ge->accept(swipe);
                 return true;
