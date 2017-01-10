@@ -209,28 +209,8 @@ void PageView::wheelEvent(QWheelEvent *wheelEvent)
     QAbstractScrollArea::wheelEvent(wheelEvent);
 }
 
-void PageView::contextMenuEvent(QContextMenuEvent *event)
+void PageView::contextMenuEvent(QContextMenuEvent *)
 {
-    m_panStartPoint = QPoint();
-    setCursor(Qt::ArrowCursor);
-
-    QMenu m(this);
-    m.addAction(QIcon(":/icons/edit-copy.svg"), "Copy");
-
-    if (!m.exec(event->globalPos()))
-        return;
-
-    int pageNumber = PdfViewer::document()->pageForPoint(toPoints(event->pos() + offset()));
-    if (-1 != pageNumber) {
-        m_rubberBandOrigin = qMakePair(pageNumber, event->pos());
-        m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
-
-        // TODO CHECK
-        QRect r = QRect(m_rubberBandOrigin.second, offset() + viewport()->mapFromGlobal(QCursor::pos())).intersected(fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect());
-        m_rubberBand->setGeometry(r.normalized());
-
-        m_rubberBand->show();
-    }
 }
 
 void PageView::updateCurrentPage()
@@ -403,8 +383,16 @@ void PageView::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    // now check if we want to highlight a link location
     int page = PdfViewer::document()->pageForPoint(toPoints(offset() + event->pos()));
+
+    if ((event->button() == Qt::RightButton || event->modifiers().testFlag(Qt::ShiftModifier)) && -1 != page) {
+        m_rubberBandOrigin = qMakePair(page, event->pos());
+        m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
+        m_rubberBand->show();
+        return;
+    }
+
+    // now check if we want to highlight a link location
     if (-1 != page) {
         QRectF pageRect = fromPoints(PdfViewer::document()->pageRect(page));
         qreal xPos = (offset().x() + event->x() - pageRect.x()) / (qreal)pageRect.width();
@@ -433,12 +421,6 @@ void PageView::mousePressEvent(QMouseEvent *event)
                 break;
             }
         }
-    }
-
-    if (event->modifiers().testFlag(Qt::ShiftModifier) && -1 != page) {
-        m_rubberBandOrigin = qMakePair(page, event->pos());
-        m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
-        m_rubberBand->show();
     }
 
     // if there is no Shift pressed we start panning
