@@ -156,6 +156,14 @@ void TocDock::pageChanged(int page)
         }
     }
 
+    // init new marked item
+    m_markedItem = m_pageToItemMap.value(1 + page);
+
+    // special test for double page layout: if left page is not in toc check right page first
+    if (!m_markedItem && PdfViewer::document()->doubleSided() && page > 0 && (page % 2) == 1)
+        m_markedItem = m_pageToItemMap.value(2 + page);
+
+    // still no item found? check previous pages
     while (!m_markedItem && page >= 0)
         m_markedItem = m_pageToItemMap.value(1 + page--);
 
