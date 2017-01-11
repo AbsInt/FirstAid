@@ -62,7 +62,7 @@ void TocDock::fillInfo()
         fillToc(*toc, m_tree, 0);
         return;
     }
-    
+
     // tell we found no toc
     QTreeWidgetItem *item = new QTreeWidgetItem();
     item->setText(0, tr("No table of contents available."));
@@ -72,7 +72,7 @@ void TocDock::fillInfo()
 
 void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
 {
-    
+
     QTreeWidgetItem *newitem = nullptr;
     for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
         QDomElement e = node.toElement();
@@ -84,7 +84,7 @@ void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem
 
         // tag name == link name, strange enough
         newitem->setText(0, e.tagName());
-        
+
         /**
          * use raw string for destination or convert the named one
          */
@@ -96,11 +96,15 @@ void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem
             delete link;
         }
 
-        Poppler::LinkDestination link(destination);
-        int pageNumber = link.pageNumber();
-        
-        // remember link string representation
-        newitem->setData(0, Qt::UserRole, link.toString());
+        // skip destination building if not there
+        int pageNumber = 0;
+        if (!destination.isEmpty()) {
+            Poppler::LinkDestination link(destination);
+            pageNumber = link.pageNumber();
+
+            // remember link string representation
+            newitem->setData(0, Qt::UserRole, link.toString());
+        }
 
         newitem->setText(1, QString::number(pageNumber));
         newitem->setData(1, Qt::TextAlignmentRole, Qt::AlignRight);
