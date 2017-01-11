@@ -118,7 +118,7 @@ void FindBar::slotHide()
 
 void FindBar::slotFindProgress(qreal progress)
 {
-    m_findEdit->setStyleSheet(QString("background-color: qlineargradient(x1: %1, y1: 0, x2: %2, y2: 0, stop: 0 %3, stop: 1 %4);").arg(qMax(0.0, progress-0.1)).arg(progress).arg(palette().color(QPalette::Highlight).name()).arg(palette().color(QPalette::Base).name()));
+    m_findEdit->setStyleSheet(QString("background-color: qlineargradient(x1: %1, y1: 0, x2: %2, y2: 0, stop: 0 %3, stop: 1 %4);").arg(qMax(0.0, progress-0.05)).arg(progress).arg(palette().color(QPalette::Highlight).name()).arg(palette().color(QPalette::Base).name()));
 }
 
 void FindBar::slotFindDone()
