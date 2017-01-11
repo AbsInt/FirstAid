@@ -446,8 +446,9 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
     // was there a page to goto?
     if (m_mousePressPage != -1) {
-        m_historyStack.add(m_mousePressPage, m_mousePressPageOffset);
-        gotoPage(m_mousePressPage, toPoints(QRectF(0, m_mousePressPageOffset, 0, 0)));
+        QRectF pointsRect = toPoints(QRectF(0, m_mousePressPageOffset, 0, 0));
+        m_historyStack.add(m_mousePressPage, pointsRect);
+        gotoPage(m_mousePressPage, pointsRect);
         m_mousePressPage = -1;
         return;
     }
@@ -602,8 +603,8 @@ void PageView::gotoDestination(const QString &destination, bool updateHistory)
 
 void PageView::gotoHistoryEntry(const HistoryEntry &entry)
 {
-    if (HistoryEntry::PageWithOffset == entry.m_type)
-        gotoPage(entry.m_page, QRectF(0, entry.m_offset, 0, 0));
+    if (HistoryEntry::PageWithRect == entry.m_type)
+        gotoPage(entry.m_page, entry.m_rect);
 
     else if (HistoryEntry::Destination == entry.m_type)
         gotoDestination(entry.m_destination, false);
