@@ -38,6 +38,7 @@ signals:
 private slots:
     void slotDocumentChanged();
 
+    void slotFindActionTriggered();
     void slotFind();
     void slotHide();
 

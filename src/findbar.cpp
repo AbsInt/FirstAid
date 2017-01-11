@@ -64,10 +64,7 @@ FindBar::FindBar(QWidget *parent)
     findAction->setShortcutContext(Qt::ApplicationShortcut);
     findAction->setShortcut(QKeySequence::Find);
     parent->addAction(findAction);
-    connect(findAction, SIGNAL(triggered()), SLOT(show()));
-    connect(findAction, SIGNAL(triggered()), SLOT(slotFind()));
-    connect(findAction, SIGNAL(triggered()), m_findEdit, SLOT(setFocus()));
-    connect(findAction, SIGNAL(triggered()), m_findEdit, SLOT(selectAll()));
+    connect(findAction, SIGNAL(triggered()), SLOT(slotFindActionTriggered()));
 
     QAction *closeAction = new QAction(this);
     closeAction->setShortcut(Qt::Key_Escape);
@@ -105,6 +102,13 @@ void FindBar::slotDocumentChanged()
     QTimer::singleShot(0, this, SLOT(slotUpdateStatus()));
 }
 
+void FindBar::slotFindActionTriggered()
+{
+    show();
+    m_findEdit->setFocus();
+    m_findEdit->selectAll();
+}
+
 void FindBar::slotFind()
 {
     PdfViewer::searchEngine()->find(m_findEdit->text());
@@ -113,6 +117,7 @@ void FindBar::slotFind()
 void FindBar::slotHide()
 {
     hide();
+    slotResetStyle();
     PdfViewer::searchEngine()->find(QString());
 }
 
