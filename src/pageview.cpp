@@ -486,7 +486,6 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
      */
     const QRectF pageRectInPixel = fromPoints(PdfViewer::document()->pageRect(page));
 
-
     /**
      * transform the rectToBeVisibleInPoints first to pixel
      */
@@ -506,7 +505,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
      * add some margin (don't do that if x value should not be changed)
      */
     const int marginToBeSeen = 100;
-    QMarginsF m = QMarginsF(scrollXValue?marginToBeSeen:0, marginToBeSeen, scrollXValue?marginToBeSeen:1, marginToBeSeen);
+    QMarginsF m = QMarginsF(scrollXValue ? marginToBeSeen : 0, marginToBeSeen, scrollXValue ? marginToBeSeen : 1, marginToBeSeen);
     toBeVisibleInPixel = toBeVisibleInPixel.marginsAdded(m);
 
     if (!scrollXValue)
@@ -516,7 +515,6 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
      * finally it is clipped with page rectangle to not end in the void
      */
     toBeVisibleInPixel = toBeVisibleInPixel.intersected(pageRectInPixel);
-
 
     /**
      * if the page difference is large, just jump there, else smooth scroll
