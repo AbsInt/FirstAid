@@ -348,25 +348,21 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
 {
     // handle panning first
     if (!m_panStartPoint.isNull()) {
-
-        //keep mouse in viewport while panning, wrap at the borders
-        if (!viewport()->rect().contains(event->pos()))
-        {
+        // keep mouse in viewport while panning, wrap at the borders
+        if (!viewport()->rect().contains(event->pos())) {
             QPoint newStart = event->globalPos();
-            if (event->x() < 0)
-            {
-                newStart += QPoint(viewport()->width(),0);
+            if (event->x() < 0) {
+                newStart += QPoint(viewport()->width(), 0);
             } else if (event->x() > viewport()->width()) {
-                newStart -= QPoint(viewport()->width(),0);
+                newStart -= QPoint(viewport()->width(), 0);
             }
-            if (event->y() < 0)
-            {
-                newStart += QPoint(0,viewport()->height());
-            } else if (event->y() > viewport()->height()){
-                newStart -= QPoint(0,viewport()->height());
+            if (event->y() < 0) {
+                newStart += QPoint(0, viewport()->height());
+            } else if (event->y() > viewport()->height()) {
+                newStart -= QPoint(0, viewport()->height());
             }
             m_panStartPoint = newStart;
-            m_panOldOffset= QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+            m_panOldOffset = QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
             QApplication::desktop()->cursor().setPos(newStart);
         }
 
@@ -439,7 +435,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
                         m_mousePressPageRect = QRectF();
                         if (gotoLink.left() > 0) {
                             m_mousePressPageRect.setLeft(gotoLink.left() * pageRect.width());
-                            m_mousePressPageRect.setRight(1+ gotoLink.left() * pageRect.width());
+                            m_mousePressPageRect.setRight(1 + gotoLink.left() * pageRect.width());
                         }
                         if (gotoLink.top() > 0) {
                             m_mousePressPageRect.setTop(gotoLink.top() * pageRect.height());
@@ -576,7 +572,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
      */
     toBeVisibleInPixel = toBeVisibleInPixel.intersected(pageRectInPixel);
 
-    if(toBeVisibleInPixel.isEmpty())
+    if (toBeVisibleInPixel.isEmpty())
         toBeVisibleInPixel = pageRectInPixel;
 
     /**

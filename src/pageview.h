@@ -285,9 +285,9 @@ private:
     /**
      * members for handling clicking on  links
      */
-    int m_mousePressPage = -1;      //! page of link at mouse press
-    QRectF m_mousePressPageRect;    //! rect for page of link
-    QString m_mousePressUrl;        //! url at mouse press
+    int m_mousePressPage = -1;   //! page of link at mouse press
+    QRectF m_mousePressPageRect; //! rect for page of link
+    QString m_mousePressUrl;     //! url at mouse press
 
     /**
      * the history stack for navigation
