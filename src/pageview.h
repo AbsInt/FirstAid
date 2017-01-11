@@ -155,7 +155,7 @@ private:
      */
     qreal resX() const
     {
-        return m_dpiX * m_zoom;
+        return logicalDpiX() * m_zoom;
     }
 
     /**
@@ -164,7 +164,7 @@ private:
      */
     qreal resY() const
     {
-        return m_dpiY * m_zoom;
+        return logicalDpiY() * m_zoom;
     }
 
     /**
@@ -241,12 +241,6 @@ signals:
     void zoomChanged(qreal CurrentZoom);
 
 private:
-    /**
-     * information about the screens pixel density
-     */
-    int m_dpiX = 72;
-    int m_dpiY = 72;
-
     /**
      * members to handle zooming
      */

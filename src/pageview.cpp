@@ -53,7 +53,6 @@
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
-#include <QPixmap>
 #include <QRubberBand>
 #include <QScrollBar>
 #include <QScroller>
@@ -66,13 +65,8 @@
 
 PageView::PageView(QWidget *parent)
     : QAbstractScrollArea(parent)
-    , m_dpiX(QApplication::desktop()->physicalDpiX())
-    , m_dpiY(QApplication::desktop()->physicalDpiY())
     , m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
 {
-    // for now to have correct aspect ratio on windows
-    m_dpiX = m_dpiY;
-
     /**
      * allow 64 cached pages
      */
@@ -775,10 +769,10 @@ void PageView::updateViewSize(qreal zoom)
         emit zoomChanged(m_zoom);
     } else if (PdfViewer::document()->numPages() > 0) {
         if (FitWidth == m_zoomMode) {
-            m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
+            m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * logicalDpiX());
         } else if (FitPage == m_zoomMode) {
-            const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
-            const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * m_dpiY);
+            const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * logicalDpiX());
+            const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * logicalDpiY());
             m_zoom = qMin(zx, zy);
         }
     }
