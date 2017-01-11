@@ -20,20 +20,21 @@
 #define HISTORYSTACK_H
 
 #include <QList>
+#include <QRectF>
 #include <QString>
 
 class HistoryEntry
 {
 public:
-    enum Type { Unknown, PageWithOffset, Destination };
+    enum Type { Unknown, PageWithRect, Destination };
 
     HistoryEntry();
-    HistoryEntry(int page, int offset = 0);
+    HistoryEntry(int page, const QRectF &rect = QRectF());
     HistoryEntry(const QString &destination);
 
     Type m_type = Unknown;
     int m_page = 0;
-    int m_offset = 0;
+    QRectF m_rect;
     QString m_destination;
 };
 
@@ -46,8 +47,8 @@ public:
     //! clean history stack
     void clear();
 
-    //! add page with offset to history
-    void add(int page, int offset = 0);
+    //! add page with rect to history
+    void add(int page, const QRectF &rect = QRectF());
 
     //! add names destination to history
     void add(const QString &destination);

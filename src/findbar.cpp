@@ -21,10 +21,11 @@
 
 #include <poppler-qt5.h>
 
-#include <QTimer>
 #include <QAction>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QLineEdit>
+#include <QTimer>
 #include <QToolButton>
 
 FindBar::FindBar(QWidget *parent)
@@ -42,15 +43,20 @@ FindBar::FindBar(QWidget *parent)
     m_findEdit->setPlaceholderText(tr("Find"));
     m_findEdit->setClearButtonEnabled(true);
     connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotFind()));
+    connect(m_findEdit, SIGNAL(textChanged(QString)), SLOT(slotResetStyle()));
     hbl->addWidget(m_findEdit);
 
+    m_statusLabel = new QLabel(this);
+    m_statusLabel->setText("0 of 0");
+    hbl->addWidget(m_statusLabel);
+
     m_prevMatch = new QToolButton(this);
-    m_prevMatch->setIcon(QIcon(":/icons/go-previous.svg"));
+    m_prevMatch->setIcon(QIcon(":/icons/go-up.svg"));
     m_prevMatch->setToolTip("Previous match");
     hbl->addWidget(m_prevMatch);
 
     m_nextMatch = new QToolButton(this);
-    m_nextMatch->setIcon(QIcon(":/icons/go-next.svg"));
+    m_nextMatch->setIcon(QIcon(":/icons/go-down.svg"));
     m_nextMatch->setToolTip("Next match");
     hbl->addWidget(m_nextMatch);
 
@@ -69,7 +75,10 @@ FindBar::FindBar(QWidget *parent)
     addAction(closeAction);
     connect(closeAction, SIGNAL(triggered()), SLOT(slotHide()));
 
+    connect(PdfViewer::searchEngine(), SIGNAL(started()), SLOT(slotUpdateStatus()));
     connect(PdfViewer::searchEngine(), SIGNAL(finished()), SLOT(slotFindDone()));
+    connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(slotUpdateStatus()));
+    connect(PdfViewer::searchEngine(), SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotUpdateStatus()));
     connect(m_prevMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(previousMatch()));
     connect(m_nextMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(nextMatch()));
 
@@ -89,8 +98,9 @@ void FindBar::slotDocumentChanged()
 
     bool on = PdfViewer::document()->isValid();
     m_findEdit->setEnabled(on);
-    m_nextMatch->setEnabled(on);
-    m_prevMatch->setEnabled(on);
+
+    // delay this as the search engine might still react to the documentChanged() signal
+    QTimer::singleShot(0, this, SLOT(slotUpdateStatus()));
 }
 
 void FindBar::slotFind()
@@ -106,8 +116,14 @@ void FindBar::slotHide()
 
 void FindBar::slotFindDone()
 {
-    if (isVisible() && PdfViewer::searchEngine()->matches().isEmpty()) {
-        m_findEdit->setStyleSheet("background-color: #f08080");
+    slotUpdateStatus();
+
+    if (isVisible()) {
+        if (PdfViewer::searchEngine()->matches().isEmpty())
+            m_findEdit->setStyleSheet("background-color: #f0a0a0");
+        else
+            m_findEdit->setStyleSheet("background-color: #a0f0a0");
+
         QTimer::singleShot(5000, this, SLOT(slotResetStyle()));
     }
 }
@@ -115,4 +131,14 @@ void FindBar::slotFindDone()
 void FindBar::slotResetStyle()
 {
     m_findEdit->setStyleSheet(QString());
+}
+
+void FindBar::slotUpdateStatus()
+{
+    int index = PdfViewer::searchEngine()->currentIndex();
+    int count = PdfViewer::searchEngine()->matchesCount();
+
+    m_statusLabel->setText(QString("%1 of %2").arg(index).arg(count));
+    m_nextMatch->setEnabled(count > 1);
+    m_prevMatch->setEnabled(count > 1);
 }

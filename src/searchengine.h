@@ -34,6 +34,9 @@ public:
     QHash<int, QList<QRectF>> matches() const;
     QList<QRectF> matchesFor(int page) const;
 
+    int currentIndex() const;
+    int matchesCount() const;
+
 public slots:
     void reset();
 
@@ -59,5 +62,6 @@ private:
     // members for navigating in find results
     QHash<int, QList<QRectF>> m_matchesForPage;
     int m_currentMatchPage = 0;
+    int m_currentMatchPageIndex = 0;
     int m_currentMatchIndex = 0;
 };

@@ -31,10 +31,10 @@ HistoryEntry::HistoryEntry()
 {
 }
 
-HistoryEntry::HistoryEntry(int page, int offset)
-    : m_type(PageWithOffset)
+HistoryEntry::HistoryEntry(int page, const QRectF &rect)
+    : m_type(PageWithRect)
     , m_page(page)
-    , m_offset(offset)
+    , m_rect(rect)
 {
 }
 
@@ -66,14 +66,14 @@ void HistoryStack::clear()
     m_index = -1;
 }
 
-void HistoryStack::add(int page, int offset)
+void HistoryStack::add(int page, const QRectF &rect)
 {
     // pop entries after current index
     while (m_index >= 0 && m_index + 1 < m_stack.count())
         m_stack.takeLast();
 
     // add new location
-    m_stack << HistoryEntry(page, offset);
+    m_stack << HistoryEntry(page, rect);
     m_index = m_stack.count() - 1;
 }
 

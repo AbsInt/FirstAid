@@ -59,7 +59,7 @@ void SearchEngine::currentMatch(int &page, QRectF &match) const
         match = QRectF();
     } else {
         page = m_currentMatchPage;
-        match = m_matchesForPage.value(m_currentMatchPage).at(m_currentMatchIndex);
+        match = m_matchesForPage.value(m_currentMatchPage).at(m_currentMatchPageIndex);
     }
 }
 
@@ -73,6 +73,22 @@ QList<QRectF> SearchEngine::matchesFor(int page) const
     return m_matchesForPage.value(page);
 }
 
+int SearchEngine::currentIndex() const
+{
+    return m_currentMatchIndex;
+}
+
+int SearchEngine::matchesCount() const
+{
+    // count matches
+    int count = 0;
+    QList<QRectF> matches;
+    foreach (matches, m_matchesForPage)
+        count += matches.count();
+
+    return count;
+}
+
 /*
  * public slots
  */
@@ -81,6 +97,7 @@ void SearchEngine::reset()
 {
     m_matchesForPage.clear();
     m_currentMatchPage = 0;
+    m_currentMatchPageIndex = 0;
     m_currentMatchIndex = 0;
 
     m_findText.clear();
@@ -122,11 +139,15 @@ void SearchEngine::nextMatch()
     if (-1 == m_currentMatchPage || m_matchesForPage.isEmpty())
         return;
 
+    m_currentMatchIndex++;
+    if (m_currentMatchIndex > matchesCount())
+        m_currentMatchIndex = 1;
+
     // more matches on current match page?
     QList<QRectF> matches = m_matchesForPage.value(m_currentMatchPage);
-    if (m_currentMatchIndex < matches.count() - 1) {
-        m_currentMatchIndex++;
-        emit highlightMatch(m_currentMatchPage, matches.at(m_currentMatchIndex));
+    if (m_currentMatchPageIndex < matches.count() - 1) {
+        m_currentMatchPageIndex++;
+        emit highlightMatch(m_currentMatchPage, matches.at(m_currentMatchPageIndex));
         return;
     }
 
@@ -135,17 +156,17 @@ void SearchEngine::nextMatch()
         QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
             m_currentMatchPage = page;
-            m_currentMatchIndex = 0;
+            m_currentMatchPageIndex = 0;
             emit highlightMatch(m_currentMatchPage, matches.first());
             return;
         }
     }
 
-    for (int page = 0; page < m_currentMatchPage; page++) {
+    for (int page = 0; page <= m_currentMatchPage; page++) {
         QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
             m_currentMatchPage = page;
-            m_currentMatchIndex = 0;
+            m_currentMatchPageIndex = 0;
             emit highlightMatch(m_currentMatchPage, matches.first());
             return;
         }
@@ -157,11 +178,15 @@ void SearchEngine::previousMatch()
     if (-1 == m_currentMatchPage || m_matchesForPage.isEmpty())
         return;
 
+    m_currentMatchIndex--;
+    if (m_currentMatchIndex < 1)
+        m_currentMatchIndex = matchesCount();
+
     // more matches on current match page?
     QList<QRectF> matches = m_matchesForPage.value(m_currentMatchPage);
-    if (m_currentMatchIndex > 0) {
-        m_currentMatchIndex--;
-        emit highlightMatch(m_currentMatchPage, matches.at(m_currentMatchIndex));
+    if (m_currentMatchPageIndex > 0) {
+        m_currentMatchPageIndex--;
+        emit highlightMatch(m_currentMatchPage, matches.at(m_currentMatchPageIndex));
         return;
     }
 
@@ -170,17 +195,17 @@ void SearchEngine::previousMatch()
         QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
             m_currentMatchPage = page;
-            m_currentMatchIndex = matches.count() - 1;
+            m_currentMatchPageIndex = matches.count() - 1;
             emit highlightMatch(m_currentMatchPage, matches.last());
             return;
         }
     }
 
-    for (int page = PdfViewer::document()->numPages() - 1; page > m_currentMatchPage; page--) {
+    for (int page = PdfViewer::document()->numPages() - 1; page >= m_currentMatchPage; page--) {
         QList<QRectF> matches = m_matchesForPage.value(page);
         if (!matches.isEmpty()) {
             m_currentMatchPage = page;
-            m_currentMatchIndex = matches.count() - 1;
+            m_currentMatchPageIndex = matches.count() - 1;
             emit highlightMatch(m_currentMatchPage, matches.last());
             return;
         }
@@ -209,7 +234,8 @@ void SearchEngine::find()
         if (!matches.isEmpty()) {
             if (m_matchesForPage.isEmpty()) {
                 m_currentMatchPage = m_findCurrentPage;
-                m_currentMatchIndex = 0;
+                m_currentMatchPageIndex = 0;
+                m_currentMatchIndex = 1;
                 emit highlightMatch(m_currentMatchPage, matches.first());
                 delayAfterFirstMatch = true;
             }
