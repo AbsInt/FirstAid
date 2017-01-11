@@ -348,6 +348,28 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
 {
     // handle panning first
     if (!m_panStartPoint.isNull()) {
+
+        //keep mouse in viewport while panning, wrap at the borders
+        if (!viewport()->rect().contains(event->pos()))
+        {
+            QPoint newStart = event->globalPos();
+            if (event->x() < 0)
+            {
+                newStart += QPoint(viewport()->width(),0);
+            } else if (event->x() > viewport()->width()) {
+                newStart -= QPoint(viewport()->width(),0);
+            }
+            if (event->y() < 0)
+            {
+                newStart += QPoint(0,viewport()->height());
+            } else if (event->y() > viewport()->height()){
+                newStart -= QPoint(0,viewport()->height());
+            }
+            m_panStartPoint = newStart;
+            m_panOldOffset= QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+            QApplication::desktop()->cursor().setPos(newStart);
+        }
+
         setCursor(Qt::ClosedHandCursor);
         setOffset(m_panOldOffset + m_panStartPoint - event->globalPos());
         return;
