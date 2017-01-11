@@ -113,7 +113,6 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *wheelEvent) override;
-    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private slots:
 
