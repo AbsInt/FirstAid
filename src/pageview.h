@@ -64,7 +64,7 @@ public slots:
      * @param page page to show
      * @param rectToBeVisibleInPoints rectangle to make visible
      */
-    void gotoPage(int page, const QRectF &rectToBeVisibleInPoints = QRectF());
+    void gotoPage(int page, const QRectF &rectToBeVisibleInPoints = QRectF(), bool showHighlight = true);
 
     void gotoPreviousPage();
     void gotoNextPage();
@@ -95,6 +95,7 @@ public slots:
     void slotCopyRequested(int page, const QRect &viewportRect);
 
     void slotFindStarted();
+    void slotHighlightMatch(int page, const QRectF &rect);
     void slotMatchesFound(int page, const QList<QRectF> &matches);
     void updateCurrentPage();
 

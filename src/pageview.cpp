@@ -86,7 +86,7 @@ PageView::PageView(QWidget *parent)
     QScroller::grabGesture(viewport(), QScroller::TouchGesture);
 
     connect(PdfViewer::searchEngine(), SIGNAL(started()), SLOT(slotFindStarted()));
-    connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(gotoPage(int, QRectF)));
+    connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(slotHighlightMatch(int, QRectF)));
     connect(PdfViewer::searchEngine(), SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotMatchesFound(int, QList<QRectF>)));
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
@@ -508,7 +508,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
  * public slots
  */
 
-void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
+void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool highlightMatch)
 {
     /**
      * filter out invalid pages
@@ -539,7 +539,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
     /**
      * if needed visualize link destination
      */
-    if (!rectToBeVisibleInPoints.isNull()) {
+    if (highlightMatch && !rectToBeVisibleInPoints.isNull()) {
         m_highlightRect = toBeVisibleInPixel.toRect();
         m_highlightRect.setLeft(pageRectInPixel.left());
         m_highlightRect.setRight(pageRectInPixel.right());
@@ -738,6 +738,11 @@ void PageView::slotCopyRequested(int page, const QRect &viewportRect)
 void PageView::slotFindStarted()
 {
     viewport()->update();
+}
+
+void PageView::slotHighlightMatch(int page, const QRectF &rect)
+{
+    gotoPage(page, rect, false);
 }
 
 void PageView::slotMatchesFound(int page, const QList<QRectF> &)
