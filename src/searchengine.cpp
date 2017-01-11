@@ -126,6 +126,7 @@ void SearchEngine::find(const QString &text)
     }
 
     m_findCurrentPage = PdfViewer::view()->currentPage();
+    m_findPagesScanned = 0;
 
     m_findStopAfterPage = m_findCurrentPage - 1;
     if (m_findStopAfterPage < 0)
@@ -258,6 +259,10 @@ void SearchEngine::find()
 
         if (delayAfterFirstMatch)
             break;
+
+        // emit progress
+        m_findPagesScanned++;
+        emit progress(m_findPagesScanned / (qreal)PdfViewer::document()->numPages());
     }
 
     QTimer::singleShot(delayAfterFirstMatch ? 10 : 0, this, SLOT(find()));

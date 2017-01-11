@@ -46,6 +46,7 @@ public slots:
 
 signals:
     void started();
+    void progress(qreal progress);
     void finished();
     void highlightMatch(int page, const QRectF &match);
     void matchesFound(int page, const QList<QRectF> &matches);
@@ -58,6 +59,7 @@ private:
     QString m_findText;
     int m_findCurrentPage = 0;
     int m_findStopAfterPage = 0;
+    int m_findPagesScanned = 0;
 
     // members for navigating in find results
     QHash<int, QList<QRectF>> m_matchesForPage;

@@ -41,6 +41,7 @@ private slots:
     void slotFind();
     void slotHide();
 
+    void slotFindProgress(qreal progress);
     void slotFindDone();
     void slotResetStyle();
     void slotUpdateStatus();

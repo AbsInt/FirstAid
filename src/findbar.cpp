@@ -75,10 +75,12 @@ FindBar::FindBar(QWidget *parent)
     addAction(closeAction);
     connect(closeAction, SIGNAL(triggered()), SLOT(slotHide()));
 
-    connect(PdfViewer::searchEngine(), SIGNAL(started()), SLOT(slotUpdateStatus()));
-    connect(PdfViewer::searchEngine(), SIGNAL(finished()), SLOT(slotFindDone()));
-    connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(slotUpdateStatus()));
-    connect(PdfViewer::searchEngine(), SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotUpdateStatus()));
+    SearchEngine *se = PdfViewer::searchEngine();
+    connect(se, SIGNAL(started()), SLOT(slotUpdateStatus()));
+    connect(se, SIGNAL(progress(qreal)), SLOT(slotFindProgress(qreal)));
+    connect(se, SIGNAL(finished()), SLOT(slotFindDone()));
+    connect(se, SIGNAL(highlightMatch(int, QRectF)), SLOT(slotUpdateStatus()));
+    connect(se, SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotUpdateStatus()));
     connect(m_prevMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(previousMatch()));
     connect(m_nextMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(nextMatch()));
 
@@ -112,6 +114,11 @@ void FindBar::slotHide()
 {
     hide();
     PdfViewer::searchEngine()->find(QString());
+}
+
+void FindBar::slotFindProgress(qreal progress)
+{
+    m_findEdit->setStyleSheet(QString("background-color: qlineargradient(x1: %1, y1: 0, x2: %2, y2: 0, stop: 0 %3, stop: 1 %4);").arg(qMax(0.0, progress-0.1)).arg(progress).arg(palette().color(QPalette::Highlight).name()).arg(palette().color(QPalette::Base).name()));
 }
 
 void FindBar::slotFindDone()
