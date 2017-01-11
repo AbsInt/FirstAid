@@ -316,7 +316,7 @@ void NavigationToolBar::slotChangeZoom(qreal currentZoom)
         text.remove("%");
         bool ok;
         int value = text.toInt(&ok);
-        if (ok && currentZoom < value / 100.0) {
+        if (ok && currentZoom <= value / 100.0) {
             QSettings s;
             s.setValue("MainWindow/zoom", c);
             break;
