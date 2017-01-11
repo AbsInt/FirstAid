@@ -332,8 +332,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     // draw the highlight rect
     if (m_highlightValue > 0) {
         p.setPen(Qt::NoPen);
-        p.setBrush(QColor(0xa5, 0x1e, 0x22, m_highlightValue));
-        p.drawEllipse(m_highlightRect);
+        p.fillRect(m_highlightRect, QColor(0xa5, 0x1e, 0x22, m_highlightValue));
     }
 }
 
@@ -528,8 +527,8 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
      */
     if (!rectToBeVisibleInPoints.isNull()) {
         m_highlightRect = toBeVisibleInPixel.toRect();
-        if (m_highlightRect.width() < 30)
-            m_highlightRect.setWidth(30);
+        m_highlightRect.setLeft(pageRectInPixel.left());
+        m_highlightRect.setRight(pageRectInPixel.right());
         if (m_highlightRect.height() < 30)
             m_highlightRect.setHeight(30);
         QVariantAnimation *va = new QVariantAnimation(this);
