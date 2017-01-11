@@ -619,14 +619,40 @@ void PageView::gotoNextPage()
 
 void PageView::stepBack()
 {
-    // TODO go to start of current page if not visible or to previous page
-    gotoPreviousPage();
+    if (-1 == m_currentPage)
+        return;
+
+    // go to start of current page if not visible or to previous page
+    QRect pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage)).toRect();
+    QRect visibleRect = QRect(offset(), viewport()->size());
+
+    if (visibleRect.top() <= pageRect.top()) {
+        // special handling here: we have to go the end of the previous page...
+        if (m_currentPage > 0) {
+            int xOffset = offset().x() - pageRect.x();
+
+            pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage - 1)).toRect();
+            int yOffset = qMax(0, pageRect.bottom() - viewport()->height());
+            xOffset += pageRect.x();
+            setOffset(QPoint(xOffset, yOffset));
+        }
+    } else
+        setOffset(QPoint(offset().x(), offset().y() - qMin(viewport()->height(), visibleRect.top() - pageRect.top())));
 }
 
 void PageView::advance()
 {
-    // TODO go to end of current page if not visible or to next page
-    gotoNextPage();
+    if (-1 == m_currentPage)
+        return;
+
+    // go to end of current page if not visible or to next page
+    QRect pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage)).toRect();
+    QRect visibleRect = QRect(offset(), viewport()->size());
+
+    if (visibleRect.bottom() >= pageRect.bottom())
+        gotoNextPage();
+    else
+        setOffset(QPoint(offset().x(), offset().y() + qMin(viewport()->height(), pageRect.bottom() - visibleRect.bottom())));
 }
 
 void PageView::zoomIn()
