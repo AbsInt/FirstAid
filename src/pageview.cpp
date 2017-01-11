@@ -222,7 +222,10 @@ QPoint PageView::offset() const
      *   - scrollbar position
      *   - centered position of pages if smaller than viewport
      */
-    return QPoint(horizontalScrollBar()->value() + qMin(0, (int(fromPoints(PdfViewer::document()->layoutSize()).width()) - viewport()->width()) / 2), verticalScrollBar()->value());
+    const int xOffset = horizontalScrollBar()->value() + qMin(0, (int(fromPoints(PdfViewer::document()->layoutSize()).width()) - viewport()->width()) / 2);
+    const int yOffset = verticalScrollBar()->value() + qMin(0, (int(fromPoints(PdfViewer::document()->layoutSize()).height()) - viewport()->height()) / 2);
+
+    return QPoint(xOffset, yOffset);
 }
 
 void PageView::setOffset(const QPoint &offset)
