@@ -508,13 +508,16 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
     QMarginsF m = QMarginsF(scrollXValue ? marginToBeSeen : 0, marginToBeSeen, scrollXValue ? marginToBeSeen : 1, marginToBeSeen);
     toBeVisibleInPixel = toBeVisibleInPixel.marginsAdded(m);
 
-    if (!scrollXValue)
+    if (!scrollXValue && offset().x() > toBeVisibleInPixel.x())
         toBeVisibleInPixel.moveLeft(offset().x());
 
     /**
      * finally it is clipped with page rectangle to not end in the void
      */
     toBeVisibleInPixel = toBeVisibleInPixel.intersected(pageRectInPixel);
+
+    if(toBeVisibleInPixel.isEmpty())
+        toBeVisibleInPixel = pageRectInPixel;
 
     /**
      * if the page difference is large, just jump there, else smooth scroll
