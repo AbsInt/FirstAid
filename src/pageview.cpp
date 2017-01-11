@@ -188,7 +188,6 @@ void PageView::setZoom(qreal zoom)
     setZoomMode(Absolute);
 
     if (zoom != m_zoom && zoom >= 0.1 && zoom <= 4.0) {
-
         // visual size of document might change now!
         updateViewSize(zoom);
     }
@@ -384,7 +383,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
     int page = PdfViewer::document()->pageForPoint(toPoints(offset() + event->pos()));
 
-    //start rubber band with right click or shift+left click
+    // start rubber band with right click or shift+left click
     if ((event->button() == Qt::RightButton || event->modifiers().testFlag(Qt::ShiftModifier)) && -1 != page) {
         m_rubberBandOrigin = qMakePair(page, event->pos());
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
@@ -655,12 +654,10 @@ void PageView::updateViewSize(qreal zoom)
      * adjust zoom level
      * HACK: we just use first page for some things
      */
-    if (zoom >= 0.0)
-    {
+    if (zoom >= 0.0) {
         m_zoom = zoom;
         emit zoomChanged(m_zoom);
-    } else
-    if (PdfViewer::document()->numPages() > 0) {
+    } else if (PdfViewer::document()->numPages() > 0) {
         if (FitWidth == m_zoomMode) {
             m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
         } else if (FitPage == m_zoomMode) {

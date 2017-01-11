@@ -20,6 +20,7 @@
 
 #include <QWidget>
 
+class QLabel;
 class QLineEdit;
 class QToolButton;
 
@@ -42,9 +43,11 @@ private slots:
 
     void slotFindDone();
     void slotResetStyle();
+    void slotUpdateStatus();
 
 private:
     QLineEdit *m_findEdit = nullptr;
+    QLabel *m_statusLabel = nullptr;
     QToolButton *m_prevMatch = nullptr;
     QToolButton *m_nextMatch = nullptr;
 };

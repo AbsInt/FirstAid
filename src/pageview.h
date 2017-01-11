@@ -88,7 +88,7 @@ public slots:
      * @param updateHistory update jump history?
      */
     void gotoDestination(const QString &destination, bool updateHistory = true);
-    
+
     void gotoHistoryEntry(const HistoryEntry &entry);
     void slotCopyRequested(int page, const QRect &viewportRect);
 

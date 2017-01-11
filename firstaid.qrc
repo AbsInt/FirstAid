@@ -9,8 +9,10 @@
         <file>icons/document-print.svg</file>
         <file>icons/edit-copy.svg</file>
         <file>icons/facing-pages.svg</file>
+        <file>icons/go-down.svg</file>
         <file>icons/go-next.svg</file>
         <file>icons/go-previous.svg</file>
+        <file>icons/go-up.svg</file>
         <file>icons/help-about.svg</file>
         <file>icons/view-refresh.svg</file>
         <file>icons/window-close.svg</file>
