@@ -95,11 +95,15 @@ void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem
             delete link;
         }
 
-        Poppler::LinkDestination link(destination);
-        int pageNumber = link.pageNumber();
+        // skip destination building if not there
+        int pageNumber = 0;
+        if (!destination.isEmpty()) {
+            Poppler::LinkDestination link(destination);
+            pageNumber = link.pageNumber();
 
-        // remember link string representation
-        newitem->setData(0, Qt::UserRole, link.toString());
+            // remember link string representation
+            newitem->setData(0, Qt::UserRole, link.toString());
+        }
 
         newitem->setText(1, QString::number(pageNumber));
         newitem->setData(1, Qt::TextAlignmentRole, Qt::AlignRight);
