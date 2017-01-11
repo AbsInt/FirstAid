@@ -196,5 +196,6 @@ void TocDock::itemClicked(QTreeWidgetItem *item, int)
         return;
 
     QString dest = item->data(0, Qt::UserRole).toString();
-    PdfViewer::view()->gotoDestination(dest);
+    if (!dest.isEmpty())
+        PdfViewer::view()->gotoDestination(dest);
 }
