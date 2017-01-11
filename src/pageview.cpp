@@ -207,10 +207,6 @@ void PageView::wheelEvent(QWheelEvent *wheelEvent)
     QAbstractScrollArea::wheelEvent(wheelEvent);
 }
 
-void PageView::contextMenuEvent(QContextMenuEvent *)
-{
-}
-
 void PageView::slotUpdateViewSize()
 {
     updateViewSize();
