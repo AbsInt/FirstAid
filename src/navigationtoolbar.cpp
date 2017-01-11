@@ -119,8 +119,8 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomButton->setFocusPolicy(Qt::NoFocus);
     m_zoomButton->setToolTip(tr("Zoom"));
     QMenu *zoomMenu = new QMenu(this);
-    zoomMenu->addAction(tr("Fit width"));
-    zoomMenu->addAction(tr("Fit page"));
+    zoomMenu->addAction(QIcon(":/icons/zoom-fit-width.svg"), tr("Fit width"));
+    zoomMenu->addAction(QIcon(":/icons/zoom-fit-best.svg"), tr("Fit page"));
     zoomMenu->addAction(tr("10%"));
     zoomMenu->addAction(tr("25%"));
     zoomMenu->addAction(tr("33%"));
