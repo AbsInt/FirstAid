@@ -35,6 +35,7 @@
 #include "historystack.h"
 
 class QRubberBand;
+class QVariantAnimation;
 
 class PageView : public QAbstractScrollArea
 {
@@ -55,6 +56,7 @@ public slots:
     void setZoom(qreal zoom);
     void slotDocumentChanged();
     void slotLayoutChanged();
+    void slotAnimationValueChanged(const QVariant &value);
 
 public slots:
     /**
@@ -240,31 +242,66 @@ signals:
     void zoomChanged(qreal CurrentZoom);
 
 private:
+    /**
+     * information about the screens pixel density
+     */
     int m_dpiX = 72;
     int m_dpiY = 72;
+
+    /**
+     * members to handle zooming
+     */
     ZoomMode m_zoomMode = Absolute;
     qreal m_zoom = 1.0;
 
-    int m_currentPage = -1; //! the current page in the range from 0 to numpages-1
+    /**
+     * the current page in the range from 0 to numpages-1
+     */
+    int m_currentPage = -1;
 
+    /*
+     * cache for already created images, key is the page number
+     */
     QCache<int, QImage> m_imageCache;
 
+    /**
+     * current offset of viewport
+     */
     QPoint m_offset;
 
+    /**
+     * members for handling the rubber band
+     * m_rubberBandOrigin is a pair of page number and offset
+     */
     QPair<int, QPoint> m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
     QRubberBand *m_rubberBand = nullptr;
 
+    /**
+     * members needed for handling panning
+     */
     QPoint m_panOldOffset;  //! the current offset when panning starts
-    QPoint m_panStartPoint; //! the global cursor position then panning starts
+    QPoint m_panStartPoint; //! the global cursor position when panning starts
 
+    /**
+     * members for handling clicking on  links
+     */
     int m_mousePressPage = -1;      //! page of link at mouse press
-    int m_mousePressPageOffset = 0; //! offset for page of link
+    QRectF m_mousePressPageRect;    //! rect for page of link
     QString m_mousePressUrl;        //! url at mouse press
 
+    /**
+     * the history stack for navigation
+     */
     HistoryStack m_historyStack;
 
     /**
      * delayed updating of view size
      */
     QTimer m_updateViewSizeTimer;
+
+    /**
+     * area in the viewport to highlight via animation
+     */
+    QRect m_highlightRect;
+    int m_highlightValue = 0;
 };

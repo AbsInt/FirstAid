@@ -58,6 +58,7 @@
 #include <QScrollBar>
 #include <QScroller>
 #include <QShortcut>
+#include <QVariantAnimation>
 
 /*
  * constructors / destructor
@@ -327,6 +328,13 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         p.setPen(Qt::darkGray);
         p.drawRect(displayRect.adjusted(-1, -1, 1, 1));
     }
+
+    // draw the highlight rect
+    if (m_highlightValue > 0) {
+        p.setPen(Qt::NoPen);
+        p.setBrush(QColor(0xa5, 0x1e, 0x22, m_highlightValue));
+        p.drawEllipse(m_highlightRect);
+    }
 }
 
 void PageView::resizeEvent(QResizeEvent *resizeEvent)
@@ -405,8 +413,23 @@ void PageView::mousePressEvent(QMouseEvent *event)
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
                         m_mousePressPage = gotoLink.pageNumber() - 1;
-                        QRect displayRect = fromPoints(PdfViewer::document()->pageRect(m_mousePressPage)).toRect();
-                        m_mousePressPageOffset = (gotoLink.isChangeTop() && gotoLink.top() >= 0) ? gotoLink.top() * displayRect.height() : 0;
+                        QRectF pageRect = PdfViewer::document()->pageRect(m_mousePressPage);
+
+                        m_mousePressPageRect = QRectF();
+                        if (gotoLink.left() > 0) {
+                            m_mousePressPageRect.setLeft(gotoLink.left() * pageRect.width());
+                            m_mousePressPageRect.setRight(1+ gotoLink.left() * pageRect.width());
+                        }
+                        if (gotoLink.top() > 0) {
+                            m_mousePressPageRect.setTop(gotoLink.top() * pageRect.height());
+                            m_mousePressPageRect.setBottom(1 + gotoLink.top() * pageRect.height());
+                        }
+                        if (gotoLink.right() > 0)
+                            m_mousePressPageRect.setRight(gotoLink.right() * pageRect.width());
+                        if (gotoLink.bottom() > 0 && gotoLink.bottom() < 1.0)
+                            m_mousePressPageRect.setBottom(gotoLink.bottom() * pageRect.height());
+
+                        m_mousePressPageRect = m_mousePressPageRect.intersected(pageRect.translated(-pageRect.topLeft()));
                     } break;
 
                     case Poppler::Link::Browse:
@@ -446,9 +469,8 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
     // was there a page to goto?
     if (m_mousePressPage != -1) {
-        QRectF pointsRect = toPoints(QRectF(0, m_mousePressPageOffset, 0, 0));
-        m_historyStack.add(m_mousePressPage, pointsRect);
-        gotoPage(m_mousePressPage, pointsRect);
+        m_historyStack.add(m_mousePressPage, m_mousePressPageRect);
+        gotoPage(m_mousePressPage, m_mousePressPageRect);
         m_mousePressPage = -1;
         return;
     }
@@ -494,12 +516,29 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
     /**
      * do not change x value (scroll to 0) if not given (use old value)
      */
-    bool scrollXValue = (toBeVisibleInPixel.x() != 0);
+    bool scrollXValue = PdfViewer::document()->doubleSided() || (toBeVisibleInPixel.x() != 0);
 
     /**
      * move it to the page
      */
     toBeVisibleInPixel.translate(pageRectInPixel.topLeft());
+
+    /**
+     * if needed visualize link destination
+     */
+    if (!rectToBeVisibleInPoints.isNull()) {
+        m_highlightRect = toBeVisibleInPixel.toRect();
+        if (m_highlightRect.width() < 30)
+            m_highlightRect.setWidth(30);
+        if (m_highlightRect.height() < 30)
+            m_highlightRect.setHeight(30);
+        QVariantAnimation *va = new QVariantAnimation(this);
+        connect(va, SIGNAL(valueChanged(QVariant)), SLOT(slotAnimationValueChanged(QVariant)));
+        va->setDuration(1000);
+        va->setStartValue(255);
+        va->setEndValue(0);
+        va->start(QAbstractAnimation::DeleteWhenStopped);
+    }
 
     /**
      * add some margin (don't do that if x value should not be changed)
@@ -666,6 +705,12 @@ void PageView::slotMatchesFound(int page, const QList<QRectF> &)
 {
     if (page == m_currentPage)
         viewport()->update();
+}
+
+void PageView::slotAnimationValueChanged(const QVariant &value)
+{
+    m_highlightValue = value.toInt();
+    viewport()->update();
 }
 
 /*
