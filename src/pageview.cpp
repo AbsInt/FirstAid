@@ -332,7 +332,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     // draw the highlight rect
     if (m_highlightValue > 0) {
         p.setPen(Qt::NoPen);
-        p.fillRect(m_highlightRect, QColor(0xa5, 0x1e, 0x22, m_highlightValue));
+        p.fillRect(m_highlightRect, QColor(255, 255, 0, m_highlightValue));
     }
 }
 
@@ -529,12 +529,12 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
         m_highlightRect = toBeVisibleInPixel.toRect();
         m_highlightRect.setLeft(pageRectInPixel.left());
         m_highlightRect.setRight(pageRectInPixel.right());
-        if (m_highlightRect.height() < 30)
-            m_highlightRect.setHeight(30);
+        if (m_highlightRect.height() < 50 * m_zoom)
+            m_highlightRect.setHeight(50 * m_zoom);
         QVariantAnimation *va = new QVariantAnimation(this);
         connect(va, SIGNAL(valueChanged(QVariant)), SLOT(slotAnimationValueChanged(QVariant)));
         va->setDuration(1000);
-        va->setStartValue(255);
+        va->setStartValue(128);
         va->setEndValue(0);
         va->start(QAbstractAnimation::DeleteWhenStopped);
     }
