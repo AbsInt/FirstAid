@@ -486,13 +486,37 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
      */
     const QRectF pageRectInPixel = fromPoints(PdfViewer::document()->pageRect(page));
 
+
     /**
-     * translate the rectange we want to show from points and move it to the page
-     * we transform the rectToBeVisibleInPoints first to pixel, move it to the page and then add some margin
-     * finally it is clipped with page rectangle to not end in the void
+     * transform the rectToBeVisibleInPoints first to pixel
+     */
+    QRectF toBeVisibleInPixel = fromPoints(rectToBeVisibleInPoints);
+
+    /**
+     * do not change x value (scroll to 0) if not given (use old value)
+     */
+    bool scrollXValue = (toBeVisibleInPixel.x() != 0);
+
+    /**
+     * move it to the page
+     */
+    toBeVisibleInPixel.translate(pageRectInPixel.topLeft());
+
+    /**
+     * add some margin (don't do that if x value should not be changed)
      */
     const int marginToBeSeen = 100;
-    const QRectF toBeVisibleInPixel = fromPoints(rectToBeVisibleInPoints).translated(pageRectInPixel.topLeft()).marginsAdded(QMarginsF(marginToBeSeen, marginToBeSeen, marginToBeSeen, marginToBeSeen)).intersected(pageRectInPixel);
+    QMarginsF m = QMarginsF(scrollXValue?marginToBeSeen:0, marginToBeSeen, scrollXValue?marginToBeSeen:1, marginToBeSeen);
+    toBeVisibleInPixel = toBeVisibleInPixel.marginsAdded(m);
+
+    if (!scrollXValue)
+        toBeVisibleInPixel.moveLeft(offset().x());
+
+    /**
+     * finally it is clipped with page rectangle to not end in the void
+     */
+    toBeVisibleInPixel = toBeVisibleInPixel.intersected(pageRectInPixel);
+
 
     /**
      * if the page difference is large, just jump there, else smooth scroll
