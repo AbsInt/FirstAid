@@ -508,6 +508,12 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints)
      * trigger repaint in any case
      */
     viewport()->update();
+
+    /**
+     * inform objects about the actual requested page
+     */
+
+    emit pageRequested(page);
 }
 
 void PageView::gotoPreviousPage()

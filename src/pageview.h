@@ -236,6 +236,7 @@ private:
 
 signals:
     void pageChanged(int page);
+    void pageRequested(int page);
     void zoomChanged(qreal CurrentZoom);
 
 private:
