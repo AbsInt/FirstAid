@@ -100,7 +100,7 @@ HelpDialog::HelpDialog(QWidget *parent)
 QStringList HelpDialog::addTable(const QString &title)
 {
     QStringList lines;
-    lines << "<td><table>";
+    lines << "<td><table cellspacing=2 cellpadding=2>";
     lines << "<tr><td colspan=2 align=center border-style=solid border-width=1 border-color=white><cap>" + title + "</cap></td></tr>";
     return lines;
 }
@@ -118,5 +118,5 @@ QStringList HelpDialog::addShortcut(const QStringList &keys, const QString &desc
     QStringList quotedKeys = keys;
     quotedKeys.replaceInStrings(QRegExp("(.*)"), "<key>\\1</key>");
 
-    return QStringList() << "<tr><td>" + quotedKeys.join("&nbsp;+&nbsp;") + "</td><td>" + description + "</td></tr>";
+    return QStringList() << "<tr><td>" + quotedKeys.join(" + ") + "</td><td>" + description + "</td></tr>";
 }
