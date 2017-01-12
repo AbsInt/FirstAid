@@ -766,7 +766,7 @@ void PageView::updateViewSize(qreal zoom)
      */
     m_imageCache.clear();
 
-    QPointF currentScrollPosition = toPoints(offset());
+    QPointF center = toPoints(offset() + QPoint(viewport()->width() / 2, viewport()->height() / 2));
 
     /**
      * adjust zoom level
@@ -802,7 +802,8 @@ void PageView::updateViewSize(qreal zoom)
     verticalScrollBar()->setPageStep(pageSizeInPixel.height());
     horizontalScrollBar()->setPageStep(pageSizeInPixel.width());
 
-    verticalScrollBar()->setValue(fromPoints(currentScrollPosition).y());
+    horizontalScrollBar()->setValue(fromPoints(center).x() - viewport()->width() / 2);
+    verticalScrollBar()->setValue(fromPoints(center).y() - viewport()->height() / 2);
 
     /**
      * update page, perhaps
