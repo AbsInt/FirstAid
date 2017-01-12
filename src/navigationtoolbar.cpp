@@ -67,6 +67,8 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_toggleFacingPagesAct = addAction(QIcon(":/icons/facing-pages.svg"), tr("Facing pages"));
     m_toggleFacingPagesAct->setCheckable(true);
     m_toggleFacingPagesAct->setChecked(s.value("MainWindow/facingPages", false).toBool());
+    m_toggleFacingPagesAct->setShortcut(Qt::Key_D);
+    m_toggleFacingPagesAct->setShortcutContext(Qt::ApplicationShortcut);
     connect(m_toggleFacingPagesAct, SIGNAL(toggled(bool)), SLOT(slotToggleFacingPages()));
 
     // add some space so next widget group is centered
