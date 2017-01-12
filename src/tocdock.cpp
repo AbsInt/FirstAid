@@ -30,6 +30,8 @@ TocDock::TocDock(QWidget *parent)
     : QDockWidget(parent)
 {
     setWindowTitle(tr("Table of contents"));
+    setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
+    setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
     // for state saving
     setObjectName("toc_info_dock");
