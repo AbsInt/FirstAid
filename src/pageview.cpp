@@ -421,28 +421,28 @@ void PageView::mousePressEvent(QMouseEvent *event)
                 switch (link->linkType()) {
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
-                        m_mousePressPage = gotoLink.pageNumber() - 1;
-                        QRectF pageRect = PdfViewer::document()->pageRect(m_mousePressPage);
+                        m_mousePressLinkPage = gotoLink.pageNumber() - 1;
+                        QRectF pageRect = PdfViewer::document()->pageRect(m_mousePressLinkPage);
 
-                        m_mousePressPageRect = QRectF();
+                        m_mousePressLinkPageRect = QRectF();
                         if (gotoLink.left() > 0) {
-                            m_mousePressPageRect.setLeft(gotoLink.left() * pageRect.width());
-                            m_mousePressPageRect.setRight(1 + gotoLink.left() * pageRect.width());
+                            m_mousePressLinkPageRect.setLeft(gotoLink.left() * pageRect.width());
+                            m_mousePressLinkPageRect.setRight(1 + gotoLink.left() * pageRect.width());
                         }
                         if (gotoLink.top() > 0) {
-                            m_mousePressPageRect.setTop(gotoLink.top() * pageRect.height());
-                            m_mousePressPageRect.setBottom(1 + gotoLink.top() * pageRect.height());
+                            m_mousePressLinkPageRect.setTop(gotoLink.top() * pageRect.height());
+                            m_mousePressLinkPageRect.setBottom(1 + gotoLink.top() * pageRect.height());
                         }
                         if (gotoLink.right() > 0)
-                            m_mousePressPageRect.setRight(gotoLink.right() * pageRect.width());
+                            m_mousePressLinkPageRect.setRight(gotoLink.right() * pageRect.width());
                         if (gotoLink.bottom() > 0 && gotoLink.bottom() < 1.0)
-                            m_mousePressPageRect.setBottom(gotoLink.bottom() * pageRect.height());
+                            m_mousePressLinkPageRect.setBottom(gotoLink.bottom() * pageRect.height());
 
-                        m_mousePressPageRect = m_mousePressPageRect.intersected(pageRect.translated(-pageRect.topLeft()));
+                        m_mousePressLinkPageRect = m_mousePressLinkPageRect.intersected(pageRect.translated(-pageRect.topLeft()));
                     } break;
 
                     case Poppler::Link::Browse:
-                        m_mousePressUrl = static_cast<Poppler::LinkBrowse *>(link)->url();
+                        m_mousePressLinkUrl = static_cast<Poppler::LinkBrowse *>(link)->url();
                         break;
 
                     default:
@@ -458,7 +458,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
         m_panOldOffset = QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
         m_panStartPoint = event->globalPos();
 
-        if (-1 == m_mousePressPage && m_mousePressUrl.isEmpty())
+        if (-1 == m_mousePressLinkPage && m_mousePressLinkUrl.isEmpty())
             setCursor(Qt::ClosedHandCursor);
     }
 }
@@ -477,17 +477,17 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
     m_panStartPoint = QPoint(0, 0);
 
     // was there a page to goto?
-    if (m_mousePressPage != -1) {
-        m_historyStack.add(m_mousePressPage, m_mousePressPageRect);
-        gotoPage(m_mousePressPage, m_mousePressPageRect);
-        m_mousePressPage = -1;
+    if (m_mousePressLinkPage != -1) {
+        m_historyStack.add(m_mousePressLinkPage, m_mousePressLinkPageRect);
+        gotoPage(m_mousePressLinkPage, m_mousePressLinkPageRect);
+        m_mousePressLinkPage = -1;
         return;
     }
 
     // was there an url to open?
-    if (!m_mousePressUrl.isEmpty()) {
-        QDesktopServices::openUrl(QUrl(m_mousePressUrl));
-        m_mousePressUrl.clear();
+    if (!m_mousePressLinkUrl.isEmpty()) {
+        QDesktopServices::openUrl(QUrl(m_mousePressLinkUrl));
+        m_mousePressLinkUrl.clear();
         return;
     }
 
