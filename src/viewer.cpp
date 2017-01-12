@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "findbar.h"
+#include "helpdialog.h"
 #include "navigationtoolbar.h"
 #include "pageview.h"
 #include "searchengine.h"
@@ -96,7 +97,10 @@ PdfViewer::PdfViewer(const QString &file)
     m_filePrintAct->setShortcut(QKeySequence::Print);
     menu->addSeparator();
 
-    QAction *act = menu->addAction(QIcon(":/icons/help-about.svg"), tr("&About"), this, SLOT(slotAbout()));
+    QAction *act = menu->addAction(QIcon(":/icons/help-keybord-shortcuts.svg"), tr("&Keyboard shortcuts..."), this, SLOT(slotHelp()));
+    act->setShortcut(QKeySequence::HelpContents);
+
+    act = menu->addAction(QIcon(":/icons/help-about.svg"), tr("&About"), this, SLOT(slotAbout()));
     menu->addSeparator();
 
     act = menu->addAction(QIcon(":/icons/application-exit.svg"), tr("&Quit"), qApp, SLOT(closeAllWindows()));
@@ -358,6 +362,12 @@ void PdfViewer::slotPrint()
 
     // flush
     painter.end();
+}
+
+void PdfViewer::slotHelp()
+{
+    HelpDialog hd(this);
+    hd.exec();
 }
 
 void PdfViewer::slotAbout()

@@ -58,6 +58,8 @@ set(firstaid_SRCS
   src/document.h
   src/findbar.cpp
   src/findbar.h
+  src/helpdialog.cpp
+  src/helpdialog.h
   src/historystack.cpp
   src/historystack.h
   src/main.cpp

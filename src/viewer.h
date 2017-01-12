@@ -114,6 +114,7 @@ private slots:
     void slotReload();
     void slotDelayedReload();
     void slotPrint();
+    void slotHelp();
     void slotAbout();
 
 protected:
