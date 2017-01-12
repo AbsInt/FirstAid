@@ -26,4 +26,9 @@ class HelpDialog : public QDialog
 
 public:
     HelpDialog(QWidget *parent = nullptr);
+
+private:
+    QStringList addTable(const QString &title);
+    QStringList endTable();
+    QStringList addShortcut(const QStringList &keys, const QString &description);
 };

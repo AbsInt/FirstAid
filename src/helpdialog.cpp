@@ -29,6 +29,8 @@ HelpDialog::HelpDialog(QWidget *parent)
     QVBoxLayout *vbl = new QVBoxLayout(this);
 
     QTextBrowser *tb = new QTextBrowser(this);
+    tb->setWordWrapMode(QTextOption::NoWrap);
+    tb->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
     vbl->addWidget(tb);
 
     QDialogButtonBox *dbb = new QDialogButtonBox(this);
@@ -37,37 +39,93 @@ HelpDialog::HelpDialog(QWidget *parent)
     QPushButton *button = dbb->addButton(QDialogButtonBox::Close);
     connect(button, SIGNAL(clicked()), SLOT(close()));
 
-    tb->setHtml("<table><tr>"
-                "<td><table>"
-                "<tr><td colspan=2 align=center padding=2px>Navigating</td></tr>"
-                "<tr><td>PageUp</td><td>Go to next page</td></tr>"
-                "<tr><td>PageDown</td><td>Go to previous page</td></tr>"
-                "<tr><td>Space</td><td>Scroll to next part of document</td></tr>"
-                "<tr><td>Backspace</td><td>Scroll to previous part of document</td></tr>"
-                "<tr><td>Alt + Left</td><td>Go back in history</td></tr>"
-                "<tr><td>Alt + Right</td><td>Go forward in history</td></tr>"
-                "<tr><td>Ctrl + G</td><td>Go to page</td></tr>"
-                "<tr></tr>"
-                "</table></td>"
-                "<td><table>"
-                "<tr><td colspan=2 align=center padding=2px>View</td></tr>"
-                "<tr><td>W</td><td>Fit page width</td></tr>"
-                "<tr><td>F</td><td>Fit full page</td></tr>"
-                "<tr><td>Crtl + 0</td><td>Zoom 100%</td></tr>"
-                "<tr><td>Crtl + +</td><td>Zoom in</td></tr>"
-                "<tr><td>Crtl + -</td><td>Zoom out</td></tr>"
-                "<tr><td>F7</td><td>Toggle table of contents</td></tr>"
-                "<tr><td>D </td><td>Toggle double sided mode</td></tr>"
-                "</table></td>"
-                "</tr><tr>"
-                "<td><table>"
-                "<tr><td colspan=2 align=center padding=2px>Document Handling</td></tr>"
-                "<tr><td>Ctrl + O</td><td>Open file</td></tr>"
-                "<tr><td>F5</td><td>Reload document</td></tr>"
-                "<tr><td>Crtl + F</td><td>Find text in document</td></tr>"
-                "<tr><td>Crtl + E</td><td>Open document in external application</td></tr>"
-                "<tr><td>Crtl + P</td><td>Print document</td></tr>"
-                "<tr><td>Crtl + Q</td><td>Quit application</td></tr>"
-                "</table></td>"
-                "</tr></table>");
+    QStringList html;
+    html << "<style>"
+         << "table { color: white; }"
+         << "cap { font-weight: bold; }"
+         << "key { color: yellow; font-weight: bold; }"
+         << "</style>"
+         << "<table bgcolor=#000000 cellspacing=5 cellpadding=5><tr>";
+
+    html += addTable("Navigation");
+
+    html += addShortcut(QStringList() << "PageUp", "Go to next page");
+    html += addShortcut(QStringList() << "PageDown", "Go to previous page");
+    html += addShortcut(QStringList() << "Space", "Scroll to next part of document");
+    html += addShortcut(QStringList() << "Backspace", "Scroll to previous part of document");
+    html += addShortcut(QStringList() << "Alt"
+                                      << "Left",
+                        "Go back in history");
+    html += addShortcut(QStringList() << "Alt"
+                                      << "Right",
+                        "Go forward in history");
+    html += addShortcut(QStringList() << "Ctrl"
+                                      << "G",
+                        "Go to page");
+    html += endTable();
+
+    html += addTable("View");
+    html += addShortcut(QStringList() << "W", "Fit page width");
+    html += addShortcut(QStringList() << "F", "Fit full page");
+    html += addShortcut(QStringList() << "Crtl"
+                                      << "0",
+                        "Zoom 100%");
+    html += addShortcut(QStringList() << "Crtl"
+                                      << "+",
+                        "Zoom in");
+    html += addShortcut(QStringList() << "Crtl"
+                                      << "-",
+                        "Zoom out");
+    html += addShortcut(QStringList() << "F7", "Toggle table of contents");
+    html += addShortcut(QStringList() << "D", "Toggle double sided mode");
+    html += endTable();
+
+    html += addTable("Document Handling");
+    html += addShortcut(QStringList() << "Ctrl"
+                                      << "O",
+                        "Open file");
+    html += addShortcut(QStringList() << "F5", "Reload document");
+    html += addShortcut(QStringList() << "Crtl"
+                                      << "F",
+                        "Find text in document");
+    html += addShortcut(QStringList() << "Crtl"
+                                      << "E",
+                        "Open document in external application");
+    html += addShortcut(QStringList() << "Crtl"
+                                      << "P",
+                        "Print document");
+    html += addShortcut(QStringList() << "Crtl"
+                                      << "Q",
+                        "Quit application");
+    html += endTable();
+
+    html << "</tr></table>";
+
+    tb->setHtml(html.join(""));
+
+    tb->setMinimumSize(tb->sizeHint());
+}
+
+QStringList HelpDialog::addTable(const QString &title)
+{
+    QStringList lines;
+    lines << "<td><table>";
+    lines << "<tr><td colspan=2 align=center border-style=solid border-width=1 border-color=white><cap>" + title + "</cap></td></tr>";
+    return lines;
+}
+
+QStringList HelpDialog::endTable()
+{
+    QStringList lines;
+    lines << "<tr></tr>";
+    lines << "</table></td>";
+    return lines;
+}
+
+QStringList HelpDialog::addShortcut(const QStringList &keys, const QString &description)
+{
+    QStringList quotedKeys = keys;
+    quotedKeys.replaceInStrings(QRegExp("(.*)"), "<key>\\1</key>");
+
+    return QStringList() << "<tr><td>" + quotedKeys.join("&nbsp;+&nbsp;") + "</td><td>" + description + "</td></tr>";
 }
