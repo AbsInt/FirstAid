@@ -72,7 +72,6 @@ public slots:
     void advance();
     void zoomIn();
     void zoomOut();
-    void zoomOriginal();
 
     void historyPrev();
     void historyNext();

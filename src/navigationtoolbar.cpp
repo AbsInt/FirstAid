@@ -119,15 +119,25 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomButton->setFocusPolicy(Qt::NoFocus);
     m_zoomButton->setToolTip(tr("Zoom"));
     QMenu *zoomMenu = new QMenu(this);
-    zoomMenu->addAction(QIcon(":/icons/zoom-fit-width.svg"), tr("Fit width"));
-    zoomMenu->addAction(QIcon(":/icons/zoom-fit-best.svg"), tr("Fit page"));
+    QAction *a = zoomMenu->addAction(QIcon(":/icons/zoom-fit-width.svg"), tr("Fit width"));
+    a->setShortcut(Qt::Key_W);
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
+    a = zoomMenu->addAction(QIcon(":/icons/zoom-fit-best.svg"), tr("Fit page"));
+    a->setShortcut(Qt::Key_F);
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
     zoomMenu->addAction(tr("10%"));
     zoomMenu->addAction(tr("25%"));
     zoomMenu->addAction(tr("33%"));
     zoomMenu->addAction(tr("50%"));
     zoomMenu->addAction(tr("66%"));
     zoomMenu->addAction(tr("75%"));
-    zoomMenu->addAction(tr("100%"));
+
+    a = zoomMenu->addAction(tr("100%"));
+    a->setShortcut(Qt::ControlModifier + Qt::Key_0);
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
     zoomMenu->addAction(tr("125%"));
     zoomMenu->addAction(tr("150%"));
     zoomMenu->addAction(tr("200%"));

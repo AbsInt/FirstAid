@@ -36,4 +36,13 @@ HelpDialog::HelpDialog(QWidget *parent)
 
     QPushButton *button = dbb->addButton(QDialogButtonBox::Close);
     connect(button, SIGNAL(clicked()), SLOT(close()));
+
+    tb->setHtml("<table>"
+                "<tr><td colspan=2 align=center padding=2px>Zooming</td></tr>"
+                "<tr><td>W</td><td>Fit page width</td></tr>"
+                "<tr><td>F</td><td>Fit full page</td></tr>"
+                "<tr><td>Crtl + 0</td><td>Zoom 100%</td></tr>"
+                "<tr><td>Crtl + +</td><td>Zoom in</td></tr>"
+                "<tr><td>Crtl + -</td><td>Zoom out</td></tr>"
+                "</table>");
 }

@@ -116,7 +116,6 @@ PageView::PageView(QWidget *parent)
     // add some shortcuts
     new QShortcut(Qt::Key_Backspace, this, SLOT(stepBack()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(Qt::Key_Space, this, SLOT(advance()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(Qt::ControlModifier + Qt::Key_0, this, SLOT(zoomOriginal()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::ZoomIn, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(Qt::ControlModifier + Qt::Key_Equal, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::ZoomOut, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
@@ -656,11 +655,6 @@ void PageView::zoomIn()
 void PageView::zoomOut()
 {
     setZoom(m_zoom - 0.1);
-}
-
-void PageView::zoomOriginal()
-{
-    setZoom(1.0);
 }
 
 void PageView::historyPrev()
