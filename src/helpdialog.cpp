@@ -18,26 +18,18 @@
 
 #include "helpdialog.h"
 
-#include <QDialogButtonBox>
-#include <QPushButton>
+#include <QLabel>
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
 HelpDialog::HelpDialog(QWidget *parent)
-    : QDialog(parent)
+    : QDialog(parent, Qt::Popup)
 {
     QVBoxLayout *vbl = new QVBoxLayout(this);
+    vbl->setContentsMargins(0, 0, 0, 0);
 
-    QTextBrowser *tb = new QTextBrowser(this);
-    tb->setWordWrapMode(QTextOption::NoWrap);
-    tb->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
-    vbl->addWidget(tb);
-
-    QDialogButtonBox *dbb = new QDialogButtonBox(this);
-    vbl->addWidget(dbb);
-
-    QPushButton *button = dbb->addButton(QDialogButtonBox::Close);
-    connect(button, SIGNAL(clicked()), SLOT(close()));
+    QLabel *label = new QLabel(this);
+    vbl->addWidget(label);
 
     QStringList html;
     html << "<style>"
@@ -45,6 +37,7 @@ HelpDialog::HelpDialog(QWidget *parent)
          << "cap { font-weight: bold; }"
          << "key { color: yellow; font-weight: bold; }"
          << "</style>"
+         << "<h3 align=center>FirstAid Shortcuts</h3>"
          << "<table bgcolor=#000000 cellspacing=5 cellpadding=5><tr>";
 
     html += addTable("Navigation");
@@ -101,9 +94,7 @@ HelpDialog::HelpDialog(QWidget *parent)
 
     html << "</tr></table>";
 
-    tb->setHtml(html.join(""));
-
-    tb->setMinimumSize(tb->sizeHint());
+    label->setText(html.join(""));
 }
 
 QStringList HelpDialog::addTable(const QString &title)
