@@ -417,6 +417,9 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
         for (auto &l : PdfViewer::document()->links(page)) {
             if (l->boundary().contains(p)) {
+                m_mousePressPage = page;
+                m_mousePressPageRect = QRectF(pageRect.width() * l->boundary().left(), pageRect.height() * l->boundary().top(), pageRect.width() * l->boundary().width(), pageRect.height() * l->boundary().height());
+
                 Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l)->linkDestination();
                 switch (link->linkType()) {
                     case Poppler::Link::Goto: {
@@ -478,8 +481,10 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
 
     // was there a page to goto?
     if (m_mousePressLinkPage != -1) {
+        m_historyStack.add(m_mousePressPage, m_mousePressPageRect);
         m_historyStack.add(m_mousePressLinkPage, m_mousePressLinkPageRect);
         gotoPage(m_mousePressLinkPage, m_mousePressLinkPageRect);
+        m_mousePressPage = -1;
         m_mousePressLinkPage = -1;
         return;
     }

@@ -276,10 +276,12 @@ private:
     QPoint m_panStartPoint; //! the global cursor position when panning starts
 
     /**
-     * members for handling clicking on  links
+     * members for handling clicking on links
      */
-    int m_mousePressLinkPage = -1;   //! page of link at mouse press
-    QRectF m_mousePressLinkPageRect; //! rect for page of link
+    int m_mousePressPage = -1;       //! page at mouse position on press
+    QRectF m_mousePressPageRect;     //! rect of link on mouse press
+    int m_mousePressLinkPage = -1;   //! page of link destination at mouse press
+    QRectF m_mousePressLinkPageRect; //! rect for page of link destination
     QString m_mousePressLinkUrl;     //! url at mouse press
 
     /**
