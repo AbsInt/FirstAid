@@ -172,9 +172,9 @@ private:
      * @param rect input in points to convert
      * @return result in pixel
      */
-    QRectF fromPoints(const QRectF &rect) const
+    QRect fromPoints(const QRectF &rect) const
     {
-        return QRectF(rect.left() / 72.0 * resX(), rect.top() / 72.0 * resY(), rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
+        return QRectF(rect.left() / 72.0 * resX(), rect.top() / 72.0 * resY(), rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY()).toRect();
     }
 
     /**
@@ -182,49 +182,49 @@ private:
      * @param rect input in pixel to convert
      * @return result in point
      */
-    QRectF toPoints(const QRectF &rect) const
+    QRectF toPoints(const QRect &rect) const
     {
         return QRectF(rect.left() * 72.0 / resX(), rect.top() * 72.0 / resY(), rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
     }
 
     /**
      * Convert from points to pixels using the current DPI and zoom.
-     * @param rect input in points to convert
+     * @param size input in points to convert
      * @return result in pixel
      */
-    QSizeF fromPoints(const QSizeF &rect) const
+    QSize fromPoints(const QSizeF &size) const
     {
-        return QSizeF(rect.width() / 72.0 * resX(), rect.height() / 72.0 * resY());
+        return QSizeF(size.width() / 72.0 * resX(), size.height() / 72.0 * resY()).toSize();
     }
 
     /**
      * Convert from pixels to points using the current DPI and zoom.
-     * @param rect input in pixel to convert
+     * @param size input in pixel to convert
      * @return result in point
      */
-    QSizeF toPoints(const QSizeF &rect) const
+    QSizeF toPoints(const QSize &size) const
     {
-        return QSizeF(rect.width() * 72.0 / resX(), rect.height() * 72.0 / resY());
+        return QSizeF(size.width() * 72.0 / resX(), size.height() * 72.0 / resY());
     }
 
     /**
      * Convert from points to pixels using the current DPI and zoom.
-     * @param rect input in points to convert
+     * @param point input in points to convert
      * @return result in pixel
      */
-    QPointF fromPoints(const QPointF &rect) const
+    QPoint fromPoints(const QPointF &point) const
     {
-        return QPointF(rect.x() / 72.0 * resX(), rect.y() / 72.0 * resY());
+        return QPointF(point.x() / 72.0 * resX(), point.y() / 72.0 * resY()).toPoint();
     }
 
     /**
      * Convert from pixels to points using the current DPI and zoom.
-     * @param rect input in pixel to convert
+     * @param point input in pixel to convert
      * @return result in point
      */
-    QPointF toPoints(const QPointF &rect) const
+    QPointF toPoints(const QPoint &point) const
     {
-        return QPointF(rect.x() * 72.0 / resX(), rect.y() * 72.0 / resY());
+        return QPointF(point.x() * 72.0 / resX(), point.y() * 72.0 / resY());
     }
 
     /**

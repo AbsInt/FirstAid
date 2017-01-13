@@ -207,7 +207,7 @@ void PageView::slotUpdateViewSize()
 
 void PageView::updateCurrentPage()
 {
-    const int page = qMax(0, PdfViewer::document()->pageForRect(toPoints(QRectF(offset(), viewport()->size()))));
+    const int page = qMax(0, PdfViewer::document()->pageForRect(toPoints(QRect(offset(), viewport()->size()))));
     if (page != m_currentPage) {
         m_currentPage = page;
         emit pageChanged(m_currentPage);
@@ -365,7 +365,7 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
 
     // update rubber band?
     if (m_rubberBandOrigin.first >= 0) {
-        QRect r = QRect(m_rubberBandOrigin.second, event->pos()).intersected(fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).toRect().translated(-offset()));
+        QRect r = QRect(m_rubberBandOrigin.second, event->pos()).intersected(fromPoints(PdfViewer::document()->pageRect(m_rubberBandOrigin.first)).translated(-offset()));
         m_rubberBand->setGeometry(r.normalized());
     }
 
@@ -620,7 +620,7 @@ void PageView::stepBack()
         return;
 
     // go to start of current page if not visible or to previous page
-    QRect pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage)).toRect();
+    QRect pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage));
     QRect visibleRect = QRect(offset(), viewport()->size());
 
     if (visibleRect.top() <= pageRect.top()) {
@@ -628,7 +628,7 @@ void PageView::stepBack()
         if (m_currentPage > 0) {
             int xOffset = offset().x() - pageRect.x();
 
-            pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage - 1)).toRect();
+            pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage - 1));
             int yOffset = qMax(0, pageRect.bottom() - viewport()->height()+1);
             xOffset += pageRect.x();
             setOffset(QPoint(xOffset, yOffset));
@@ -643,7 +643,7 @@ void PageView::advance()
         return;
 
     // go to end of current page if not visible or to next page
-    QRect pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage)).toRect();
+    QRect pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage));
     QRect visibleRect = QRect(offset(), viewport()->size());
 
     if (visibleRect.bottom() >= pageRect.bottom())
@@ -795,7 +795,7 @@ void PageView::updateViewSize(qreal zoom)
      * set single & page step depending on page size (with margin)
      * fallback to dummy values if no pages
      */
-    const QSize pageSizeInPixel = (PdfViewer::document()->numPages() > 0) ? fromPoints(PdfViewer::document()->pageRect(0, true)).size().toSize() : QSize(100, 100);
+    const QSize pageSizeInPixel = (PdfViewer::document()->numPages() > 0) ? fromPoints(PdfViewer::document()->pageRect(0, true)).size() : QSize(100, 100);
     verticalScrollBar()->setSingleStep(pageSizeInPixel.height() / 30);
     horizontalScrollBar()->setSingleStep(pageSizeInPixel.width() / 30);
     verticalScrollBar()->setPageStep(pageSizeInPixel.height());
@@ -849,7 +849,7 @@ QSize PageView::sizeHint() const
      * HACK: we just use first page for some things
      */
     if (PdfViewer::document()->numPages() > 0)
-        return (1.1 * fromPoints(PdfViewer::document()->pageRect(0, true)).size()).toSize();
+        return fromPoints(1.1 * PdfViewer::document()->pageRect(0, true).size());
 
     /**
      * else: normal hint
