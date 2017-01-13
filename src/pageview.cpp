@@ -299,7 +299,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
 
     foreach (int page, PdfViewer::document()->visiblePages(toPoints(paintEvent->rect().translated(offset())))) {
         QRectF pageRect = PdfViewer::document()->pageRect(page);
-        QRectF displayRect = fromPoints(pageRect);
+        QRect displayRect = fromPoints(pageRect);
 
         QImage cachedPage = getPage(page);
         p.drawImage(displayRect, cachedPage);
@@ -311,7 +311,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
             if (page == matchPage && rect == matchRect)
                 matchColor = QColor(255, 128, 0, 128);
 
-            QRectF r = fromPoints(rect);
+            QRect r = fromPoints(rect);
             r.adjust(-3, -5, 3, 2);
             p.fillRect(r.translated(displayRect.topLeft()), matchColor);
         }
@@ -372,7 +372,7 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
     // now check if we want to highlight a link location
     int page = PdfViewer::document()->pageForPoint(toPoints(offset() + event->pos()));
     if (-1 != page) {
-        QRectF pageRect = fromPoints(PdfViewer::document()->pageRect(page));
+        QRect pageRect = fromPoints(PdfViewer::document()->pageRect(page));
         qreal xPos = (offset().x() + event->x() - pageRect.x()) / (qreal)pageRect.width();
         qreal yPos = (offset().y() + event->y() - pageRect.y()) / (qreal)pageRect.height();
         QPointF p = QPointF(xPos, yPos);
@@ -520,12 +520,12 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     /**
      * get page rect for the requested page, converted to pixels
      */
-    const QRectF pageRectInPixel = fromPoints(PdfViewer::document()->pageRect(page));
+    const QRect pageRectInPixel = fromPoints(PdfViewer::document()->pageRect(page));
 
     /**
      * transform the rectToBeVisibleInPoints first to pixel
      */
-    QRectF toBeVisibleInPixel = fromPoints(rectToBeVisibleInPoints);
+    QRect toBeVisibleInPixel = fromPoints(rectToBeVisibleInPoints);
 
     /**
      * do not change x value (scroll to 0) if not given (use old value)
@@ -541,7 +541,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
      * if needed visualize link destination
      */
     if (highlightMatch && !rectToBeVisibleInPoints.isNull()) {
-        m_highlightRect = toBeVisibleInPixel.toRect();
+        m_highlightRect = toBeVisibleInPixel;
         m_highlightRect.setLeft(pageRectInPixel.left());
         m_highlightRect.setRight(pageRectInPixel.right());
         if (m_highlightRect.height() < 50 * m_zoom)
@@ -558,7 +558,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
      * add some margin (don't do that if x value should not be changed)
      */
     const int marginToBeSeen = 100;
-    QMarginsF m = QMarginsF(scrollXValue ? marginToBeSeen : 0, marginToBeSeen, scrollXValue ? marginToBeSeen : 1, marginToBeSeen);
+    QMargins m = QMargins(scrollXValue ? marginToBeSeen : 0, marginToBeSeen, scrollXValue ? marginToBeSeen : 1, marginToBeSeen);
     toBeVisibleInPixel = toBeVisibleInPixel.marginsAdded(m);
 
     if (!scrollXValue && offset().x() > toBeVisibleInPixel.x())
@@ -576,9 +576,9 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
      * if the page difference is large, just jump there, else smooth scroll
      */
     if (qAbs(m_currentPage - page) > 4) {
-        setOffset(toBeVisibleInPixel.topLeft().toPoint());
+        setOffset(toBeVisibleInPixel.topLeft());
     } else {
-        setOffset(toBeVisibleInPixel.topLeft().toPoint());
+        setOffset(toBeVisibleInPixel.topLeft());
         // QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);
     }
 
