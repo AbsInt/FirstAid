@@ -131,6 +131,13 @@ PageView::PageView(QWidget *parent)
     connect(&m_updateViewSizeTimer, &QTimer::timeout, this, &PageView::slotUpdateViewSize);
 
     /**
+     * delays clearing of the image cache when zooming
+     */
+    m_clearImageCacheTimer.setSingleShot(true);
+    m_clearImageCacheTimer.setInterval(100);
+    connect(&m_clearImageCacheTimer, &QTimer::timeout, this, &PageView::slotClearImageCache);
+
+    /**
      * initial inits
      */
     slotDocumentChanged();
@@ -203,6 +210,12 @@ void PageView::wheelEvent(QWheelEvent *wheelEvent)
 void PageView::slotUpdateViewSize()
 {
     updateViewSize();
+}
+
+void PageView::slotClearImageCache()
+{
+    m_imageCache.clear();
+    viewport()->update();
 }
 
 void PageView::updateCurrentPage()
@@ -760,11 +773,14 @@ void PageView::slotAnimationValueChanged(const QVariant &value)
 void PageView::updateViewSize(qreal zoom)
 {
     /**
-     * invalidate cache
+     * invalidate cache delayed
      * we might alter sizes
      */
-    m_imageCache.clear();
+    m_clearImageCacheTimer.start();
 
+    /**
+     * remember current center of viewport
+     */
     QPointF center = toPoints(offset() + QPoint(viewport()->width() / 2, viewport()->height() / 2));
 
     /**

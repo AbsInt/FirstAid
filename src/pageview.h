@@ -121,6 +121,11 @@ private slots:
      */
     void slotUpdateViewSize();
 
+    /**
+     * slot to trigger clearing of image cache
+     */
+    void slotClearImageCache();
+
 private:
     /**
      * Color for search matches.
@@ -293,6 +298,11 @@ private:
      * delayed updating of view size
      */
     QTimer m_updateViewSizeTimer;
+
+    /**
+     * delayed clearing of image cache
+     */
+    QTimer m_clearImageCacheTimer;;
 
     /**
      * area in the viewport to highlight via animation
