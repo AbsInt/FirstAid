@@ -189,6 +189,9 @@ void Document::relayout()
             offset += QPointF(0, pageRect.height() + m_spacing);
         }
     } else {
+        // layout pages from top to bottom and determine maximum width
+        qreal maxWidth = 0.0;
+
         for (int i = 0; i < numPages(); ++i) {
             Poppler::Page *p = page(i);
 
@@ -196,6 +199,14 @@ void Document::relayout()
             m_pageRects << pageRect;
 
             offset += QPointF(0, pageRect.height() + m_spacing);
+
+            maxWidth = qMax(maxWidth, pageRect.width());
+        }
+
+        // now we can center the page rects according to the maximum width
+        for (int i = 0; i < numPages(); ++i) {
+            if (m_pageRects.at(i).width() < maxWidth)
+                m_pageRects[i].translate((maxWidth - m_pageRects.at(i).width()) / 2.0, 0);
         }
     }
 
