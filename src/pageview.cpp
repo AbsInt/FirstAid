@@ -318,7 +318,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
 
         // draw border around page
         p.setPen(Qt::darkGray);
-        p.drawRect(displayRect.adjusted(-1, -1, 1, 1));
+        p.drawRect(displayRect);
     }
 
     // draw the highlight rect

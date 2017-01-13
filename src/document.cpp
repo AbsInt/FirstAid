@@ -165,10 +165,13 @@ void Document::relayout()
     QPointF offset(m_spacing, m_spacing);
 
     if (doubleSided()) {
+        qreal leftMaxWidth = 0.0;
+
         int currentPage = 0;
         while (currentPage < numPages()) {
             Poppler::Page *p = page(currentPage);
             QRectF pageRect = QRectF(QPointF(), p->pageSizeF());
+            qreal pageHeight = pageRect.height();
 
             // special handling for first page in documents with more than 2 pages
             if (currentPage == 0 && numPages() > 2) {
@@ -176,17 +179,51 @@ void Document::relayout()
                 m_pageRects << pageRect.translated(offset);
             } else {
                 m_pageRects << pageRect.translated(offset);
+                leftMaxWidth = qMax(leftMaxWidth, pageRect.width());
                 currentPage++;
 
+                // check right side
                 if (currentPage < numPages()) {
                     p = page(currentPage);
                     pageRect = QRectF(QPointF(), p->pageSizeF()).translated(offset + QPointF(pageRect.width(), 0));
+
+                    // ensure pages are vertically centered
+                    if (pageRect.height() > m_pageRects.last().height()) {
+                        m_pageRects[m_pageRects.count()-1].translate(0, (pageRect.height() - m_pageRects.last().height()) / 2.0);
+                        pageHeight = pageRect.height();
+                    }
+                    else if (pageRect.height() < m_pageRects.last().height())
+                        pageRect.translate(0, (m_pageRects.last().height() - pageRect.height()) / 2.0);
+
                     m_pageRects << pageRect;
                 }
             }
 
             currentPage++;
-            offset += QPointF(0, pageRect.height() + m_spacing);
+            offset += QPointF(0, pageHeight + m_spacing);
+        }
+
+        // now we can center the page rects according to the maximum width
+        currentPage = 0;
+
+        // special handling for first page in documents with more than 2 pages
+        if (numPages() > 2) {
+            m_pageRects[0].translate(leftMaxWidth - m_pageRects.first().width(), 0);
+            currentPage++;
+        }
+
+        while (currentPage < numPages()) {
+            int leftPageWidth = m_pageRects.at(currentPage).width();
+
+            if (leftPageWidth < leftMaxWidth) {
+                m_pageRects[currentPage].translate(leftMaxWidth - leftPageWidth, 0);
+                currentPage++;
+
+                if (currentPage < numPages()) {
+                    m_pageRects[currentPage].translate(leftMaxWidth - leftPageWidth, 0);
+                    currentPage++;
+                }
+            }
         }
     } else {
         // layout pages from top to bottom and determine maximum width
