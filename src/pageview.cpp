@@ -629,7 +629,7 @@ void PageView::stepBack()
             int xOffset = offset().x() - pageRect.x();
 
             pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage - 1)).toRect();
-            int yOffset = qMax(0, pageRect.bottom() - viewport()->height());
+            int yOffset = qMax(0, pageRect.bottom() - viewport()->height()+1);
             xOffset += pageRect.x();
             setOffset(QPoint(xOffset, yOffset));
         }
