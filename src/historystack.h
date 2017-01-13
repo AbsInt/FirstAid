@@ -32,6 +32,8 @@ public:
     HistoryEntry(int page, const QRectF &rect = QRectF());
     HistoryEntry(const QString &destination);
 
+    bool operator!=(const HistoryEntry &other);
+
     Type m_type = Unknown;
     int m_page = 0;
     QRectF m_rect;

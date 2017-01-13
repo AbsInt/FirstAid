@@ -410,9 +410,10 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
     // now check if we want to highlight a link location
     if (-1 != page) {
-        QRectF pageRect = fromPoints(PdfViewer::document()->pageRect(page));
-        qreal xPos = (offset().x() + event->x() - pageRect.x()) / (qreal)pageRect.width();
-        qreal yPos = (offset().y() + event->y() - pageRect.y()) / (qreal)pageRect.height();
+        QRectF pageRect = PdfViewer::document()->pageRect(page);
+        QRect pixelPageRect = fromPoints(pageRect);
+        qreal xPos = (offset().x() + event->x() - pixelPageRect.x()) / (qreal)pixelPageRect.width();
+        qreal yPos = (offset().y() + event->y() - pixelPageRect.y()) / (qreal)pixelPageRect.height();
         QPointF p = QPointF(xPos, yPos);
 
         for (auto &l : PdfViewer::document()->links(page)) {
@@ -425,7 +426,6 @@ void PageView::mousePressEvent(QMouseEvent *event)
                     case Poppler::Link::Goto: {
                         Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
                         m_mousePressLinkPage = gotoLink.pageNumber() - 1;
-                        QRectF pageRect = PdfViewer::document()->pageRect(m_mousePressLinkPage);
 
                         m_mousePressLinkPageRect = QRectF();
                         if (gotoLink.left() > 0) {
@@ -629,7 +629,7 @@ void PageView::stepBack()
             int xOffset = offset().x() - pageRect.x();
 
             pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage - 1));
-            int yOffset = qMax(0, pageRect.bottom() - viewport()->height()+1);
+            int yOffset = qMax(0, pageRect.bottom() - viewport()->height() + 1);
             xOffset += pageRect.x();
             setOffset(QPoint(xOffset, yOffset));
         }

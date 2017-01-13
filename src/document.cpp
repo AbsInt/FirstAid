@@ -189,10 +189,9 @@ void Document::relayout()
 
                     // ensure pages are vertically centered
                     if (pageRect.height() > m_pageRects.last().height()) {
-                        m_pageRects[m_pageRects.count()-1].translate(0, (pageRect.height() - m_pageRects.last().height()) / 2.0);
+                        m_pageRects[m_pageRects.count() - 1].translate(0, (pageRect.height() - m_pageRects.last().height()) / 2.0);
                         pageHeight = pageRect.height();
-                    }
-                    else if (pageRect.height() < m_pageRects.last().height())
+                    } else if (pageRect.height() < m_pageRects.last().height())
                         pageRect.translate(0, (m_pageRects.last().height() - pageRect.height()) / 2.0);
 
                     m_pageRects << pageRect;

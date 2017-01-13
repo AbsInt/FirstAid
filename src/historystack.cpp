@@ -44,6 +44,20 @@ HistoryEntry::HistoryEntry(const QString &destination)
 {
 }
 
+bool HistoryEntry::operator!=(const HistoryEntry &other)
+{
+    if (m_type != other.m_type)
+        return true;
+
+    if (PageWithRect == m_type)
+        return m_page != other.m_page || m_rect != other.m_rect;
+
+    if (Destination == m_type)
+        return m_destination != other.m_destination;
+
+    return false;
+}
+
 /*
  * constructors / destructor
  */
@@ -73,8 +87,11 @@ void HistoryStack::add(int page, const QRectF &rect)
         m_stack.takeLast();
 
     // add new location
-    m_stack << HistoryEntry(page, rect);
-    m_index = m_stack.count() - 1;
+    HistoryEntry entry(page, rect);
+    if (m_stack.isEmpty() || entry != m_stack.last()) {
+        m_stack << entry;
+        m_index = m_stack.count() - 1;
+    }
 }
 
 void HistoryStack::add(const QString &destination)
@@ -84,8 +101,11 @@ void HistoryStack::add(const QString &destination)
         m_stack.takeLast();
 
     // add new location
-    m_stack << HistoryEntry(destination);
-    m_index = m_stack.count() - 1;
+    HistoryEntry entry(destination);
+    if (m_stack.isEmpty() || entry != m_stack.last()) {
+        m_stack << entry;
+        m_index = m_stack.count() - 1;
+    }
 }
 
 bool HistoryStack::HistoryStack::previous(HistoryEntry &entry)
