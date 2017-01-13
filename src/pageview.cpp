@@ -302,14 +302,23 @@ bool PageView::event(QEvent *event)
 
 void PageView::paintEvent(QPaintEvent *paintEvent)
 {
+    // create painter on the viewport
     QPainter p(viewport());
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setRenderHint(QPainter::SmoothPixmapTransform);
+
+    // fill background
     p.fillRect(paintEvent->rect(), Qt::gray);
+
+    // move the desired offset
     p.translate(-offset());
 
+    // get the current match that should be highlighted differently
     int matchPage;
     QRectF matchRect;
     PdfViewer::searchEngine()->currentMatch(matchPage, matchRect);
 
+    // paint all visible pages
     foreach (int page, PdfViewer::document()->visiblePages(toPoints(paintEvent->rect().translated(offset())))) {
         QRectF pageRect = PdfViewer::document()->pageRect(page);
         QRect displayRect = fromPoints(pageRect);
@@ -319,6 +328,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
 
         p.setPen(Qt::NoPen);
 
+        // paint any matches on the current page
         foreach (QRectF rect, PdfViewer::searchEngine()->matchesFor(page)) {
             QColor matchColor = QColor(255, 255, 0, 64);
             if (page == matchPage && rect == matchRect)
