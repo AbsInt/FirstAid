@@ -50,6 +50,8 @@ private slots:
 private:
     QLineEdit *m_findEdit = nullptr;
     QLabel *m_statusLabel = nullptr;
+    QAction *m_acCaseSensitive = nullptr;
+    QAction *m_acWholeWords = nullptr;
     QToolButton *m_prevMatch = nullptr;
     QToolButton *m_nextMatch = nullptr;
 };

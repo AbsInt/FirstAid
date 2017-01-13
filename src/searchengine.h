@@ -40,7 +40,7 @@ public:
 public slots:
     void reset();
 
-    void find(const QString &text);
+    void find(const QString &text, bool caseSensitive = false, bool wholeWords = false);
     void nextMatch();
     void previousMatch();
 
@@ -57,6 +57,7 @@ protected slots:
 private:
     // members for finding text
     QString m_findText;
+    int m_findFlags = 0;
     int m_findCurrentPage = 0;
     int m_findStopAfterPage = 0;
     int m_findPagesScanned = 0;

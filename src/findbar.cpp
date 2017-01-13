@@ -23,6 +23,7 @@
 
 #include <QAction>
 #include <QHBoxLayout>
+#include <QMenu>
 #include <QLabel>
 #include <QLineEdit>
 #include <QTimer>
@@ -45,6 +46,20 @@ FindBar::FindBar(QWidget *parent)
     connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotFind()));
     connect(m_findEdit, SIGNAL(textChanged(QString)), SLOT(slotResetStyle()));
     hbl->addWidget(m_findEdit);
+
+    tb = new QToolButton(this);
+    tb->setIcon(QIcon(":/icons/view-filter.svg"));
+    tb->setToolTip("Options");
+    hbl->addWidget(tb);
+
+    QMenu *m = new QMenu(this);
+    m_acCaseSensitive = m->addAction("Case sensitive");
+    m_acCaseSensitive->setCheckable(true);
+    m_acWholeWords = m->addAction("Whole words");
+    m_acWholeWords->setCheckable(true);
+
+    tb->setMenu(m);
+    tb->setPopupMode(QToolButton::InstantPopup);
 
     m_statusLabel = new QLabel(this);
     m_statusLabel->setText("0 of 0");
@@ -111,7 +126,7 @@ void FindBar::slotFindActionTriggered()
 
 void FindBar::slotFind()
 {
-    PdfViewer::searchEngine()->find(m_findEdit->text());
+    PdfViewer::searchEngine()->find(m_findEdit->text(), m_acCaseSensitive->isChecked(), m_acWholeWords->isChecked());
 }
 
 void FindBar::slotHide()

@@ -23,8 +23,6 @@
 #include "searchengine.h"
 #include "viewer.h"
 
-#include <poppler-qt5.h>
-
 #include <QGuiApplication>
 #include <QTimer>
 
@@ -103,9 +101,17 @@ void SearchEngine::reset()
     m_findText.clear();
 }
 
-void SearchEngine::find(const QString &text)
+void SearchEngine::find(const QString &text, bool caseSensitive, bool wholeWords)
 {
-    if (text == m_findText) {
+    // compose flags first
+    int flags = 0;
+    if (!caseSensitive)
+        flags |= Poppler::Page::IgnoreCase;
+    if (wholeWords)
+        flags |= Poppler::Page::WholeWords;
+
+    // continue search if neither text nor flags changed
+    if (text == m_findText && flags == m_findFlags) {
         if (QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
             previousMatch();
         else
@@ -115,10 +121,14 @@ void SearchEngine::find(const QString &text)
     }
 
     m_matchesForPage.clear();
+    m_currentMatchPage = 0;
+    m_currentMatchPageIndex = 0;
+    m_currentMatchIndex = 0;
 
     emit started();
 
     m_findText = text;
+    m_findFlags = flags;
 
     if (text.isEmpty()) {
         emit finished();
@@ -227,9 +237,7 @@ void SearchEngine::find()
     for (int count = 0; count < PagePileSize; count++) {
         // find our text on the current search page
         Poppler::Page *p = PdfViewer::document()->page(m_findCurrentPage);
-        if (!p)
-            qWarning("no page for %d", m_findCurrentPage);
-        QList<QRectF> matches = p->search(m_findText, Poppler::Page::IgnoreCase);
+        QList<QRectF> matches = p->search(m_findText, static_cast<Poppler::Page::SearchFlag>(m_findFlags));
 
         // signal matches and remember them
         if (!matches.isEmpty()) {
