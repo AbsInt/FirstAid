@@ -223,6 +223,8 @@ void Document::relayout()
                     currentPage++;
                 }
             }
+            else
+                currentPage += 2;
         }
     } else {
         // layout pages from top to bottom and determine maximum width
