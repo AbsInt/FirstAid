@@ -595,6 +595,8 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     if (toBeVisibleInPixel.isEmpty())
         toBeVisibleInPixel = pageRectInPixel;
 
+    toBeVisibleInPixel.adjust(0, -1, 0, 0);
+
     /**
      * if the page difference is large, just jump there, else smooth scroll
      */
