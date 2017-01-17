@@ -218,13 +218,12 @@ void Document::relayout()
                 m_pageRects[currentPage].translate(leftMaxWidth - leftPageWidth, 0);
                 currentPage++;
 
-                if (currentPage < numPages()) {
-                    m_pageRects[currentPage].translate(leftMaxWidth - leftPageWidth, 0);
-                    currentPage++;
-                }
+                if (currentPage+1 < numPages())
+                    m_pageRects[currentPage+1].translate(leftMaxWidth - leftPageWidth, 0);
             }
-            else
-                currentPage += 2;
+
+            // advance to the next left side page
+            currentPage += 2;
         }
     } else {
         // layout pages from top to bottom and determine maximum width
