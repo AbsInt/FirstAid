@@ -726,7 +726,7 @@ void PageView::gotoDestination(const QString &destination, bool updateHistory)
     Poppler::LinkDestination link(destination);
     if (link.pageNumber() > 0) {
         const int pageNumber = link.pageNumber() - 1;
-        gotoPage(pageNumber, QRectF(0, (link.isChangeTop() ? link.top() * PdfViewer::document()->pageRect(pageNumber).height() : 0), 0, 0));
+        gotoPage(pageNumber, QRectF(0, (link.isChangeTop() ? link.top() * PdfViewer::document()->pageRect(pageNumber).height() : 0), 1, 1));
 
         if (updateHistory)
             m_historyStack.add(destination);
