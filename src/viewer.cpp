@@ -253,6 +253,10 @@ void PdfViewer::processCommand(const QString &command)
             m_view->gotoPage(pageNumber);
         else
             m_view->gotoDestinationName(target);
+
+        // the user should take note of us
+        raise();
+        activateWindow();
     }
 
     else if (command.startsWith("close"))
