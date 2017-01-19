@@ -562,7 +562,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     if (highlightMatch && !rectToBeVisibleInPoints.isNull()) {
         // ensure the rectangle covers any text
         for (int c = 0; c < 72; c++) {
-            QString text = PdfViewer::document()->page(page)->text(adjustedRectToBeVisibleInPoints.adjusted(-5, -5, 5, 5)); //, Poppler::Page::RawOrderLayout);
+            QString text = PdfViewer::document()->page(page)->text(adjustedRectToBeVisibleInPoints.adjusted(-5, -5, 5, 5));
             if (!text.isEmpty())
                 break;
 
