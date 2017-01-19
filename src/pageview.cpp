@@ -544,14 +544,50 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
         return;
 
     /**
-     * get page rect for the requested page, converted to pixels
+     * get page rect for the requested page, in points and converted to pixels
      */
-    const QRect pageRectInPixel = fromPoints(PdfViewer::document()->pageRect(page));
+    const QRectF pageRectInPoints = PdfViewer::document()->pageRect(page);
+    const QRect pageRectInPixel = fromPoints(pageRectInPoints);
 
     /**
-     * transform the rectToBeVisibleInPoints first to pixel
+     * create a working copy of the rectToBeVisibleInPoints
      */
-    QRect toBeVisibleInPixel = fromPoints(rectToBeVisibleInPoints);
+    QRectF adjustedRectToBeVisibleInPoints = rectToBeVisibleInPoints;
+    adjustedRectToBeVisibleInPoints.setLeft(0);
+    adjustedRectToBeVisibleInPoints.setRight(pageRectInPoints.width());
+
+    /**
+     * if needed visualize link destination
+     */
+    if (highlightMatch && !rectToBeVisibleInPoints.isNull()) {
+        // ensure the rectangle covers any text
+        for (int c = 0; c < 72; c++) {
+            QString text = PdfViewer::document()->page(page)->text(adjustedRectToBeVisibleInPoints.adjusted(-5, -5, 5, 5)); //, Poppler::Page::RawOrderLayout);
+            if (!text.isEmpty())
+                break;
+
+            adjustedRectToBeVisibleInPoints.translate(0, 1);
+        }
+
+        m_highlightRect = fromPoints(adjustedRectToBeVisibleInPoints.translated(pageRectInPoints.topLeft()));
+        if (m_highlightRect.height() < 50 * m_zoom) {
+            m_highlightRect.setHeight(50 * m_zoom);
+            m_highlightRect.translate(0, -25 * m_zoom);
+        }
+
+        // start animation
+        QVariantAnimation *va = new QVariantAnimation(this);
+        connect(va, SIGNAL(valueChanged(QVariant)), SLOT(slotAnimationValueChanged(QVariant)));
+        va->setDuration(1000);
+        va->setStartValue(128);
+        va->setEndValue(0);
+        va->start(QAbstractAnimation::DeleteWhenStopped);
+    }
+
+    /**
+     * transform the adjustedRectToBeVisibleInPoints first to pixel
+     */
+    QRect toBeVisibleInPixel = fromPoints(adjustedRectToBeVisibleInPoints);
 
     /**
      * do not change x value (scroll to 0) if not given (use old value)
@@ -562,23 +598,6 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
      * move it to the page
      */
     toBeVisibleInPixel.translate(pageRectInPixel.topLeft());
-
-    /**
-     * if needed visualize link destination
-     */
-    if (highlightMatch && !rectToBeVisibleInPoints.isNull()) {
-        m_highlightRect = toBeVisibleInPixel;
-        m_highlightRect.setLeft(pageRectInPixel.left());
-        m_highlightRect.setRight(pageRectInPixel.right());
-        if (m_highlightRect.height() < 50 * m_zoom)
-            m_highlightRect.setHeight(50 * m_zoom);
-        QVariantAnimation *va = new QVariantAnimation(this);
-        connect(va, SIGNAL(valueChanged(QVariant)), SLOT(slotAnimationValueChanged(QVariant)));
-        va->setDuration(1000);
-        va->setStartValue(128);
-        va->setEndValue(0);
-        va->start(QAbstractAnimation::DeleteWhenStopped);
-    }
 
     /**
      * add some margin (don't do that if x value should not be changed)
