@@ -101,10 +101,11 @@ PdfViewer::PdfViewer(const QString &file)
     act->setShortcut(QKeySequence::HelpContents);
 
     act = menu->addAction(QIcon(":/icons/help-about.svg"), tr("&About"), this, SLOT(slotAbout()));
+    act->setShortcut(QKeySequence::WhatsThis);
     menu->addSeparator();
 
     act = menu->addAction(QIcon(":/icons/application-exit.svg"), tr("&Quit"), qApp, SLOT(closeAllWindows()));
-    act->setShortcut(Qt::CTRL + Qt::Key_Q);
+    act->setShortcut(QKeySequence::Quit);
 
     QWidget *w = new QWidget(this);
     QVBoxLayout *vbl = new QVBoxLayout(w);

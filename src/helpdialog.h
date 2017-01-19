@@ -19,6 +19,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QKeySequence>
 
 class HelpDialog : public QDialog
 {
@@ -31,4 +32,5 @@ private:
     QStringList addTable(const QString &title);
     QStringList endTable();
     QStringList addShortcut(const QStringList &keys, const QString &description);
+    QStringList fromStandardKey(QKeySequence::StandardKey key);
 };

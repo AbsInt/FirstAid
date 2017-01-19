@@ -40,18 +40,27 @@ HelpDialog::HelpDialog(QWidget *parent)
          << "<h3 align=center>FirstAid Shortcuts</h3>"
          << "<table bgcolor=#000000 cellspacing=5 cellpadding=5><tr>";
 
+    html += addTable("Document Handling");
+    html += addShortcut(fromStandardKey(QKeySequence::Open), "Open file");
+    html += addShortcut(fromStandardKey(QKeySequence::Refresh), "Reload document");
+    html += addShortcut(fromStandardKey(QKeySequence::Find), "Find text in document");
+    html += addShortcut(QStringList() << "Crtl"
+                                      << "E",
+                        "Open in external application");
+    html += addShortcut(fromStandardKey(QKeySequence::Print), "Print document");
+    html += addShortcut(fromStandardKey(QKeySequence::Quit), "Quit application");
+    html += endTable();
+
     html += addTable("Navigation");
 
+    html += addShortcut(QStringList() << "Pos1", "Go to first page");
+    html += addShortcut(QStringList() << "End", "Go to last page");
     html += addShortcut(QStringList() << "PageUp", "Go to next page");
     html += addShortcut(QStringList() << "PageDown", "Go to previous page");
     html += addShortcut(QStringList() << "Space", "Scroll to next part of document");
     html += addShortcut(QStringList() << "Backspace", "Scroll to previous part of document");
-    html += addShortcut(QStringList() << "Alt"
-                                      << "Left",
-                        "Go back in history");
-    html += addShortcut(QStringList() << "Alt"
-                                      << "Right",
-                        "Go forward in history");
+    html += addShortcut(fromStandardKey(QKeySequence::Back), "Go back in history");
+    html += addShortcut(fromStandardKey(QKeySequence::Forward), "Go forward in history");
     html += addShortcut(QStringList() << "Ctrl"
                                       << "G",
                         "Go to page");
@@ -63,33 +72,10 @@ HelpDialog::HelpDialog(QWidget *parent)
     html += addShortcut(QStringList() << "Crtl"
                                       << "0",
                         "Zoom 100%");
-    html += addShortcut(QStringList() << "Crtl"
-                                      << "+",
-                        "Zoom in");
-    html += addShortcut(QStringList() << "Crtl"
-                                      << "-",
-                        "Zoom out");
+    html += addShortcut(fromStandardKey(QKeySequence::ZoomIn), "Zoom in");
+    html += addShortcut(fromStandardKey(QKeySequence::ZoomOut), "Zoom out");
     html += addShortcut(QStringList() << "F7", "Toggle table of contents");
     html += addShortcut(QStringList() << "D", "Toggle double sided mode");
-    html += endTable();
-
-    html += addTable("Document Handling");
-    html += addShortcut(QStringList() << "Ctrl"
-                                      << "O",
-                        "Open file");
-    html += addShortcut(QStringList() << "F5", "Reload document");
-    html += addShortcut(QStringList() << "Crtl"
-                                      << "F",
-                        "Find text in document");
-    html += addShortcut(QStringList() << "Crtl"
-                                      << "E",
-                        "Open document in external application");
-    html += addShortcut(QStringList() << "Crtl"
-                                      << "P",
-                        "Print document");
-    html += addShortcut(QStringList() << "Crtl"
-                                      << "Q",
-                        "Quit application");
     html += endTable();
 
     html << "</tr></table>";
@@ -116,7 +102,19 @@ QStringList HelpDialog::endTable()
 QStringList HelpDialog::addShortcut(const QStringList &keys, const QString &description)
 {
     QStringList quotedKeys = keys;
-    quotedKeys.replaceInStrings(QRegExp("(.*)"), "<key>\\1</key>");
+    quotedKeys.replaceInStrings(QRegExp("(^.+$)"), "<key>\\1</key>");
 
     return QStringList() << "<tr><td>" + quotedKeys.join(" + ") + "</td><td>" + description + "</td></tr>";
+}
+
+QStringList HelpDialog::fromStandardKey(QKeySequence::StandardKey key)
+{
+    QKeySequence ks(key);
+    QStringList alternatives = ks.toString().split(",");
+    if (!ks.isEmpty()) {
+        QString keys = alternatives.first();
+        keys.replace("++", "+&#43;");
+        return keys.split("+");
+    } else
+        return QStringList();
 }
