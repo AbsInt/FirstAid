@@ -50,6 +50,7 @@
 #include <QIcon>
 #include <QImage>
 #include <QLabel>
+#include <QLinearGradient>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
@@ -348,9 +349,22 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     }
 
     // draw the highlight rect
-    if (m_highlightValue > 0) {
+    if (m_highlightValue < 100) {
         p.setPen(Qt::NoPen);
-        p.fillRect(m_highlightRect, QColor(255, 255, 0, m_highlightValue));
+
+        QColor c = QColor(255, 255, 0, m_highlightValue > 50 ? 128 * (100 - m_highlightValue) / 50 : 128);
+
+        QLinearGradient lg(QPointF(0.0, 0.5), QPointF(0.0, 1.0));
+        lg.setSpread(QGradient::ReflectSpread);
+        lg.setCoordinateMode(QGradient::ObjectBoundingMode);
+        lg.setColorAt(0.5, c);
+        lg.setColorAt(1.0, c.lighter());
+
+        QRect r = m_highlightRect;
+        if (m_highlightValue < 10)
+            r.setWidth(m_highlightValue * r.width() / 10);
+
+        p.fillRect(r, lg);
     }
 }
 
@@ -573,14 +587,15 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
         if (m_highlightRect.height() < 50 * m_zoom) {
             m_highlightRect.setHeight(50 * m_zoom);
             m_highlightRect.translate(0, -25 * m_zoom);
+            m_highlightRect.adjust(1, 0, -1, 0);
         }
 
         // start animation
         QVariantAnimation *va = new QVariantAnimation(this);
         connect(va, SIGNAL(valueChanged(QVariant)), SLOT(slotAnimationValueChanged(QVariant)));
         va->setDuration(1000);
-        va->setStartValue(128);
-        va->setEndValue(0);
+        va->setStartValue(0);
+        va->setEndValue(100);
         va->start(QAbstractAnimation::DeleteWhenStopped);
     }
 
