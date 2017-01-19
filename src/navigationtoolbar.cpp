@@ -51,10 +51,10 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QSettings s;
 
     // some shortcuts for first/last page
-    QShortcut *firstShortcut = new QShortcut(Qt::Key_Home, this);
+    QShortcut *firstShortcut = new QShortcut(QKeySequence::MoveToStartOfLine, this);
     connect(firstShortcut, SIGNAL(activated()), this, SLOT(slotGoFirst()));
 
-    QShortcut *lastShortcut = new QShortcut(Qt::Key_End, this);
+    QShortcut *lastShortcut = new QShortcut(QKeySequence::MoveToEndOfLine, this);
     connect(lastShortcut, SIGNAL(activated()), this, SLOT(slotGoLast()));
 
     // left side is table of content action
@@ -78,7 +78,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 
     // previous page action
     m_prevAct = addAction(QIcon(":/icons/go-previous.svg"), tr("Previous page"), this, SLOT(slotGoPrev()));
-    QShortcut *previousShortcut = new QShortcut(Qt::Key_PageUp, this);
+    QShortcut *previousShortcut = new QShortcut(QKeySequence::MoveToPreviousPage, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
     // combined line edit for goto action and status label
@@ -103,7 +103,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 
     // next page action
     m_nextAct = addAction(QIcon(":/icons/go-next.svg"), tr("Next page"), this, SLOT(slotGoNext()));
-    QShortcut *nextShortcut = new QShortcut(Qt::Key_PageDown, this);
+    QShortcut *nextShortcut = new QShortcut(QKeySequence::MoveToNextPage, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
     // more space for centering

@@ -53,10 +53,10 @@ HelpDialog::HelpDialog(QWidget *parent)
 
     html += addTable("Navigation");
 
-    html += addShortcut(QStringList() << "Pos1", "Go to first page");
-    html += addShortcut(QStringList() << "End", "Go to last page");
-    html += addShortcut(QStringList() << "PageUp", "Go to next page");
-    html += addShortcut(QStringList() << "PageDown", "Go to previous page");
+    html += addShortcut(fromStandardKey(QKeySequence::MoveToStartOfLine), "Go to first page");
+    html += addShortcut(fromStandardKey(QKeySequence::MoveToEndOfLine), "Go to last page");
+    html += addShortcut(fromStandardKey(QKeySequence::MoveToNextPage), "Go to next page");
+    html += addShortcut(fromStandardKey(QKeySequence::MoveToPreviousPage), "Go to previous page");
     html += addShortcut(QStringList() << "Space", "Scroll to next part of document");
     html += addShortcut(QStringList() << "Backspace", "Scroll to previous part of document");
     html += addShortcut(fromStandardKey(QKeySequence::Back), "Go back in history");
