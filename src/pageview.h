@@ -302,7 +302,8 @@ private:
     /**
      * delayed clearing of image cache
      */
-    QTimer m_clearImageCacheTimer;;
+    QTimer m_clearImageCacheTimer;
+    ;
 
     /**
      * area in the viewport to highlight via animation
