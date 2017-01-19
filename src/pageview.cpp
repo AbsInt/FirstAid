@@ -162,11 +162,14 @@ void PageView::slotDocumentChanged()
 
 void PageView::slotLayoutChanged()
 {
+    // remember current page
+    int currentPage = m_currentPage;
+
     // visual size of document might change now!
     updateViewSize();
 
-    // update page
-    updateCurrentPage();
+    // goto remembered page
+    gotoPage(currentPage);
 }
 
 int PageView::currentPage() const
