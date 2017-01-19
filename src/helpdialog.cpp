@@ -29,6 +29,7 @@ HelpDialog::HelpDialog(QWidget *parent)
     vbl->setContentsMargins(0, 0, 0, 0);
 
     QLabel *label = new QLabel(this);
+    label->setStyleSheet("background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #000000, stop: 0.3 #505050, stop: 1 #000000);");
     vbl->addWidget(label);
 
     QStringList html;
@@ -37,8 +38,8 @@ HelpDialog::HelpDialog(QWidget *parent)
          << "cap { font-weight: bold; }"
          << "key { color: yellow; font-weight: bold; }"
          << "</style>"
-         << "<h3 align=center>FirstAid Shortcuts</h3>"
-         << "<table bgcolor=#000000 cellspacing=5 cellpadding=5><tr>";
+         << "<table bgcolor=#f0f0f0 width=100%><tr><td align=center><font color=#000000 size=+1><b>FirstAid Shortcuts</b></font></td></tr></table>"
+         << "<table cellspacing=5 cellpadding=5><tr>";
 
     html += addTable("Document Handling");
     html += addShortcut(fromStandardKey(QKeySequence::Open), "Open file");
