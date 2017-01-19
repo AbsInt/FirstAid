@@ -23,6 +23,7 @@
 class QLabel;
 class QLineEdit;
 class QToolButton;
+class QTimer;
 
 class FindBar : public QWidget
 {
@@ -54,4 +55,5 @@ private:
     QAction *m_acWholeWords = nullptr;
     QToolButton *m_prevMatch = nullptr;
     QToolButton *m_nextMatch = nullptr;
+    QTimer *m_findStartTimer = nullptr;
 };

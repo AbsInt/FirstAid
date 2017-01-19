@@ -43,7 +43,7 @@ FindBar::FindBar(QWidget *parent)
     m_findEdit = new QLineEdit(this);
     m_findEdit->setPlaceholderText(tr("Find"));
     m_findEdit->setClearButtonEnabled(true);
-    connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotFind()));
+    connect(m_findEdit, SIGNAL(returnPressed()), PdfViewer::searchEngine(), SLOT(nextMatch()));
     connect(m_findEdit, SIGNAL(textChanged(QString)), SLOT(slotResetStyle()));
     hbl->addWidget(m_findEdit);
 
@@ -96,6 +96,12 @@ FindBar::FindBar(QWidget *parent)
     connect(m_prevMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(previousMatch()));
     connect(m_nextMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(nextMatch()));
 
+    m_findStartTimer = new QTimer(this);
+    m_findStartTimer->setSingleShot(true);
+    m_findStartTimer->setInterval(500);
+    connect(m_findStartTimer, SIGNAL(timeout()), SLOT(slotFind()));
+    connect(m_findEdit, SIGNAL(textChanged(QString)), m_findStartTimer, SLOT(start()));
+
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
 
     slotDocumentChanged();
@@ -126,6 +132,8 @@ void FindBar::slotFindActionTriggered()
 
 void FindBar::slotFind()
 {
+    m_findStartTimer->stop();
+
     PdfViewer::searchEngine()->find(m_findEdit->text(), m_acCaseSensitive->isChecked(), m_acWholeWords->isChecked());
 }
 
