@@ -253,7 +253,7 @@ void PdfViewer::processCommand(const QString &command)
         if (ok)
             m_view->gotoPage(pageNumber);
         else
-            m_view->gotoDestinationName(target);
+            m_view->gotoDestinationName(target, true, false);
 
         // the user should take note of us
         raise();

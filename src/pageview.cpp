@@ -549,7 +549,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
  * public slots
  */
 
-void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool highlightMatch)
+void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool highlightMatch, bool downwards)
 {
     /**
      * filter out invalid pages
@@ -574,14 +574,16 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
      * if needed visualize link destination
      */
     if (highlightMatch && !rectToBeVisibleInPoints.isNull()) {
-        adjustedRectToBeVisibleInPoints.translate(0, -10);
-        // ensure the rectangle covers any text
-        for (int c = 0; c < 72; c++) {
-            QString text = PdfViewer::document()->page(page)->text(adjustedRectToBeVisibleInPoints.adjusted(-5, -5, 5, 5));
-            if (!text.isEmpty())
-                break;
-
-            adjustedRectToBeVisibleInPoints.translate(0, 1);
+        if (PdfViewer::document()->page(page)->text(adjustedRectToBeVisibleInPoints.adjusted(-5, -5, 5, 5)).isEmpty()) {
+            // ensure the rectangle covers any text
+            for (int c = 1; c < 72; c++) {
+                QRectF r=adjustedRectToBeVisibleInPoints.translated(0, downwards ? c : -c);
+                QString text = PdfViewer::document()->page(page)->text(r.adjusted(-5, -5, 5, 5));
+                if (!text.isEmpty()){
+                    adjustedRectToBeVisibleInPoints = r;
+                    break;
+                }
+            }
         }
 
         m_highlightRect = fromPoints(adjustedRectToBeVisibleInPoints.translated(pageRectInPoints.topLeft()));
@@ -744,17 +746,17 @@ void PageView::historyNext()
  * protected slots
  */
 
-void PageView::gotoDestinationName(const QString &destination, bool updateHistory)
+void PageView::gotoDestinationName(const QString &destination, bool updateHistory, bool downwards)
 {
     // try to lookup
     if (Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(destination)) {
         // call function that takes description, skip that if page is already bogus
         if (link->pageNumber() > 0)
-            gotoDestination(link->toString(), updateHistory);
+            gotoDestination(link->toString(), updateHistory, downwards);
         delete link;
     }
 }
-void PageView::gotoDestination(const QString &destination, bool updateHistory)
+void PageView::gotoDestination(const QString &destination, bool updateHistory, bool downwards)
 {
     if (destination.isEmpty())
         return;
@@ -763,7 +765,7 @@ void PageView::gotoDestination(const QString &destination, bool updateHistory)
     Poppler::LinkDestination link(destination);
     if (link.pageNumber() > 0) {
         const int pageNumber = link.pageNumber() - 1;
-        gotoPage(pageNumber, QRectF(0, (link.isChangeTop() ? link.top() * PdfViewer::document()->pageRect(pageNumber).height() : 0), 1, 1));
+        gotoPage(pageNumber, QRectF(0, (link.isChangeTop() ? link.top() * PdfViewer::document()->pageRect(pageNumber).height() : 0), 1, 1), true, downwards);
 
         if (updateHistory)
             m_historyStack.add(destination);

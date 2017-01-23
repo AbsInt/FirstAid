@@ -64,7 +64,7 @@ public slots:
      * @param page page to show
      * @param rectToBeVisibleInPoints rectangle to make visible
      */
-    void gotoPage(int page, const QRectF &rectToBeVisibleInPoints = QRectF(), bool showHighlight = true);
+    void gotoPage(int page, const QRectF &rectToBeVisibleInPoints = QRectF(), bool showHighlight = true, bool downwards = true);
 
     void gotoPreviousPage();
     void gotoNextPage();
@@ -81,14 +81,14 @@ public slots:
      * @param destination named destination to go to
      * @param updateHistory update jump history?
      */
-    void gotoDestinationName(const QString &destination, bool updateHistory = true);
+    void gotoDestinationName(const QString &destination, bool updateHistory = true, bool downwards = true);
 
     /**
      * Go to given destination (raw string representation parsable by LinkDestination constructor)
      * @param destination string representation of destination to go to
      * @param updateHistory update jump history?
      */
-    void gotoDestination(const QString &destination, bool updateHistory = true);
+    void gotoDestination(const QString &destination, bool updateHistory = true, bool downwards = true);
 
     void gotoHistoryEntry(const HistoryEntry &entry);
     void slotCopyRequested(int page, const QRect &viewportRect);
