@@ -196,15 +196,13 @@ NavigationToolBar::~NavigationToolBar()
 
 bool NavigationToolBar::eventFilter(QObject *object, QEvent *event)
 {
-    if (PdfViewer::document()->isValid()) {
-        // clicking on the status label displaying the current page number will trigger goto action
-        if (object == m_pageLabel && QEvent::MouseButtonPress == event->type())
-            QTimer::singleShot(0, this, SLOT(slotGoto()));
+    // clicking on the status label displaying the current page number will trigger goto action
+    if (object == m_pageLabel && QEvent::MouseButtonPress == event->type() && PdfViewer::document()->isValid())
+        QTimer::singleShot(0, this, SLOT(slotGoto()));
 
-        // clicking on the zoom label displaying the current scale factor will trigger zoom menu
-        else if (object == m_zoomLabel && QEvent::MouseButtonPress == event->type())
-            QTimer::singleShot(0, m_zoomButton, SLOT(showMenu()));
-    }
+    // clicking on the zoom label displaying the current scale factor will trigger zoom menu
+    if (object == m_zoomLabel && QEvent::MouseButtonPress == event->type() && PdfViewer::document()->isValid())
+        QTimer::singleShot(0, m_zoomButton, SLOT(showMenu()));
 
     return QToolBar::eventFilter(object, event);
 }
