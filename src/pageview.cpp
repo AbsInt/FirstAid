@@ -577,9 +577,9 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
         if (PdfViewer::document()->page(page)->text(adjustedRectToBeVisibleInPoints.adjusted(-5, -5, 5, 5)).isEmpty()) {
             // ensure the rectangle covers any text
             for (int c = 1; c < 100; c++) {
-                QRectF r=adjustedRectToBeVisibleInPoints.translated(0, downwards ? c : -c);
+                QRectF r = adjustedRectToBeVisibleInPoints.translated(0, downwards ? c : -c);
                 QString text = PdfViewer::document()->page(page)->text(r.adjusted(-5, -5, 5, 5));
-                if (!text.isEmpty()){
+                if (!text.isEmpty()) {
                     adjustedRectToBeVisibleInPoints = r;
                     break;
                 }
@@ -643,7 +643,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     if (qAbs(m_currentPage - page) > 4) {
         setOffset(toBeVisibleInPixel.topLeft());
     } else {
-        //setOffset(toBeVisibleInPixel.topLeft());
+        // setOffset(toBeVisibleInPixel.topLeft());
         QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);
     }
 
