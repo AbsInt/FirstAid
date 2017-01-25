@@ -638,14 +638,9 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     toBeVisibleInPixel.adjust(0, -1, 0, 0);
 
     /**
-     * if the page difference is large, just jump there, else smooth scroll
+     * set the new offset
      */
-    if (qAbs(m_currentPage - page) > 4) {
-        setOffset(toBeVisibleInPixel.topLeft());
-    } else {
-        // setOffset(toBeVisibleInPixel.topLeft());
-        QScroller::scroller(viewport())->ensureVisible(toBeVisibleInPixel, 0, 0);
-    }
+    setOffset(toBeVisibleInPixel.topLeft());
 
     /**
      * trigger repaint in any case
