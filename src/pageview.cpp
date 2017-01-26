@@ -148,6 +148,7 @@ PageView::PageView(QWidget *parent)
 
 PageView::~PageView()
 {
+    delete m_mutex;
 }
 
 void PageView::slotDocumentChanged()
@@ -226,7 +227,6 @@ void PageView::slotClearImageCache()
 
 void PageView::prerender()
 {
-    QMutexLocker locker(m_mutex);
     QList<int> pages = PdfViewer::document()->visiblePages(toPoints(QRect(offset(), viewport()->size())));
 
     if (pages.isEmpty())
@@ -903,6 +903,7 @@ void PageView::updateViewSize(qreal zoom)
 
 QImage PageView::getPage(int pageNumber)
 {
+    QMutexLocker locker(m_mutex);
     /**
      * prefer cached image
      */
