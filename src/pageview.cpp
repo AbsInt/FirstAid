@@ -42,6 +42,7 @@
 
 #include <QApplication>
 #include <QClipboard>
+#include <QtConcurrent>
 #include <QCursor>
 #include <QDebug>
 #include <QDesktopServices>
@@ -241,7 +242,7 @@ void PageView::updateCurrentPage()
     const int page = qMax(0, PdfViewer::document()->pageForRect(toPoints(QRect(offset(), viewport()->size()))));
     if (page != m_currentPage) {
         m_currentPage = page;
-        metaObject()->invokeMethod(this, "prerender", Qt::QueuedConnection);
+        QtConcurrent::run(this, &PageView::prerender);
         emit pageChanged(m_currentPage);
     }
 }
