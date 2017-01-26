@@ -27,6 +27,7 @@
 #include <QAbstractScrollArea>
 #include <QCache>
 #include <QImage>
+class QMutex;
 #include <QTimer>
 
 #include <poppler-qt5.h>
@@ -312,4 +313,6 @@ private:
      */
     QRect m_highlightRect;
     int m_highlightValue = 0;
+
+    QMutex *m_mutex;
 };

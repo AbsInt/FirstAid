@@ -68,6 +68,7 @@
 PageView::PageView(QWidget *parent)
     : QAbstractScrollArea(parent)
     , m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
+    , m_mutex(new QMutex(QMutex::Recursive))
 {
     /**
      * allow 64 cached pages
@@ -225,6 +226,7 @@ void PageView::slotClearImageCache()
 
 void PageView::prerender()
 {
+    QMutexLocker locker(m_mutex);
     QList<int> pages = PdfViewer::document()->visiblePages(toPoints(QRect(offset(), viewport()->size())));
 
     if (pages.isEmpty())
@@ -232,8 +234,12 @@ void PageView::prerender()
 
     if (PdfViewer::document()->numPages() > pages.last() + 1)
         getPage(pages.last() + 1);
+    if (PdfViewer::document()->numPages() > pages.last() + 2)
+        getPage(pages.last() + 2);
     if (pages.first() > 0)
         getPage(pages.first() - 1);
+    if (pages.first() - 1 > 0)
+        getPage(pages.first() - 2);
 }
 
 void PageView::updateCurrentPage()
