@@ -126,6 +126,8 @@ private slots:
      */
     void slotClearImageCache();
 
+    void prerender();
+
 private:
     /**
      * Color for search matches.

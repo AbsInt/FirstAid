@@ -222,11 +222,26 @@ void PageView::slotClearImageCache()
     viewport()->update();
 }
 
+void PageView::prerender()
+{
+    QList<int> pages = PdfViewer::document()->visiblePages(toPoints(QRect(offset(), viewport()->size())));
+
+    if (pages.isEmpty())
+        return;
+
+    if (PdfViewer::document()->numPages() > pages.last() + 1)
+        getPage(pages.last() + 1);
+    if (pages.first() > 0)
+        getPage(pages.first() - 1);
+}
+
 void PageView::updateCurrentPage()
+
 {
     const int page = qMax(0, PdfViewer::document()->pageForRect(toPoints(QRect(offset(), viewport()->size()))));
     if (page != m_currentPage) {
         m_currentPage = page;
+        metaObject()->invokeMethod(this, "prerender", Qt::QueuedConnection);
         emit pageChanged(m_currentPage);
     }
 }
