@@ -50,6 +50,8 @@ HelpDialog::HelpDialog(QWidget *parent)
                         "Open in external application");
     html += addShortcut(fromStandardKey(QKeySequence::Print), "Print document");
     html += addShortcut(fromStandardKey(QKeySequence::Quit), "Quit application");
+    html += addShortcut(QStringList() << "RightClick" << "Drag", "Copy text area");
+    html += addShortcut(QStringList() << "Shift" << "LeftClick" << "Drag", "Copy text area");
     html += endTable();
 
     html += addTable("Navigation");

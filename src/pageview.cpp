@@ -483,7 +483,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
         m_rubberBand->show();
 
-        showHint("<b>Drag to copy text in selection...<b>", 0);
+        showHint("<b>Drag to copy text in selection...<b>");
 
         return;
     }
@@ -841,13 +841,16 @@ void PageView::slotCopyRequested(int page, const QRect &viewportRect)
         QRectF r = toPoints(viewportRect.translated(offset())).translated(-pageRect.topLeft());
         QString text = p->text(r);
 
-        QClipboard *clipboard = QGuiApplication::clipboard();
-        clipboard->setText(text, QClipboard::Clipboard);
-        clipboard->setText(text, QClipboard::Selection);
+        if (!text.isEmpty()) {
+            QClipboard *clipboard = QGuiApplication::clipboard();
+            clipboard->setText(text, QClipboard::Clipboard);
+            clipboard->setText(text, QClipboard::Selection);
 
-        text.replace("\n", "<br>");
-        showHint("<b>Text copied:</b><br>" + text);
-    } else
+            text.replace("\n", "<br>");
+            showHint("<b>Text copied:</b><br>"+text);
+        }
+    }
+    else
         showHint(QString());
 }
 
