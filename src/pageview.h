@@ -116,7 +116,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *wheelEvent) override;
 
-    void showHint(const QString &text, int timeout=3000);
+    void showHint(const QString &text, int timeout = 3000);
 
 private slots:
 
@@ -245,13 +245,6 @@ private:
      * @return rendered page as image, HiDPI aware
      */
     QImage getPage(int page);
-
-    /**
-     * @brief renderPage
-     * for internal usage to prerender page if returned copy of the image is not needed.
-     * returned pointer may be deleted at any time by the cache
-     */
-    QImage *renderPage(int pageNumber);
 
 signals:
     void pageChanged(int page);

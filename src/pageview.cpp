@@ -130,11 +130,12 @@ PageView::PageView(QWidget *parent)
     m_hintLabel->move(5, 5);
     m_hintLabel->hide();
 
-    m_hintLabel->setStyleSheet("color: white;"
-                               "border: 2px solid white;"
-                               "border-radius: 4px;"
-                               "padding: 6px;"
-                               "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #000000, stop: 0.3 #505050, stop: 1 #000000);");
+    m_hintLabel->setStyleSheet(
+        "color: white;"
+        "border: 2px solid white;"
+        "border-radius: 4px;"
+        "padding: 6px;"
+        "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #000000, stop: 0.3 #505050, stop: 1 #000000);");
 
     m_hintLabelTimer = new QTimer(this);
     m_hintLabelTimer->setSingleShot(true);
@@ -249,11 +250,11 @@ void PageView::prerender()
 
     for (int i = 1; i <= 3; ++i)
         if (PdfViewer::document()->numPages() > pages.last() + i)
-            renderPage(pages.last() + i);
+            getPage(pages.last() + i);
 
     for (int i = 1; i <= 3; ++i)
         if (pages.first() - i >= 0)
-            renderPage(pages.first() - i);
+            getPage(pages.first() - i);
 }
 
 void PageView::updateCurrentPage()
@@ -845,9 +846,8 @@ void PageView::slotCopyRequested(int page, const QRect &viewportRect)
         clipboard->setText(text, QClipboard::Selection);
 
         text.replace("\n", "<br>");
-        showHint("<b>Text copied:</b><br>"+text);
-    }
-    else
+        showHint("<b>Text copied:</b><br>" + text);
+    } else
         showHint(QString());
 }
 
@@ -940,44 +940,35 @@ void PageView::updateViewSize(qreal zoom)
 
 QImage PageView::getPage(int pageNumber)
 {
-    /**
-     * check and create cached image
-     */
-    if (QImage *cachedPage = renderPage(pageNumber))
-        return *cachedPage;
-
-    /**
-     * else: empty image, if no page there
-     */
-    return QImage();
-}
-
-QImage *PageView::renderPage(int pageNumber)
-{
     QMutexLocker locker(m_mutex);
     /**
      * prefer cached image
      */
     if (QImage *cachedPage = m_imageCache.object(pageNumber))
-        return cachedPage;
+        return *cachedPage;
 
     /**
      * try to get poppler page => render
      */
     if (Poppler::Page *page = PdfViewer::document()->page(pageNumber)) {
+        locker.unlock();
+
         /**
          * we render in too high resolution and then set the right ratio
          */
         QImage *cachedPage = new QImage(page->renderToImage(resX() * devicePixelRatio(), resY() * devicePixelRatio(), -1, -1, -1, -1, Poppler::Page::Rotate0));
         cachedPage->setDevicePixelRatio(devicePixelRatio());
+
+        locker.relock();
+
         m_imageCache.insert(pageNumber, cachedPage);
-        return cachedPage;
+        return *cachedPage;
     }
 
     /**
-     * else null pointer
+     * else return empty image
      */
-    return nullptr;
+    return QImage();
 }
 
 QSize PageView::sizeHint() const
