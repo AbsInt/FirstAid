@@ -125,6 +125,21 @@ PageView::PageView(QWidget *parent)
     new QShortcut(QKeySequence::Back, this, SLOT(historyPrev()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::Forward, this, SLOT(historyNext()), nullptr, Qt::ApplicationShortcut);
 
+    // prepare hint label
+    m_hintLabel = new QLabel(viewport());
+    m_hintLabel->move(5, 5);
+    m_hintLabel->hide();
+
+    m_hintLabel->setStyleSheet("color: white;"
+                               "border: 2px solid white;"
+                               "border-radius: 4px;"
+                               "padding: 6px;"
+                               "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #000000, stop: 0.3 #505050, stop: 1 #000000);");
+
+    m_hintLabelTimer = new QTimer(this);
+    m_hintLabelTimer->setSingleShot(true);
+    connect(m_hintLabelTimer, &QTimer::timeout, m_hintLabel, &QLabel::hide);
+
     /**
      * delays updateViewSize
      * delay it by 100 mseconds e.g. during resizing
@@ -466,6 +481,9 @@ void PageView::mousePressEvent(QMouseEvent *event)
         m_rubberBandOrigin = qMakePair(page, event->pos());
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
         m_rubberBand->show();
+
+        showHint("<b>Drag to copy text in selection...<b>", 0);
+
         return;
     }
 
@@ -564,6 +582,21 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
         m_rubberBandOrigin = qMakePair(-1, QPoint(0, 0));
         m_rubberBand->hide();
     }
+}
+
+void PageView::showHint(const QString &text, int timeout)
+{
+    if (text.isEmpty())
+        m_hintLabel->hide();
+
+    m_hintLabel->setText(text);
+    m_hintLabel->adjustSize();
+    m_hintLabel->show();
+
+    m_hintLabelTimer->stop();
+
+    if (timeout)
+        m_hintLabelTimer->start(timeout);
 }
 
 /*
@@ -810,7 +843,12 @@ void PageView::slotCopyRequested(int page, const QRect &viewportRect)
         QClipboard *clipboard = QGuiApplication::clipboard();
         clipboard->setText(text, QClipboard::Clipboard);
         clipboard->setText(text, QClipboard::Selection);
+
+        text.replace("\n", "<br>");
+        showHint("<b>Text copied:</b><br>"+text);
     }
+    else
+        showHint(QString());
 }
 
 void PageView::slotFindStarted()

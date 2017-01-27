@@ -35,6 +35,7 @@ class QMutex;
 #include "document.h"
 #include "historystack.h"
 
+class QLabel;
 class QRubberBand;
 class QVariantAnimation;
 
@@ -114,6 +115,8 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *wheelEvent) override;
+
+    void showHint(const QString &text, int timeout=3000);
 
 private slots:
 
@@ -322,4 +325,10 @@ private:
     int m_highlightValue = 0;
 
     QMutex *m_mutex;
+
+    /**
+     * a hint label displayed for small help texts
+     */
+    QLabel *m_hintLabel = nullptr;
+    QTimer *m_hintLabelTimer = nullptr;
 };
