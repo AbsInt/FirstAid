@@ -243,6 +243,13 @@ private:
      */
     QImage getPage(int page);
 
+    /**
+     * @brief renderPage
+     * for internal usage to prerender page if returned copy of the image is not needed.
+     * returned pointer may be deleted at any time by the cache
+     */
+    QImage *renderPage(int pageNumber);
+
 signals:
     void pageChanged(int page);
     void pageRequested(int page);

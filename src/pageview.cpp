@@ -232,14 +232,13 @@ void PageView::prerender()
     if (pages.isEmpty())
         return;
 
-    if (PdfViewer::document()->numPages() > pages.last() + 1)
-        getPage(pages.last() + 1);
-    if (PdfViewer::document()->numPages() > pages.last() + 2)
-        getPage(pages.last() + 2);
-    if (pages.first() > 0)
-        getPage(pages.first() - 1);
-    if (pages.first() - 1 > 0)
-        getPage(pages.first() - 2);
+    for (int i = 1; i <= 3; ++i)
+        if (PdfViewer::document()->numPages() > pages.last() + i)
+            renderPage(pages.last() + i);
+
+    for (int i = 1; i <= 3; ++i)
+        if (pages.first() - i >= 0)
+            renderPage(pages.first() - i);
 }
 
 void PageView::updateCurrentPage()
@@ -903,12 +902,26 @@ void PageView::updateViewSize(qreal zoom)
 
 QImage PageView::getPage(int pageNumber)
 {
+    /**
+     * check and create cached image
+     */
+    if (QImage *cachedPage = renderPage(pageNumber))
+        return *cachedPage;
+
+    /**
+     * else: empty image, if no page there
+     */
+    return QImage();
+}
+
+QImage *PageView::renderPage(int pageNumber)
+{
     QMutexLocker locker(m_mutex);
     /**
      * prefer cached image
      */
     if (QImage *cachedPage = m_imageCache.object(pageNumber))
-        return *cachedPage;
+        return cachedPage;
 
     /**
      * try to get poppler page => render
@@ -920,13 +933,13 @@ QImage PageView::getPage(int pageNumber)
         QImage *cachedPage = new QImage(page->renderToImage(resX() * devicePixelRatio(), resY() * devicePixelRatio(), -1, -1, -1, -1, Poppler::Page::Rotate0));
         cachedPage->setDevicePixelRatio(devicePixelRatio());
         m_imageCache.insert(pageNumber, cachedPage);
-        return *cachedPage;
+        return cachedPage;
     }
 
     /**
-     * else: empty image, if no page there
+     * else null pointer
      */
-    return QImage();
+    return nullptr;
 }
 
 QSize PageView::sizeHint() const
