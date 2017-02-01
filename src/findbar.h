@@ -47,6 +47,7 @@ private slots:
     void slotFindDone();
     void slotResetStyle();
     void slotUpdateStatus();
+    void slotReturnPressed();
 
 private:
     QLineEdit *m_findEdit = nullptr;

@@ -43,7 +43,7 @@ FindBar::FindBar(QWidget *parent)
     m_findEdit = new QLineEdit(this);
     m_findEdit->setPlaceholderText(tr("Find"));
     m_findEdit->setClearButtonEnabled(true);
-    connect(m_findEdit, SIGNAL(returnPressed()), PdfViewer::searchEngine(), SLOT(nextMatch()));
+    connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotReturnPressed()));
     connect(m_findEdit, SIGNAL(textChanged(QString)), SLOT(slotResetStyle()));
     hbl->addWidget(m_findEdit);
 
@@ -98,7 +98,7 @@ FindBar::FindBar(QWidget *parent)
 
     m_findStartTimer = new QTimer(this);
     m_findStartTimer->setSingleShot(true);
-    m_findStartTimer->setInterval(500);
+    m_findStartTimer->setInterval(1000);
     connect(m_findStartTimer, SIGNAL(timeout()), SLOT(slotFind()));
     connect(m_findEdit, SIGNAL(textChanged(QString)), m_findStartTimer, SLOT(start()));
 
@@ -126,8 +126,12 @@ void FindBar::slotDocumentChanged()
 void FindBar::slotFindActionTriggered()
 {
     show();
+
     m_findEdit->setFocus();
     m_findEdit->selectAll();
+
+    if (!m_findEdit->text().isEmpty())
+        slotFind();
 }
 
 void FindBar::slotFind()
@@ -180,4 +184,12 @@ void FindBar::slotUpdateStatus()
     m_statusLabel->setText(QString("%1 of %2").arg(index).arg(count));
     m_nextMatch->setEnabled(count > 1);
     m_prevMatch->setEnabled(count > 1);
+}
+
+void FindBar::slotReturnPressed()
+{
+    if (m_findStartTimer->isActive())
+        slotFind();
+    else
+        PdfViewer::searchEngine()->nextMatch();
 }

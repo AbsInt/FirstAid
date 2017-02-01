@@ -110,16 +110,6 @@ void SearchEngine::find(const QString &text, bool caseSensitive, bool wholeWords
     if (wholeWords)
         flags |= Poppler::Page::WholeWords;
 
-    // continue search if neither text nor flags changed
-    if (text == m_findText && flags == m_findFlags) {
-        if (QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
-            previousMatch();
-        else
-            nextMatch();
-
-        return;
-    }
-
     m_matchesForPage.clear();
     m_currentMatchPage = 0;
     m_currentMatchPageIndex = 0;
