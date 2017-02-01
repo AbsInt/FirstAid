@@ -739,14 +739,18 @@ void PageView::stepBack()
     QRect visibleRect = QRect(offset(), viewport()->size());
 
     if (visibleRect.top() <= pageRect.top()) {
-        // special handling here: we have to go the end of the previous page...
-        if (m_currentPage > 0) {
-            int xOffset = offset().x() - pageRect.x();
+        if (pageRect.height() <= visibleRect.height())
+            gotoPreviousPage();
+        else {
+            // special handling here: we have to go the end of the previous page...
+            if (m_currentPage > 0) {
+                int xOffset = offset().x() - pageRect.x();
 
-            pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage - 1));
-            int yOffset = qMax(0, pageRect.bottom() - viewport()->height() + 1);
-            xOffset += pageRect.x();
-            setOffset(QPoint(xOffset, yOffset));
+                pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage - 1));
+                int yOffset = qMax(0, pageRect.bottom() - viewport()->height() + 1);
+                xOffset += pageRect.x();
+                setOffset(QPoint(xOffset, yOffset));
+            }
         }
     } else
         setOffset(QPoint(offset().x(), offset().y() - qMin(viewport()->height(), visibleRect.top() - pageRect.top())));
@@ -761,7 +765,7 @@ void PageView::advance()
     QRect pageRect = fromPoints(PdfViewer::document()->pageRect(m_currentPage));
     QRect visibleRect = QRect(offset(), viewport()->size());
 
-    if (visibleRect.bottom() >= pageRect.bottom()) {
+    if (visibleRect.bottom() >= pageRect.bottom() - 1) {
         if (m_currentPage < PdfViewer::document()->numPages() - 1)
             gotoNextPage();
     } else
