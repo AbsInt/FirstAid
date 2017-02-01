@@ -22,10 +22,12 @@
 
 #include <poppler-qt5.h>
 
-#include <QDebug>
 #include <QHeaderView>
+#include <QLineEdit>
+#include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <QTreeView>
+#include <QVBoxLayout>
 
 TocDock::TocDock(QWidget *parent)
     : QDockWidget(parent)
@@ -39,15 +41,28 @@ TocDock::TocDock(QWidget *parent)
 
     m_model = new QStandardItemModel(this);
 
+    m_proxyModel = new QSortFilterProxyModel(this);
+    m_proxyModel->setSourceModel(m_model);
+
+    QWidget *container = new QWidget(this);
+    QVBoxLayout *vbl = new QVBoxLayout(container);
+    vbl->setContentsMargins(0, 0, 0, 0);
+    setWidget(container);
+
     m_tree = new QTreeView(this);
     m_tree->setAlternatingRowColors(true);
     m_tree->header()->hide();
     m_tree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    vbl->addWidget(m_tree);
 
-    setWidget(m_tree);
+    m_filter = new QLineEdit(this);
+    m_filter->setPlaceholderText("Filter");
+    m_filter->setClearButtonEnabled(true);
+    vbl->addWidget(m_filter);
 
     connect(this, SIGNAL(visibilityChanged(bool)), SLOT(visibilityChanged(bool)));
     connect(m_tree, SIGNAL(clicked(QModelIndex)), SLOT(indexClicked(QModelIndex)));
+    connect(m_filter, SIGNAL(textChanged(QString)), SLOT(filterChanged(QString)));
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(documentChanged()));
     connect(PdfViewer::view(), SIGNAL(pageChanged(int)), SLOT(pageChanged(int)));
@@ -64,7 +79,7 @@ void TocDock::fillInfo()
         QSet<QModelIndex> openIndices = fillToc(*toc);
 
         // inform tree about new model
-        m_tree->setModel(m_model);
+        m_tree->setModel(m_proxyModel);
         m_tree->header()->setStretchLastSection(false);
         m_tree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
         m_tree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -143,7 +158,9 @@ void TocDock::documentChanged()
 {
     // reset old data
     m_model->clear();
+    m_proxyModel->setFilterRegExp(QRegExp());
     m_tree->setModel(nullptr);
+    m_filter->clear();
     m_pageToIndexMap.clear();
     m_markedIndex = QModelIndex();
     m_filled = false;
@@ -204,4 +221,9 @@ void TocDock::indexClicked(const QModelIndex &index)
     QString dest = firstColumnIndex.data(Qt::UserRole).toString();
     if (!dest.isEmpty())
         PdfViewer::view()->gotoDestination(dest);
+}
+
+void TocDock::filterChanged(const QString &text)
+{
+    m_proxyModel->setFilterRegExp(text);
 }

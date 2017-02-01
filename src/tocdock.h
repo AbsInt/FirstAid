@@ -24,6 +24,8 @@
 #include <QModelIndex>
 
 class QDomNode;
+class QLineEdit;
+class QSortFilterProxyModel;
 class QStandardItem;
 class QStandardItemModel;
 class QTreeView;
@@ -48,11 +50,14 @@ protected slots:
     void pageChanged(int page);
     void visibilityChanged(bool visible);
     void indexClicked(const QModelIndex &index);
+    void filterChanged(const QString &text);
 
 private:
     bool m_filled = false;
     QStandardItemModel *m_model;
+    QSortFilterProxyModel *m_proxyModel;
     QTreeView *m_tree = nullptr;
+    QLineEdit *m_filter = nullptr;
     QHash<int, QModelIndex> m_pageToIndexMap;
     QModelIndex m_markedIndex;
 };
