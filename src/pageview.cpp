@@ -693,9 +693,11 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     toBeVisibleInPixel.adjust(0, -1, 0, 0);
 
     /**
-     * set the new offset
+     * set the new offset - only if needed
      */
-    setOffset(toBeVisibleInPixel.topLeft());
+    QRect visibleRect = QRect(offset(), viewport()->size());
+    if (!visibleRect.contains(toBeVisibleInPixel))
+        setOffset(toBeVisibleInPixel.topLeft());
 
     /**
      * trigger repaint in any case
