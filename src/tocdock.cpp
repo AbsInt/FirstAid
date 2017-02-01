@@ -24,7 +24,8 @@
 
 #include <QDebug>
 #include <QHeaderView>
-#include <QTreeWidget>
+#include <QStandardItemModel>
+#include <QTreeView>
 
 TocDock::TocDock(QWidget *parent)
     : QDockWidget(parent)
@@ -36,19 +37,17 @@ TocDock::TocDock(QWidget *parent)
     // for state saving
     setObjectName("toc_info_dock");
 
-    m_tree = new QTreeWidget(this);
+    m_model = new QStandardItemModel(this);
+
+    m_tree = new QTreeView(this);
     m_tree->setAlternatingRowColors(true);
-    m_tree->setColumnCount(2);
     m_tree->header()->hide();
-    m_tree->header()->setStretchLastSection(false);
-    m_tree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    m_tree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     m_tree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     setWidget(m_tree);
 
     connect(this, SIGNAL(visibilityChanged(bool)), SLOT(visibilityChanged(bool)));
-    connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), SLOT(itemClicked(QTreeWidgetItem *, int)));
+    connect(m_tree, SIGNAL(clicked(QModelIndex)), SLOT(indexClicked(QModelIndex)));
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(documentChanged()));
     connect(PdfViewer::view(), SIGNAL(pageChanged(int)), SLOT(pageChanged(int)));
@@ -62,30 +61,35 @@ TocDock::~TocDock()
 void TocDock::fillInfo()
 {
     if (const QDomDocument *toc = PdfViewer::document()->toc()) {
-        fillToc(*toc, m_tree, 0);
-        return;
-    }
+        QSet<QModelIndex> openIndices = fillToc(*toc);
 
-    // tell we found no toc
-    QTreeWidgetItem *item = new QTreeWidgetItem();
-    item->setText(0, tr("No table of contents available."));
-    item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-    m_tree->addTopLevelItem(item);
+        // inform tree about new model
+        m_tree->setModel(m_model);
+        m_tree->header()->setStretchLastSection(false);
+        m_tree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+        m_tree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+
+        // expand open indices
+        foreach (QModelIndex index, openIndices)
+            m_tree->setExpanded(index, true);
+    } else {
+        // tell we found no toc
+        QStandardItem *item = new QStandardItem(tr("No table of contents available."));
+        item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+        m_model->appendRow(item);
+        m_tree->setModel(m_model);
+    }
 }
 
-void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
+QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parentItem)
 {
-    QTreeWidgetItem *newitem = nullptr;
+    QSet<QModelIndex> openIndices;
+
     for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
         QDomElement e = node.toElement();
 
-        if (!parentItem)
-            newitem = new QTreeWidgetItem(tree, newitem);
-        else
-            newitem = new QTreeWidgetItem(parentItem, newitem);
-
         // tag name == link name, strange enough
-        newitem->setText(0, e.tagName());
+        QStandardItem *labelItem = new QStandardItem(e.tagName());
 
         /**
          * use raw string for destination or convert the named one
@@ -105,25 +109,30 @@ void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem
             pageNumber = link.pageNumber();
 
             // remember link string representation
-            newitem->setData(0, Qt::UserRole, link.toString());
+            labelItem->setData(link.toString(), Qt::UserRole);
         }
 
-        newitem->setText(1, QString::number(pageNumber));
-        newitem->setData(1, Qt::TextAlignmentRole, Qt::AlignRight);
+        QStandardItem *pageItem = new QStandardItem(QString::number(pageNumber));
+        pageItem->setData(Qt::AlignRight, Qt::TextAlignmentRole);
 
-        if (!m_pageToItemMap.contains(pageNumber))
-            m_pageToItemMap.insert(pageNumber, newitem);
+        if (!parentItem)
+            m_model->appendRow(QList<QStandardItem *>() << labelItem << pageItem);
+        else
+            parentItem->appendRow(QList<QStandardItem *>() << labelItem << pageItem);
 
-        bool isOpen = false;
-        if (e.hasAttribute(QString::fromLatin1("Open")))
-            isOpen = QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
+        if (!m_pageToIndexMap.contains(pageNumber))
+            m_pageToIndexMap.insert(pageNumber, labelItem->index());
 
-        if (isOpen)
-            tree->expandItem(newitem);
+        if (e.hasAttribute(QString::fromLatin1("Open"))) {
+            if (QVariant(e.attribute(QString::fromLatin1("Open"))).toBool())
+                openIndices << labelItem->index();
+        }
 
         if (e.hasChildNodes())
-            fillToc(node, tree, newitem);
+            openIndices += fillToc(node, labelItem);
     }
+
+    return openIndices;
 }
 
 /*
@@ -133,9 +142,10 @@ void TocDock::fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem
 void TocDock::documentChanged()
 {
     // reset old data
-    m_tree->clear();
-    m_pageToItemMap.clear();
-    m_markedItem = nullptr;
+    m_model->clear();
+    m_tree->setModel(nullptr);
+    m_pageToIndexMap.clear();
+    m_markedIndex = QModelIndex();
     m_filled = false;
 
     // try to fill toc if visible
@@ -147,39 +157,35 @@ void TocDock::documentChanged()
 
 void TocDock::pageChanged(int page)
 {
-    if (m_markedItem) {
-        m_markedItem->setData(0, Qt::FontRole, QVariant());
-        m_markedItem->setData(1, Qt::FontRole, QVariant());
-
-        while (m_markedItem) {
-            m_markedItem->setData(0, Qt::FontRole, QVariant());
-            m_markedItem->setData(1, Qt::FontRole, QVariant());
-            m_markedItem = m_markedItem->parent();
-        }
+    while (m_markedIndex.isValid()) {
+        m_model->setData(m_markedIndex, QVariant(), Qt::FontRole);
+        m_model->setData(m_markedIndex, QVariant(), Qt::FontRole);
+        m_markedIndex = m_markedIndex.parent();
     }
 
     // init new marked item
-    m_markedItem = m_pageToItemMap.value(1 + page);
+    m_markedIndex = m_pageToIndexMap.value(1 + page);
 
     // special test for double page layout: if left page is not in toc check right page first
-    if (!m_markedItem && PdfViewer::document()->doubleSided() && page > 0 && (page % 2) == 1)
-        m_markedItem = m_pageToItemMap.value(2 + page);
+    if (!m_markedIndex.isValid() && PdfViewer::document()->doubleSided() && page > 0 && (page % 2) == 1)
+        m_markedIndex = m_pageToIndexMap.value(2 + page);
 
     // still no item found? check previous pages
-    while (!m_markedItem && page >= 0)
-        m_markedItem = m_pageToItemMap.value(1 + page--);
+    while (!m_markedIndex.isValid() && page >= 0)
+        m_markedIndex = m_pageToIndexMap.value(1 + page--);
 
-    if (m_markedItem) {
+    if (m_markedIndex.isValid()) {
         QFont font = m_tree->font();
         font.setBold(true);
-        m_markedItem->setData(0, Qt::FontRole, font);
-        m_markedItem->setData(1, Qt::FontRole, font);
 
-        QTreeWidgetItem *item = m_markedItem;
-        while (item) {
-            item->setData(0, Qt::FontRole, font);
-            item->setData(1, Qt::FontRole, font);
-            item = item->parent();
+        m_model->setData(m_markedIndex, font, Qt::FontRole);
+        m_model->setData(m_markedIndex, font, Qt::FontRole);
+
+        QModelIndex index = m_markedIndex.parent();
+        while (index.isValid()) {
+            m_model->setData(index, font, Qt::FontRole);
+            m_model->setData(index, font, Qt::FontRole);
+            index = index.parent();
         }
     }
 }
@@ -192,12 +198,10 @@ void TocDock::visibilityChanged(bool visible)
     }
 }
 
-void TocDock::itemClicked(QTreeWidgetItem *item, int)
+void TocDock::indexClicked(const QModelIndex &index)
 {
-    if (!item)
-        return;
-
-    QString dest = item->data(0, Qt::UserRole).toString();
+    QModelIndex firstColumnIndex = index.sibling(index.row(), 0);
+    QString dest = firstColumnIndex.data(Qt::UserRole).toString();
     if (!dest.isEmpty())
         PdfViewer::view()->gotoDestination(dest);
 }

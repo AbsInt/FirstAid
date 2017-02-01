@@ -21,10 +21,12 @@
 
 #include <QDockWidget>
 #include <QHash>
+#include <QModelIndex>
 
 class QDomNode;
-class QTreeWidget;
-class QTreeWidgetItem;
+class QStandardItem;
+class QStandardItemModel;
+class QTreeView;
 
 class TocDock : public QDockWidget
 {
@@ -39,17 +41,18 @@ signals:
 
 protected:
     void fillInfo();
-    void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem);
+    QSet<QModelIndex> fillToc(const QDomNode &parent, QStandardItem *parentItem = nullptr);
 
 protected slots:
     void documentChanged();
     void pageChanged(int page);
     void visibilityChanged(bool visible);
-    void itemClicked(QTreeWidgetItem *item, int column);
+    void indexClicked(const QModelIndex &index);
 
 private:
     bool m_filled = false;
-    QTreeWidget *m_tree = nullptr;
-    QHash<int, QTreeWidgetItem *> m_pageToItemMap;
-    QTreeWidgetItem *m_markedItem = nullptr;
+    QStandardItemModel *m_model;
+    QTreeView *m_tree = nullptr;
+    QHash<int, QModelIndex> m_pageToIndexMap;
+    QModelIndex m_markedIndex;
 };
