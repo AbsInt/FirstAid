@@ -50,6 +50,24 @@ public:
 public:
     enum ZoomMode { FitWidth, FitPage, Absolute };
 
+    /**
+     * Color for search matches.
+     * @return search match color
+     */
+    static QColor matchColor()
+    {
+        return QColor(255, 255, 0, 64);
+    }
+
+    /**
+     * Color for currently highlighted search match.
+     * @return highlighed search match color
+     */
+    static QColor highlightColor()
+    {
+        return QColor(255, 128, 0, 128);
+    }
+
     QPoint offset() const;
     int currentPage() const;
 
@@ -133,24 +151,6 @@ private slots:
     void prerender();
 
 private:
-    /**
-     * Color for search matches.
-     * @return search match color
-     */
-    static QColor matchColor()
-    {
-        return QColor(255, 255, 0, 64);
-    }
-
-    /**
-     * Color for currently highlighted search match.
-     * @return highlighed search match color
-     */
-    static QColor highlightColor()
-    {
-        return QColor(255, 128, 0, 128);
-    }
-
     /**
      * Update viewport dimensions after:
      *  - document change

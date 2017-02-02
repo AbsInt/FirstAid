@@ -18,6 +18,7 @@
  */
 
 #include "tocdock.h"
+#include "pageview.h"
 #include "viewer.h"
 
 #include <poppler-qt5.h>
@@ -33,6 +34,25 @@
 #define FilterRole (Qt::UserRole + 2)
 #define UnicodeOr QChar(0x22c1)
 
+class MySortFilterProxyModel : public QSortFilterProxyModel
+{
+public:
+    MySortFilterProxyModel(QObject *parent)
+        : QSortFilterProxyModel(parent)
+    {
+    }
+
+    QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
+    {
+        if (Qt::BackgroundRole == role && !filterRegExp().isEmpty()) {
+            if (-1 != filterRegExp().indexIn(proxyIndex.data().toString()))
+                return QVariant::fromValue(PageView::matchColor());
+        }
+
+        return QSortFilterProxyModel::data(proxyIndex, role);
+    }
+};
+
 TocDock::TocDock(QWidget *parent)
     : QDockWidget(parent)
 {
@@ -45,7 +65,7 @@ TocDock::TocDock(QWidget *parent)
 
     m_model = new QStandardItemModel(this);
 
-    m_proxyModel = new QSortFilterProxyModel(this);
+    m_proxyModel = new MySortFilterProxyModel(this);
     m_proxyModel->setSourceModel(m_model);
     m_proxyModel->setFilterRole(FilterRole);
 
