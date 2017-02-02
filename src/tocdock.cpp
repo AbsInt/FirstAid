@@ -29,6 +29,10 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 
+#define DestinationRole (Qt::UserRole + 1)
+#define FilterRole (Qt::UserRole + 2)
+#define UnicodeOr QChar(0x22c1)
+
 TocDock::TocDock(QWidget *parent)
     : QDockWidget(parent)
 {
@@ -43,6 +47,7 @@ TocDock::TocDock(QWidget *parent)
 
     m_proxyModel = new QSortFilterProxyModel(this);
     m_proxyModel->setSourceModel(m_model);
+    m_proxyModel->setFilterRole(FilterRole);
 
     QWidget *container = new QWidget(this);
     QVBoxLayout *vbl = new QVBoxLayout(container);
@@ -124,7 +129,7 @@ QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parent
             pageNumber = link.pageNumber();
 
             // remember link string representation
-            labelItem->setData(link.toString(), Qt::UserRole);
+            labelItem->setData(link.toString(), DestinationRole);
         }
 
         QStandardItem *pageItem = new QStandardItem(QString::number(pageNumber));
@@ -145,6 +150,15 @@ QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parent
 
         if (e.hasChildNodes())
             openIndices += fillToc(node, labelItem);
+
+        // adjust filter role
+        QStringList filterRoles;
+        for (int c = 0; c < labelItem->rowCount(); c++)
+            filterRoles << labelItem->child(c, 0)->data(FilterRole).toString();
+
+        filterRoles.prepend(labelItem->text());
+
+        labelItem->setData(filterRoles.join(UnicodeOr), FilterRole);
     }
 
     return openIndices;
@@ -218,12 +232,12 @@ void TocDock::visibilityChanged(bool visible)
 void TocDock::indexClicked(const QModelIndex &index)
 {
     QModelIndex firstColumnIndex = index.sibling(index.row(), 0);
-    QString dest = firstColumnIndex.data(Qt::UserRole).toString();
+    QString dest = firstColumnIndex.data(DestinationRole).toString();
     if (!dest.isEmpty())
         PdfViewer::view()->gotoDestination(dest);
 }
 
 void TocDock::filterChanged(const QString &text)
 {
-    m_proxyModel->setFilterRegExp(text);
+    m_proxyModel->setFilterRegExp(QRegExp(text, Qt::CaseInsensitive));
 }
