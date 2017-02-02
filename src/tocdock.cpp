@@ -91,7 +91,7 @@ void TocDock::fillInfo()
 
         // expand open indices
         foreach (QModelIndex index, openIndices)
-            m_tree->setExpanded(index, true);
+            m_tree->setExpanded(m_proxyModel->mapFromSource(index), true);
     } else {
         // tell we found no toc
         QStandardItem *item = new QStandardItem(tr("No table of contents available."));
