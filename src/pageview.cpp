@@ -60,6 +60,7 @@
 #include <QScroller>
 #include <QShortcut>
 #include <QVariantAnimation>
+#include <QWhatsThis>
 
 /*
  * constructors / destructor
@@ -501,37 +502,44 @@ void PageView::mousePressEvent(QMouseEvent *event)
                 m_mousePressPage = page;
                 m_mousePressPageRect = QRectF(pageRect.width() * l->boundary().left(), pageRect.height() * l->boundary().top(), pageRect.width() * l->boundary().width(), pageRect.height() * l->boundary().height());
 
-                Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l)->linkDestination();
-                switch (link->linkType()) {
-                    case Poppler::Link::Goto: {
-                        Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
-                        m_mousePressLinkPage = gotoLink.pageNumber() - 1;
+                if (Poppler::Annotation::ALink == l->subType()) {
+                    Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l)->linkDestination();
+                    switch (link->linkType()) {
+                        case Poppler::Link::Goto: {
+                            Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
+                            m_mousePressLinkPage = gotoLink.pageNumber() - 1;
 
-                        m_mousePressLinkPageRect = QRectF();
-                        if (gotoLink.left() > 0) {
-                            m_mousePressLinkPageRect.setLeft(gotoLink.left() * pageRect.width());
-                            m_mousePressLinkPageRect.setRight(1 + gotoLink.left() * pageRect.width());
-                        }
-                        if (gotoLink.top() > 0) {
-                            m_mousePressLinkPageRect.setTop(gotoLink.top() * pageRect.height());
-                            m_mousePressLinkPageRect.setBottom(1 + gotoLink.top() * pageRect.height());
-                        }
-                        if (gotoLink.right() > 0)
-                            m_mousePressLinkPageRect.setRight(gotoLink.right() * pageRect.width());
-                        if (gotoLink.bottom() > 0 && gotoLink.bottom() < 1.0)
-                            m_mousePressLinkPageRect.setBottom(gotoLink.bottom() * pageRect.height());
+                            m_mousePressLinkPageRect = QRectF();
+                            if (gotoLink.left() > 0) {
+                                m_mousePressLinkPageRect.setLeft(gotoLink.left() * pageRect.width());
+                                m_mousePressLinkPageRect.setRight(1 + gotoLink.left() * pageRect.width());
+                            }
+                            if (gotoLink.top() > 0) {
+                                m_mousePressLinkPageRect.setTop(gotoLink.top() * pageRect.height());
+                                m_mousePressLinkPageRect.setBottom(1 + gotoLink.top() * pageRect.height());
+                            }
+                            if (gotoLink.right() > 0)
+                                m_mousePressLinkPageRect.setRight(gotoLink.right() * pageRect.width());
+                            if (gotoLink.bottom() > 0 && gotoLink.bottom() < 1.0)
+                                m_mousePressLinkPageRect.setBottom(gotoLink.bottom() * pageRect.height());
 
-                        m_mousePressLinkPageRect = m_mousePressLinkPageRect.intersected(pageRect.translated(-pageRect.topLeft()));
-                    } break;
+                            m_mousePressLinkPageRect = m_mousePressLinkPageRect.intersected(pageRect.translated(-pageRect.topLeft()));
+                        } break;
 
-                    case Poppler::Link::Browse:
-                        m_mousePressLinkUrl = static_cast<Poppler::LinkBrowse *>(link)->url();
-                        break;
+                        case Poppler::Link::Browse:
+                            m_mousePressLinkUrl = static_cast<Poppler::LinkBrowse *>(link)->url();
+                            break;
 
-                    default:
-                        break;
+                        default:
+                            break;
+                    }
+                    break;
                 }
-                break;
+
+                else if (Poppler::Annotation::AText == l->subType()) {
+                    QWhatsThis::showText(event->globalPos(), l->contents());
+                    return;
+                }
             }
         }
     }

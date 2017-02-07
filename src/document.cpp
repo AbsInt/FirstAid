@@ -62,7 +62,7 @@ void Document::setDocument(Poppler::Document *document)
             m_pages.append(page);
 
             // extract links from the page
-            m_links.append(page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink));
+            m_links.append(page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink << Poppler::Annotation::AText));
         }
     }
 
