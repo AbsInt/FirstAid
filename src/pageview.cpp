@@ -704,8 +704,6 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     QRect visibleRect = QRect(offset(), viewport()->size());
     if (!visibleRect.contains(toBeVisibleInPixel))
         setOffset(toBeVisibleInPixel.topLeft());
-    else
-        qDebug("already visible");
 
     /**
      * trigger repaint in any case
