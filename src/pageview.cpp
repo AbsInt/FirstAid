@@ -536,7 +536,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
                     break;
                 }
 
-                else if (Poppler::Annotation::AText == l->subType()) {
+                else if (Poppler::Annotation::AText == l->subType() || Poppler::Annotation::ACaret == l->subType()) {
                     QWhatsThis::showText(event->globalPos(), l->contents());
                     return;
                 }
