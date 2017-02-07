@@ -621,9 +621,12 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     /**
      * create a working copy of the rectToBeVisibleInPoints
      */
-    QRectF adjustedRectToBeVisibleInPoints = rectToBeVisibleInPoints;
-    adjustedRectToBeVisibleInPoints.setLeft(0);
-    adjustedRectToBeVisibleInPoints.setRight(pageRectInPoints.width());
+    QRectF adjustedRectToBeVisibleInPoints;
+    if (!rectToBeVisibleInPoints.isNull()) {
+        adjustedRectToBeVisibleInPoints = rectToBeVisibleInPoints;
+        adjustedRectToBeVisibleInPoints.setLeft(0);
+        adjustedRectToBeVisibleInPoints.setRight(pageRectInPoints.width());
+    }
 
     /**
      * if needed visualize link destination
@@ -660,32 +663,35 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     /**
      * transform the adjustedRectToBeVisibleInPoints first to pixel
      */
-    QRect toBeVisibleInPixel = fromPoints(adjustedRectToBeVisibleInPoints);
+    QRect toBeVisibleInPixel;
+    if (!adjustedRectToBeVisibleInPoints.isNull()) {
+        toBeVisibleInPixel = fromPoints(adjustedRectToBeVisibleInPoints);
 
-    /**
-     * do not change x value (scroll to 0) if not given (use old value)
-     */
-    bool scrollXValue = PdfViewer::document()->doubleSided() || (toBeVisibleInPixel.x() != 0);
+        /**
+         * do not change x value (scroll to 0) if not given (use old value)
+         */
+        bool scrollXValue = PdfViewer::document()->doubleSided() || (toBeVisibleInPixel.x() != 0);
 
-    /**
-     * move it to the page
-     */
-    toBeVisibleInPixel.translate(pageRectInPixel.topLeft());
+        /**
+         * move it to the page
+         */
+        toBeVisibleInPixel.translate(pageRectInPixel.topLeft());
 
-    /**
-     * add some margin (don't do that if x value should not be changed)
-     */
-    const int marginToBeSeen = 100;
-    QMargins m = QMargins(scrollXValue ? marginToBeSeen : 0, marginToBeSeen, scrollXValue ? marginToBeSeen : 1, marginToBeSeen);
-    toBeVisibleInPixel = toBeVisibleInPixel.marginsAdded(m);
+        /**
+         * add some margin (don't do that if x value should not be changed)
+         */
+        const int marginToBeSeen = 100;
+        QMargins m = QMargins(scrollXValue ? marginToBeSeen : 0, marginToBeSeen, scrollXValue ? marginToBeSeen : 1, marginToBeSeen);
+        toBeVisibleInPixel = toBeVisibleInPixel.marginsAdded(m);
 
-    if (!scrollXValue && offset().x() > toBeVisibleInPixel.x())
-        toBeVisibleInPixel.moveLeft(offset().x());
+        if (!scrollXValue && offset().x() > toBeVisibleInPixel.x())
+            toBeVisibleInPixel.moveLeft(offset().x());
 
-    /**
-     * finally it is clipped with page rectangle to not end in the void
-     */
-    toBeVisibleInPixel = toBeVisibleInPixel.intersected(pageRectInPixel);
+        /**
+         * finally it is clipped with page rectangle to not end in the void
+         */
+        toBeVisibleInPixel = toBeVisibleInPixel.intersected(pageRectInPixel);
+    }
 
     if (toBeVisibleInPixel.isEmpty())
         toBeVisibleInPixel = pageRectInPixel;
@@ -698,6 +704,8 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     QRect visibleRect = QRect(offset(), viewport()->size());
     if (!visibleRect.contains(toBeVisibleInPixel))
         setOffset(toBeVisibleInPixel.topLeft());
+    else
+        qDebug("already visible");
 
     /**
      * trigger repaint in any case
