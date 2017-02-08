@@ -254,9 +254,11 @@ void PdfViewer::processCommand(const QString &command)
             m_view->gotoPage(pageNumber);
         else {
             foreach (QString t, target.split(",", QString::SkipEmptyParts)) {
-                Poppler::LinkDestination *linkDest = (document()->linkDestination(t));
-                bool valid = linkDest->pageNumber() > 0;
-                delete linkDest;
+                bool valid = false;
+                if (Poppler::LinkDestination *linkDest = (document()->linkDestination(t))) {
+                    valid = linkDest->pageNumber() > 0;
+                    delete linkDest;
+                }
 
                 if (valid) {
                     m_view->gotoDestinationName(t, true, false);
