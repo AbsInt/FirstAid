@@ -251,7 +251,7 @@ void PdfViewer::processCommand(const QString &command)
         bool ok = false;
         const int pageNumber = target.toInt(&ok);
         if (ok)
-            m_view->gotoPage(pageNumber);
+            m_view->gotoPage(pageNumber - 1);
         else {
             foreach (QString t, target.split(",", QString::SkipEmptyParts)) {
                 bool valid = false;
