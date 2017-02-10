@@ -335,16 +335,22 @@ void PdfViewer::slotPrint()
     // let the user select the printer to use
     QPrinter printer(QPrinter::HighResolution);
     QPrintDialog printDialog(&printer, this);
-    if (!printDialog.exec())
+    if (!printDialog.exec()) {
+        qDebug("Failed");
         return;
+    }
 
     // determine range
     int fromPage = qMax(printer.fromPage(), 1);
     int toPage = qMin(printer.toPage(), m_document.numPages());
+    if (0 == toPage)
+        toPage = m_document.numPages();
 
     // provide some feedback
     QProgressDialog pd("Printing...", "Abort", fromPage, toPage, this);
     pd.setWindowModality(Qt::WindowModal);
+    pd.setMinimumDuration(0);
+    pd.show();
 
     // gather some information
     QRectF printerPageRect = printer.pageRect(QPrinter::DevicePixel);
@@ -353,6 +359,7 @@ void PdfViewer::slotPrint()
     QPainter painter;
     painter.begin(&printer);
     for (int pageNumber = fromPage; pageNumber <= toPage; pageNumber++) {
+        pd.setLabelText(QString("Printing page %1...").arg(pageNumber));
         pd.setValue(pageNumber);
         if (pd.wasCanceled())
             break;
@@ -370,7 +377,7 @@ void PdfViewer::slotPrint()
         QImage image = page->renderToImage(res, res);
 
         // print image
-        painter.drawImage(printerPageRect.topLeft(), image);
+        painter.drawImage(-printerPageRect.topLeft(), image);
 
         // advance page
         if (pageNumber != printer.toPage())
