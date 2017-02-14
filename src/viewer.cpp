@@ -55,6 +55,7 @@
 #include <QProcess>
 #include <QProgressDialog>
 #include <QStackedWidget>
+#include <QThreadPool>
 #include <QVBoxLayout>
 
 PdfViewer *PdfViewer::s_instance = nullptr;
@@ -225,6 +226,9 @@ void PdfViewer::closeDocument()
 {
     if (!m_document.isValid())
         return;
+
+    // drain the thread pool with the potential still running background renderers
+    QThreadPool::globalInstance()->waitForDone();
 
     QSettings settings;
     settings.beginGroup("Files");
