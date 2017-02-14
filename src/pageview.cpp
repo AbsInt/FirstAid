@@ -238,6 +238,7 @@ void PageView::slotUpdateViewSize()
 
 void PageView::slotClearImageCache()
 {
+    QMutexLocker locker(m_mutex);
     m_imageCache.clear();
     viewport()->update();
 }
