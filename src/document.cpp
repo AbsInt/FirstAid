@@ -57,8 +57,12 @@ void Document::setDocument(Poppler::Document *document)
 
         // create all poppler pages and collect links on them
         for (int i = 0; i < count; ++i) {
-            // get the page and remember it
+            // skip invalid pages
             Poppler::Page *page = m_document->page(i);
+            if (!page)
+                continue;
+
+            // remember the page
             m_pages.append(page);
 
             // extract links from the page
