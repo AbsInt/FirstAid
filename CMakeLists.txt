@@ -89,7 +89,7 @@ add_executable(firstaid ${firstaid_SRCS} ${firstaid_UI_SRCS} ${firstaid_QRC_SRCS
 if (WIN32)
     target_link_libraries(firstaid poppler-qt5.lib poppler.lib freetype.lib Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 elseif (APPLE)
-    target_link_libraries(firstaid -lpoppler-qt5 -lpoppler -lfontconfig -lfreetype -lexpat Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
+    target_link_libraries(firstaid -lpoppler-qt5 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 else()
     target_link_libraries(firstaid -lpoppler-qt5 -lpoppler Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 endif()
