@@ -61,7 +61,7 @@ TocDock::TocDock(QWidget *parent)
     setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
     // for state saving
-    setObjectName("toc_info_dock");
+    setObjectName(QStringLiteral("toc_info_dock"));
 
     m_model = new QStandardItemModel(this);
 
@@ -81,7 +81,7 @@ TocDock::TocDock(QWidget *parent)
     vbl->addWidget(m_tree);
 
     m_filter = new QLineEdit(this);
-    m_filter->setPlaceholderText("Filter");
+    m_filter->setPlaceholderText(tr("Filter"));
     m_filter->setClearButtonEnabled(true);
     vbl->addWidget(m_filter);
 
@@ -134,9 +134,9 @@ QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parent
         /**
          * use raw string for destination or convert the named one
          */
-        QString destination = e.attribute("Destination");
-        if (!e.attribute("DestinationName").isNull()) {
-            Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(e.attribute("DestinationName"));
+        QString destination = e.attribute(QStringLiteral("Destination"));
+        if (!e.attribute(QStringLiteral("DestinationName")).isNull()) {
+            Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(e.attribute(QStringLiteral("DestinationName")));
             if (link && link->pageNumber() > 0)
                 destination = link->toString();
             delete link;
@@ -163,8 +163,8 @@ QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parent
         if (!m_pageToIndexMap.contains(pageNumber))
             m_pageToIndexMap.insert(pageNumber, labelItem->index());
 
-        if (e.hasAttribute(QString::fromLatin1("Open"))) {
-            if (QVariant(e.attribute(QString::fromLatin1("Open"))).toBool())
+        if (e.hasAttribute(QStringLiteral("Open"))) {
+            if (QVariant(e.attribute(QStringLiteral("Open"))).toBool())
                 openIndices << labelItem->index();
         }
 

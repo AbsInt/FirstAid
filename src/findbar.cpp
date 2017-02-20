@@ -36,7 +36,7 @@ FindBar::FindBar(QWidget *parent)
     hbl->setContentsMargins(0, 0, 0, 0);
 
     QToolButton *tb = new QToolButton(this);
-    tb->setIcon(QIcon(":/icons/window-close.svg"));
+    tb->setIcon(QIcon(QStringLiteral(":/icons/window-close.svg")));
     connect(tb, SIGNAL(clicked()), SLOT(slotHide()));
     hbl->addWidget(tb);
 
@@ -48,31 +48,31 @@ FindBar::FindBar(QWidget *parent)
     hbl->addWidget(m_findEdit);
 
     tb = new QToolButton(this);
-    tb->setIcon(QIcon(":/icons/view-filter.svg"));
-    tb->setToolTip("Options");
+    tb->setIcon(QIcon(QStringLiteral(":/icons/view-filter.svg")));
+    tb->setToolTip(tr("Options"));
     hbl->addWidget(tb);
 
     QMenu *m = new QMenu(this);
-    m_acCaseSensitive = m->addAction("Case sensitive");
+    m_acCaseSensitive = m->addAction(tr("Case sensitive"));
     m_acCaseSensitive->setCheckable(true);
-    m_acWholeWords = m->addAction("Whole words");
+    m_acWholeWords = m->addAction(tr("Whole words"));
     m_acWholeWords->setCheckable(true);
 
     tb->setMenu(m);
     tb->setPopupMode(QToolButton::InstantPopup);
 
     m_statusLabel = new QLabel(this);
-    m_statusLabel->setText("0 of 0");
+    m_statusLabel->setText(QStringLiteral("0 of 0"));
     hbl->addWidget(m_statusLabel);
 
     m_prevMatch = new QToolButton(this);
-    m_prevMatch->setIcon(QIcon(":/icons/go-up.svg"));
-    m_prevMatch->setToolTip("Previous match");
+    m_prevMatch->setIcon(QIcon(QStringLiteral(":/icons/go-up.svg")));
+    m_prevMatch->setToolTip(tr("Previous match"));
     hbl->addWidget(m_prevMatch);
 
     m_nextMatch = new QToolButton(this);
-    m_nextMatch->setIcon(QIcon(":/icons/go-down.svg"));
-    m_nextMatch->setToolTip("Next match");
+    m_nextMatch->setIcon(QIcon(QStringLiteral(":/icons/go-down.svg")));
+    m_nextMatch->setToolTip(tr("Next match"));
     hbl->addWidget(m_nextMatch);
 
     QAction *findAction = new QAction(parent);
@@ -150,7 +150,7 @@ void FindBar::slotHide()
 
 void FindBar::slotFindProgress(qreal progress)
 {
-    m_findEdit->setStyleSheet(QString("background-color: qlineargradient(x1: %1, y1: 0, x2: %2, y2: 0, stop: 0 %3, stop: 1 %4);")
+    m_findEdit->setStyleSheet(QStringLiteral("background-color: qlineargradient(x1: %1, y1: 0, x2: %2, y2: 0, stop: 0 %3, stop: 1 %4);")
                                   .arg(qMax(0.0, progress - 0.05))
                                   .arg(progress)
                                   .arg(palette().color(QPalette::Highlight).name())
@@ -163,9 +163,9 @@ void FindBar::slotFindDone()
 
     if (isVisible()) {
         if (PdfViewer::searchEngine()->matches().isEmpty())
-            m_findEdit->setStyleSheet("background-color: #f0a0a0");
+            m_findEdit->setStyleSheet(QStringLiteral("background-color: #f0a0a0"));
         else
-            m_findEdit->setStyleSheet("background-color: #a0f0a0");
+            m_findEdit->setStyleSheet(QStringLiteral("background-color: #a0f0a0"));
 
         QTimer::singleShot(5000, this, SLOT(slotResetStyle()));
     }
@@ -181,7 +181,7 @@ void FindBar::slotUpdateStatus()
     int index = PdfViewer::searchEngine()->currentIndex();
     int count = PdfViewer::searchEngine()->matchesCount();
 
-    m_statusLabel->setText(QString("%1 of %2").arg(index).arg(count));
+    m_statusLabel->setText(QStringLiteral("%1 of %2").arg(index).arg(count));
     m_nextMatch->setEnabled(count > 1);
     m_prevMatch->setEnabled(count > 1);
 }

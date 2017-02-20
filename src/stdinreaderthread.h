@@ -63,7 +63,7 @@ public:
          * if we leave this, force close in any case
          * if we already are closing down, nothing will happen
          */
-        QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, QString("close")));
+        QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, QStringLiteral("close")));
     }
 
 private:

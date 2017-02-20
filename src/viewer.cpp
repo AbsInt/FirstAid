@@ -66,10 +66,10 @@ PdfViewer::PdfViewer(const QString &file)
     // register singleton
     s_instance = this;
 
-    setWindowIcon(QIcon(":/firstaid.svg"));
+    setWindowIcon(QIcon(QStringLiteral(":/firstaid.svg")));
 
     setStyleSheet(
-        QString("QToolButton { border-width: 1px; border-radius: 6px; border-style: none; padding: 2px }"
+        QStringLiteral("QToolButton { border-width: 1px; border-radius: 6px; border-style: none; padding: 2px }"
                 "QToolButton:hover { border-style: solid; border-color: gray; padding: 1px }"
                 "QToolButton:focus { border-style: dotted; border-color: gray; padding: 1px }"
                 "QToolButton:pressed { border-style: solid; border-color: gray; padding-left: 3px; padding-top: 3px; padding-right: 1px; padding-bottom: 1px }"
@@ -84,28 +84,28 @@ PdfViewer::PdfViewer(const QString &file)
     // setup the menu action
     QMenu *menu = new QMenu(this);
 
-    QAction *fileOpen = menu->addAction(QIcon(":/icons/document-open.svg"), tr("&Open..."), this, SLOT(slotOpenFile()));
+    QAction *fileOpen = menu->addAction(QIcon(QStringLiteral(":/icons/document-open.svg")), tr("&Open..."), this, SLOT(slotOpenFile()));
     fileOpen->setShortcut(QKeySequence::Open);
 
-    m_fileReloadAct = menu->addAction(QIcon(":/icons/view-refresh.svg"), tr("&Reload"), this, SLOT(slotReload()));
+    m_fileReloadAct = menu->addAction(QIcon(QStringLiteral(":/icons/view-refresh.svg")), tr("&Reload"), this, SLOT(slotReload()));
     m_fileReloadAct->setShortcut(QKeySequence::Refresh);
     menu->addSeparator();
 
-    m_fileOpenExternalAct = menu->addAction(QIcon(":/icons/acrobat.svg"), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
+    m_fileOpenExternalAct = menu->addAction(QIcon(QStringLiteral(":/icons/acrobat.svg")), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
     m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
 
-    m_filePrintAct = menu->addAction(QIcon(":/icons/document-print.svg"), tr("&Print..."), this, SLOT(slotPrint()));
+    m_filePrintAct = menu->addAction(QIcon(QStringLiteral(":/icons/document-print.svg")), tr("&Print..."), this, SLOT(slotPrint()));
     m_filePrintAct->setShortcut(QKeySequence::Print);
     menu->addSeparator();
 
-    QAction *act = menu->addAction(QIcon(":/icons/help-keybord-shortcuts.svg"), tr("&Keyboard shortcuts..."), this, SLOT(slotHelp()));
+    QAction *act = menu->addAction(QIcon(QStringLiteral(":/icons/help-keybord-shortcuts.svg")), tr("&Keyboard shortcuts..."), this, SLOT(slotHelp()));
     act->setShortcut(QKeySequence::HelpContents);
 
-    act = menu->addAction(QIcon(":/icons/help-about.svg"), tr("&About"), this, SLOT(slotAbout()));
+    act = menu->addAction(QIcon(QStringLiteral(":/icons/help-about.svg")), tr("&About"), this, SLOT(slotAbout()));
     act->setShortcut(QKeySequence::WhatsThis);
     menu->addSeparator();
 
-    act = menu->addAction(QIcon(":/icons/application-exit.svg"), tr("&Quit"), qApp, SLOT(closeAllWindows()));
+    act = menu->addAction(QIcon(QStringLiteral(":/icons/application-exit.svg")), tr("&Quit"), qApp, SLOT(closeAllWindows()));
     act->setShortcut(QKeySequence::Quit);
 
     QWidget *w = new QWidget(this);
@@ -153,8 +153,8 @@ PdfViewer::PdfViewer(const QString &file)
      * restore old geometry & dock widget state, will handle "bad geometries", see http://doc.qt.io/qt-5.7/qmainwindow.html#restoreState
      */
     QSettings settings;
-    restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
-    restoreState(settings.value("MainWindow/windowState").toByteArray());
+    restoreGeometry(settings.value(QStringLiteral("MainWindow/geometry")).toByteArray());
+    restoreState(settings.value(QStringLiteral("MainWindow/windowState")).toByteArray());
 }
 
 PdfViewer::~PdfViewer()
@@ -214,7 +214,7 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
 
     // determine last visible page for the current file
     QSettings settings;
-    settings.beginGroup("Files");
+    settings.beginGroup(QStringLiteral("Files"));
     int page = settings.value(m_filePath, 0).toInt();
     settings.endGroup();
 
@@ -231,7 +231,7 @@ void PdfViewer::closeDocument()
     QThreadPool::globalInstance()->waitForDone();
 
     QSettings settings;
-    settings.beginGroup("Files");
+    settings.beginGroup(QStringLiteral("Files"));
     settings.setValue(m_filePath, m_view->currentPage());
     settings.endGroup();
 
@@ -247,17 +247,17 @@ void PdfViewer::closeDocument()
 
 void PdfViewer::processCommand(const QString &command)
 {
-    if (command.startsWith("open "))
+    if (command.startsWith(QLatin1String("open ")))
         loadDocument(command.mid(5));
 
-    else if (command.startsWith("goto ")) {
+    else if (command.startsWith(QLatin1String("goto "))) {
         const QString target = command.mid(5);
         bool ok = false;
         const int pageNumber = target.toInt(&ok);
         if (ok)
             m_view->gotoPage(pageNumber - 1);
         else {
-            foreach (QString t, target.split(",", QString::SkipEmptyParts)) {
+            foreach (QString t, target.split(QLatin1Char(','), QString::SkipEmptyParts)) {
                 bool valid = false;
                 if (Poppler::LinkDestination *linkDest = (document()->linkDestination(t))) {
                     valid = linkDest->pageNumber() > 0;
@@ -276,7 +276,7 @@ void PdfViewer::processCommand(const QString &command)
         activateWindow();
     }
 
-    else if (command.startsWith("close"))
+    else if (command.startsWith(QLatin1String("close")))
         qApp->quit();
 }
 
@@ -286,8 +286,8 @@ void PdfViewer::closeEvent(QCloseEvent *event)
      * save geometry & dock widgets state, like show in http://doc.qt.io/qt-5.7/qmainwindow.html#saveState
      */
     QSettings settings;
-    settings.setValue("MainWindow/geometry", saveGeometry());
-    settings.setValue("MainWindow/windowState", saveState());
+    settings.setValue(QStringLiteral("MainWindow/geometry"), saveGeometry());
+    settings.setValue(QStringLiteral("MainWindow/windowState"), saveState());
     QMainWindow::closeEvent(event);
 }
 
@@ -319,7 +319,7 @@ void PdfViewer::slotOpenFileExternal()
 {
     if (!m_filePath.isEmpty())
         if (!QDesktopServices::openUrl(QUrl::fromLocalFile(m_filePath)))
-            QMessageBox::warning(this, "Error", "Failed to open file in external PDF viewer.");
+            QMessageBox::warning(this, tr("Error"), tr("Failed to open file in external PDF viewer."));
 }
 
 void PdfViewer::slotReload()
@@ -339,10 +339,8 @@ void PdfViewer::slotPrint()
     // let the user select the printer to use
     QPrinter printer(QPrinter::HighResolution);
     QPrintDialog printDialog(&printer, this);
-    if (!printDialog.exec()) {
-        qDebug("Failed");
+    if (!printDialog.exec())
         return;
-    }
 
     // determine range
     int fromPage = qMax(printer.fromPage(), 1);
@@ -351,7 +349,7 @@ void PdfViewer::slotPrint()
         toPage = m_document.numPages();
 
     // provide some feedback
-    QProgressDialog pd("Printing...", "Abort", fromPage, toPage, this);
+    QProgressDialog pd(tr("Printing..."), tr("Abort"), fromPage, toPage, this);
     pd.setWindowModality(Qt::WindowModal);
     pd.setMinimumDuration(0);
     pd.show();
@@ -363,7 +361,7 @@ void PdfViewer::slotPrint()
     QPainter painter;
     painter.begin(&printer);
     for (int pageNumber = fromPage; pageNumber <= toPage; pageNumber++) {
-        pd.setLabelText(QString("Printing page %1...").arg(pageNumber));
+        pd.setLabelText(tr("Printing page %1...").arg(pageNumber));
         pd.setValue(pageNumber);
         if (pd.wasCanceled())
             break;
@@ -404,8 +402,8 @@ void PdfViewer::slotAbout()
      * construct release info, if defined to something != ""
      */
     QString releaseInfo;
-    if (!QString(FIRSTAID_RELEASE_STRING).isEmpty())
-        releaseInfo = tr("<p><b>Version %1 Build %2<br>Tag %3</b></p>").arg(FIRSTAID_RELEASE_STRING).arg(FIRSTAID_BUILD_STRING).arg(FIRSTAID_TAG_STRING);
+    if (!QString::fromUtf8(FIRSTAID_RELEASE_STRING).isEmpty())
+        releaseInfo = tr("<p><b>Version %1 Build %2<br>Tag %3</b></p>").arg(QString::fromUtf8(FIRSTAID_RELEASE_STRING)).arg(QString::fromUtf8(FIRSTAID_BUILD_STRING)).arg(QString::fromUtf8(FIRSTAID_TAG_STRING));
 
     QMessageBox::about(this,
                        tr("About FirstAid"),

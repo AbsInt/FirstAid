@@ -73,19 +73,19 @@ int main(int argc, char *argv[])
     /**
      * Basic info about the program
      */
-    QCoreApplication::setOrganizationName("AbsInt");
-    QCoreApplication::setOrganizationDomain("absint.com");
-    QCoreApplication::setApplicationName("FirstAid");
+    QCoreApplication::setOrganizationName(QStringLiteral("AbsInt"));
+    QCoreApplication::setOrganizationDomain(QStringLiteral("absint.com"));
+    QCoreApplication::setApplicationName(QStringLiteral("FirstAid"));
 
     /**
      * define & parse our command line
      */
     QCommandLineParser parser;
-    parser.setApplicationDescription("FirstAid - PDF Help Viewer");
+    parser.setApplicationDescription(QStringLiteral("FirstAid - PDF Help Viewer"));
     parser.addHelpOption();
     parser.addVersionOption();
-    parser.addPositionalArgument("file", QCoreApplication::translate("main", "PDF file to open"));
-    parser.addOption(QCommandLineOption("stdin", QCoreApplication::translate("main", "Read commands from stdin.")));
+    parser.addPositionalArgument(QStringLiteral("file"), QCoreApplication::translate("main", "PDF file to open"));
+    parser.addOption(QCommandLineOption(QStringLiteral("stdin"), QCoreApplication::translate("main", "Read commands from stdin.")));
     parser.process(app);
 
     /**
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
      * should we handle commands from stdin?
      */
     StdinReaderThread *stdinThread = nullptr;
-    if (parser.isSet("stdin")) {
+    if (parser.isSet(QStringLiteral("stdin"))) {
         /**
          * create our own thread for blocking read stdin, tell it to send the events to the viewer instance
          */

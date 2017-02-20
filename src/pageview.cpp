@@ -131,12 +131,12 @@ PageView::PageView(QWidget *parent)
     m_hintLabel->move(5, 5);
     m_hintLabel->hide();
 
-    m_hintLabel->setStyleSheet(
+    m_hintLabel->setStyleSheet(QStringLiteral(
         "color: white;"
         "border: 2px solid white;"
         "border-radius: 4px;"
         "padding: 6px;"
-        "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #000000, stop: 0.3 #505050, stop: 1 #000000);");
+        "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #000000, stop: 0.3 #505050, stop: 1 #000000);"));
 
     m_hintLabelTimer = new QTimer(this);
     m_hintLabelTimer->setSingleShot(true);
@@ -485,7 +485,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
         m_rubberBand->setGeometry(QRect(m_rubberBandOrigin.second, QSize()));
         m_rubberBand->show();
 
-        showHint("<b>Drag to copy text in selection...<b>");
+        showHint(QStringLiteral("<b>Drag to copy text in selection...<b>"));
 
         return;
     }
@@ -867,8 +867,8 @@ void PageView::slotCopyRequested(int page, const QRect &viewportRect)
             clipboard->setText(text, QClipboard::Clipboard);
             clipboard->setText(text, QClipboard::Selection);
 
-            text.replace("\n", "<br>");
-            showHint("<b>Text copied:</b><br>" + text);
+            text.replace(QLatin1String("\n"), QLatin1String("<br>"));
+            showHint(QStringLiteral("<b>Text copied:</b><br>%1").arg(text));
         }
     } else
         showHint(QString());

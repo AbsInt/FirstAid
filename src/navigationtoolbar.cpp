@@ -38,10 +38,10 @@
 #include <QToolButton>
 
 NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *parent)
-    : QToolBar("Navigation", parent)
+    : QToolBar(QStringLiteral("Navigation"), parent)
 {
     // for state saving
-    setObjectName("navigation_toolbar");
+    setObjectName(QStringLiteral("navigation_toolbar"));
 
     // we stay in place
     setFloatable(false);
@@ -58,15 +58,15 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     connect(lastShortcut, SIGNAL(activated()), this, SLOT(slotGoLast()));
 
     // left side is table of content action
-    tocAction->setIcon(QIcon(":/icons/bookmark-new.svg"));
+    tocAction->setIcon(QIcon(QStringLiteral(":/icons/bookmark-new.svg")));
     addAction(tocAction);
     QShortcut *tocShortcut = new QShortcut(Qt::Key_F7, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
 
     // left side also holds the toggle button for facing pages mode
-    m_toggleFacingPagesAct = addAction(QIcon(":/icons/facing-pages.svg"), tr("Facing pages"));
+    m_toggleFacingPagesAct = addAction(QIcon(QStringLiteral(":/icons/facing-pages.svg")), tr("Facing pages"));
     m_toggleFacingPagesAct->setCheckable(true);
-    m_toggleFacingPagesAct->setChecked(s.value("MainWindow/facingPages", false).toBool());
+    m_toggleFacingPagesAct->setChecked(s.value(QStringLiteral("MainWindow/facingPages"), false).toBool());
     m_toggleFacingPagesAct->setShortcut(Qt::Key_D);
     m_toggleFacingPagesAct->setShortcutContext(Qt::ApplicationShortcut);
     connect(m_toggleFacingPagesAct, SIGNAL(toggled(bool)), SLOT(slotToggleFacingPages()));
@@ -77,7 +77,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     addWidget(spacer);
 
     // previous page action
-    m_prevAct = addAction(QIcon(":/icons/go-previous.svg"), tr("Previous page"), this, SLOT(slotGoPrev()));
+    m_prevAct = addAction(QIcon(QStringLiteral(":/icons/go-previous.svg")), tr("Previous page"), this, SLOT(slotGoPrev()));
     QShortcut *previousShortcut = new QShortcut(QKeySequence::MoveToPreviousPage, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
@@ -102,7 +102,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     connect(gotoShortCut, SIGNAL(activated()), SLOT(slotGoto()));
 
     // next page action
-    m_nextAct = addAction(QIcon(":/icons/go-next.svg"), tr("Next page"), this, SLOT(slotGoNext()));
+    m_nextAct = addAction(QIcon(QStringLiteral(":/icons/go-next.svg")), tr("Next page"), this, SLOT(slotGoNext()));
     QShortcut *nextShortcut = new QShortcut(QKeySequence::MoveToNextPage, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
@@ -121,11 +121,11 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomButton->setFocusPolicy(Qt::NoFocus);
     m_zoomButton->setToolTip(tr("Zoom"));
     QMenu *zoomMenu = new QMenu(this);
-    QAction *a = zoomMenu->addAction(QIcon(":/icons/zoom-fit-width.svg"), tr("Fit width"));
+    QAction *a = zoomMenu->addAction(QIcon(QStringLiteral(":/icons/zoom-fit-width.svg")), tr("Fit width"));
     a->setShortcut(Qt::Key_W);
     a->setShortcutContext(Qt::ApplicationShortcut);
 
-    a = zoomMenu->addAction(QIcon(":/icons/zoom-fit-best.svg"), tr("Fit page"));
+    a = zoomMenu->addAction(QIcon(QStringLiteral(":/icons/zoom-fit-best.svg")), tr("Fit page"));
     a->setShortcut(Qt::Key_F);
     a->setShortcutContext(Qt::ApplicationShortcut);
 
@@ -156,7 +156,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QToolButton *menuButton = new QToolButton();
     menuButton->setToolTip(tr("Application menu"));
     menuButton->setFocusPolicy(Qt::NoFocus);
-    menuButton->setIcon(QIcon(":/icons/application-menu.svg"));
+    menuButton->setIcon(QIcon(QStringLiteral(":/icons/application-menu.svg")));
     menuButton->setMenu(menu);
     menuButton->setPopupMode(QToolButton::InstantPopup);
     addWidget(menuButton);
@@ -174,7 +174,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     // triggere these slots so view gets redrawn with stored settings
     QTimer::singleShot(0, this, SLOT(slotToggleFacingPages()));
 
-    int index = s.value("MainWindow/zoom", 8).toInt();
+    int index = s.value(QStringLiteral("MainWindow/zoom"), 8).toInt();
     QList<QAction *> zoomActions = zoomMenu->actions();
     if (index >= 0 && index < zoomActions.count())
         QTimer::singleShot(0, zoomActions.at(index), SLOT(trigger()));
@@ -191,7 +191,7 @@ NavigationToolBar::~NavigationToolBar()
 {
     // store settings
     QSettings s;
-    s.setValue("MainWindow/facingPages", m_toggleFacingPagesAct->isChecked());
+    s.setValue(QStringLiteral("MainWindow/facingPages"), m_toggleFacingPagesAct->isChecked());
 }
 
 bool NavigationToolBar::eventFilter(QObject *object, QEvent *event)
@@ -261,7 +261,7 @@ void NavigationToolBar::slotGoto()
     if (!PdfViewer::document())
         return;
 
-    m_pageLabel->setText(QString(" / %2").arg(PdfViewer::document()->numPages()));
+    m_pageLabel->setText(QStringLiteral(" / %2").arg(PdfViewer::document()->numPages()));
 
     m_pageEditAct->setVisible(true);
 
@@ -273,9 +273,9 @@ void NavigationToolBar::slotGoto()
 void NavigationToolBar::slotHideGoto()
 {
     if (PdfViewer::document()->isValid())
-        m_pageLabel->setText(QString("%1 / %2").arg(1 + PdfViewer::view()->currentPage()).arg(PdfViewer::document()->numPages()));
+        m_pageLabel->setText(QStringLiteral("%1 / %2").arg(1 + PdfViewer::view()->currentPage()).arg(PdfViewer::document()->numPages()));
     else
-        m_pageLabel->setText("n/a");
+        m_pageLabel->setText(QStringLiteral("n/a"));
 
     m_pageEditAct->setVisible(false);
 }
@@ -287,24 +287,24 @@ void NavigationToolBar::slotZoomChanged()
         return;
 
     QSettings s;
-    s.setValue("MainWindow/zoom", m_zoomButton->menu()->actions().indexOf(a));
+    s.setValue(QStringLiteral("MainWindow/zoom"), m_zoomButton->menu()->actions().indexOf(a));
 
     QString text = a->text();
 
-    if ("Fit width" == text) {
+    if (QLatin1String("Fit width") == text) {
         m_zoomLabelAct->setVisible(false);
-        m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-width.svg"));
+        m_zoomButton->setIcon(QIcon(QStringLiteral(":/icons/zoom-fit-width.svg")));
         PdfViewer::view()->setZoomMode(PageView::FitWidth);
-    } else if ("Fit page" == text) {
+    } else if (QLatin1String("Fit page") == text) {
         m_zoomLabelAct->setVisible(false);
-        m_zoomButton->setIcon(QIcon(":/icons/zoom-fit-best.svg"));
+        m_zoomButton->setIcon(QIcon(QStringLiteral(":/icons/zoom-fit-best.svg")));
         PdfViewer::view()->setZoomMode(PageView::FitPage);
     } else {
         m_zoomLabelAct->setVisible(true);
         m_zoomLabel->setText(text);
-        m_zoomButton->setIcon(QIcon(":/icons/zoom.svg"));
+        m_zoomButton->setIcon(QIcon(QStringLiteral(":/icons/zoom.svg")));
 
-        text.remove("%");
+        text.remove(QLatin1Char('%'));
         bool ok;
         int value = text.toInt(&ok);
 
@@ -316,19 +316,19 @@ void NavigationToolBar::slotZoomChanged()
 void NavigationToolBar::slotChangeZoom(qreal currentZoom)
 {
     m_zoomLabelAct->setVisible(true);
-    m_zoomLabel->setText(QString("%1%").arg(qRound(currentZoom * 100)));
-    m_zoomButton->setIcon(QIcon(":/icons/zoom.svg"));
+    m_zoomLabel->setText(QStringLiteral("%1%").arg(qRound(currentZoom * 100)));
+    m_zoomButton->setIcon(QIcon(QStringLiteral(":/icons/zoom.svg")));
 
     // save nearest zoom
     QList<QAction *> actions = m_zoomButton->menu()->actions();
     for (int c = 2; c < actions.count(); c++) {
         QString text = actions.at(c)->text();
-        text.remove("%");
+        text.remove(QLatin1Char('%'));
         bool ok;
         int value = text.toInt(&ok);
         if (ok && currentZoom <= value / 100.0) {
             QSettings s;
-            s.setValue("MainWindow/zoom", c);
+            s.setValue(QStringLiteral("MainWindow/zoom"), c);
             break;
         }
     }
