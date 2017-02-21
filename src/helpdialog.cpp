@@ -33,30 +33,18 @@ HelpDialog::HelpDialog(QWidget *parent)
     vbl->addWidget(label);
 
     QStringList html;
-    html << QStringLiteral("<style>")
-         << QStringLiteral("table { color: white; }")
-         << QStringLiteral("cap { font-weight: bold; }")
-         << QStringLiteral("key { color: yellow; font-weight: bold; }")
-         << QStringLiteral("</style>")
-         << QStringLiteral("<table bgcolor=#f0f0f0 width=100%><tr><td align=center><font color=#000000 size=+1><b>FirstAid Shortcuts</b></font></td></tr></table>")
-         << QStringLiteral("<table cellspacing=5 cellpadding=5><tr>");
+    html << QStringLiteral("<style>") << QStringLiteral("table { color: white; }") << QStringLiteral("cap { font-weight: bold; }") << QStringLiteral("key { color: yellow; font-weight: bold; }") << QStringLiteral("</style>")
+         << QStringLiteral("<table bgcolor=#f0f0f0 width=100%><tr><td align=center><font color=#000000 size=+1><b>FirstAid Shortcuts</b></font></td></tr></table>") << QStringLiteral("<table cellspacing=5 cellpadding=5><tr>");
 
     html += addTable(QStringLiteral("Document Handling"));
     html += addShortcut(fromStandardKey(QKeySequence::Open), tr("Open file"));
     html += addShortcut(fromStandardKey(QKeySequence::Refresh), tr("Reload document"));
     html += addShortcut(fromStandardKey(QKeySequence::Find), tr("Find text in document"));
-    html += addShortcut(QStringList() << QStringLiteral("Crtl")
-                                      << QStringLiteral("E"),
-                        tr("Open in external application"));
+    html += addShortcut(QStringList() << QStringLiteral("Crtl") << QStringLiteral("E"), tr("Open in external application"));
     html += addShortcut(fromStandardKey(QKeySequence::Print), tr("Print document"));
     html += addShortcut(fromStandardKey(QKeySequence::Quit), tr("Quit application"));
-    html += addShortcut(QStringList() << QStringLiteral("RightClick")
-                                      << QStringLiteral("Drag"),
-                        tr("Copy text area"));
-    html += addShortcut(QStringList() << QStringLiteral("Shift")
-                                      << QStringLiteral("LeftClick")
-                                      << QStringLiteral("Drag"),
-                        tr("Copy text area"));
+    html += addShortcut(QStringList() << QStringLiteral("RightClick") << QStringLiteral("Drag"), tr("Copy text area"));
+    html += addShortcut(QStringList() << QStringLiteral("Shift") << QStringLiteral("LeftClick") << QStringLiteral("Drag"), tr("Copy text area"));
     html += endTable();
 
     html += addTable(QStringLiteral("Navigation"));
@@ -69,17 +57,13 @@ HelpDialog::HelpDialog(QWidget *parent)
     html += addShortcut(QStringList() << QStringLiteral("Backspace"), tr("Scroll to previous part of document"));
     html += addShortcut(fromStandardKey(QKeySequence::Back), tr("Go back in history"));
     html += addShortcut(fromStandardKey(QKeySequence::Forward), tr("Go forward in history"));
-    html += addShortcut(QStringList() << QStringLiteral("Ctrl")
-                                      << QStringLiteral("G"),
-                        tr("Go to page"));
+    html += addShortcut(QStringList() << QStringLiteral("Ctrl") << QStringLiteral("G"), tr("Go to page"));
     html += endTable();
 
     html += addTable(QStringLiteral("View"));
     html += addShortcut(QStringList() << QStringLiteral("W"), tr("Fit page width"));
     html += addShortcut(QStringList() << QStringLiteral("F"), tr("Fit full page"));
-    html += addShortcut(QStringList() << QStringLiteral("Crtl")
-                                      << QStringLiteral("0"),
-                        tr("Zoom 100%"));
+    html += addShortcut(QStringList() << QStringLiteral("Crtl") << QStringLiteral("0"), tr("Zoom 100%"));
     html += addShortcut(fromStandardKey(QKeySequence::ZoomIn), tr("Zoom in"));
     html += addShortcut(fromStandardKey(QKeySequence::ZoomOut), tr("Zoom out"));
     html += addShortcut(QStringList() << QStringLiteral("F7"), tr("Toggle table of contents"));

@@ -70,13 +70,13 @@ PdfViewer::PdfViewer(const QString &file)
 
     setStyleSheet(
         QStringLiteral("QToolButton { border-width: 1px; border-radius: 6px; border-style: none; padding: 2px }"
-                "QToolButton:hover { border-style: solid; border-color: gray; padding: 1px }"
-                "QToolButton:focus { border-style: dotted; border-color: gray; padding: 1px }"
-                "QToolButton:pressed { border-style: solid; border-color: gray; padding-left: 3px; padding-top: 3px; padding-right: 1px; padding-bottom: 1px }"
-                "QToolButton:checked { border-style: solid; border-top-color: gray; border-left-color: gray; border-bottom-color: lightGray; border-right-color: lightGray; padding-left: 2px; padding-top: 2px; padding-right: 0px; "
-                "padding-bottom: 0px }"
-                "QToolButton::menu-indicator { image: url(empty.png) }"
-                "QMenu { padding: 1px }"));
+                       "QToolButton:hover { border-style: solid; border-color: gray; padding: 1px }"
+                       "QToolButton:focus { border-style: dotted; border-color: gray; padding: 1px }"
+                       "QToolButton:pressed { border-style: solid; border-color: gray; padding-left: 3px; padding-top: 3px; padding-right: 1px; padding-bottom: 1px }"
+                       "QToolButton:checked { border-style: solid; border-top-color: gray; border-left-color: gray; border-bottom-color: lightGray; border-right-color: lightGray; padding-left: 2px; padding-top: 2px; padding-right: 0px; "
+                       "padding-bottom: 0px }"
+                       "QToolButton::menu-indicator { image: url(empty.png) }"
+                       "QMenu { padding: 1px }"));
 
     // allow gui to potentially accept drops at all
     setAcceptDrops(true);

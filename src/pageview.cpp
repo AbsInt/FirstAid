@@ -131,12 +131,12 @@ PageView::PageView(QWidget *parent)
     m_hintLabel->move(5, 5);
     m_hintLabel->hide();
 
-    m_hintLabel->setStyleSheet(QStringLiteral(
-        "color: white;"
-        "border: 2px solid white;"
-        "border-radius: 4px;"
-        "padding: 6px;"
-        "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #000000, stop: 0.3 #505050, stop: 1 #000000);"));
+    m_hintLabel->setStyleSheet(
+        QStringLiteral("color: white;"
+                       "border: 2px solid white;"
+                       "border-radius: 4px;"
+                       "padding: 6px;"
+                       "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #000000, stop: 0.3 #505050, stop: 1 #000000);"));
 
     m_hintLabelTimer = new QTimer(this);
     m_hintLabelTimer->setSingleShot(true);
