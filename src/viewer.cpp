@@ -239,7 +239,6 @@ void PdfViewer::closeDocument()
 
     // remove path
     m_fileWatcher.removePath(m_filePath);
-    m_filePath.clear();
 
     // update action state & co.
     updateOnDocumentChange();
