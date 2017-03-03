@@ -868,7 +868,7 @@ void PageView::slotCopyRequested(int page, const QRect &viewportRect)
             clipboard->setText(text, QClipboard::Selection);
 
             text.replace(QLatin1String("\n"), QLatin1String("<br>"));
-            showHint(QStringLiteral("<b>Text copied:</b><br>%1").arg(text));
+            showHint(QStringLiteral("<b>Text copied:</b><br>%1").arg(text.toHtmlEscaped()));
         }
     } else
         showHint(QString());
