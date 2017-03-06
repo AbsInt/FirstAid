@@ -130,6 +130,7 @@ QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parent
 
         // tag name == link name, strange enough
         QStandardItem *labelItem = new QStandardItem(e.tagName());
+        labelItem->setFlags(labelItem->flags() & ~Qt::ItemIsEditable);
 
         /**
          * use raw string for destination or convert the named one
@@ -153,6 +154,7 @@ QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parent
         }
 
         QStandardItem *pageItem = new QStandardItem(QString::number(pageNumber));
+        pageItem->setFlags(pageItem->flags() & ~Qt::ItemIsEditable);
         pageItem->setData(Qt::AlignRight, Qt::TextAlignmentRole);
 
         if (!parentItem)
