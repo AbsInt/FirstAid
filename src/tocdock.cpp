@@ -162,8 +162,7 @@ QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parent
         else
             parentItem->appendRow(QList<QStandardItem *>() << labelItem << pageItem);
 
-        if (!m_pageToIndexMap.contains(pageNumber))
-            m_pageToIndexMap.insert(pageNumber, labelItem->index());
+        m_pageToIndexMap.insert(pageNumber, labelItem->index());
 
         if (e.hasAttribute(QStringLiteral("Open"))) {
             if (QVariant(e.attribute(QStringLiteral("Open"))).toBool())
@@ -217,15 +216,32 @@ void TocDock::pageChanged(int page)
     }
 
     // init new marked item
-    m_markedIndex = m_pageToIndexMap.value(1 + page);
+    QList<QModelIndex> indices = m_pageToIndexMap.values(1 + page);
+    m_markedIndex = (indices.count() > 0 ? indices.last() : QModelIndex());
 
     // special test for double page layout: if left page is not in toc check right page first
-    if (!m_markedIndex.isValid() && PdfViewer::document()->doubleSided() && page > 0 && (page % 2) == 1)
-        m_markedIndex = m_pageToIndexMap.value(2 + page);
+    if (!m_markedIndex.isValid() && PdfViewer::document()->doubleSided() && page > 0 && (page % 2) == 1) {
+        indices = m_pageToIndexMap.values(2 + page);
+        m_markedIndex = (indices.count() > 0 ? indices.last() : QModelIndex());
+    }
 
     // still no item found? check previous pages
-    while (!m_markedIndex.isValid() && page >= 0)
-        m_markedIndex = m_pageToIndexMap.value(1 + page--);
+    while (!m_markedIndex.isValid() && page >= 0) {
+        indices = m_pageToIndexMap.values(1 + page--);
+        m_markedIndex = (indices.count() > 0 ? indices.last() : QModelIndex());
+    }
+
+    // if there is a selected index with the same page use this index instead
+    if (m_tree->selectionModel()) {
+        QModelIndexList selected = m_tree->selectionModel()->selectedIndexes();
+        foreach (QModelIndex idx, selected) {
+            QModelIndex sourceIndex = m_proxyModel->mapToSource(idx);
+            if (indices.contains(sourceIndex)) {
+                m_markedIndex = sourceIndex;
+                break;
+            }
+        }
+    }
 
     if (m_markedIndex.isValid()) {
         QFont font = m_tree->font();

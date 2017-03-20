@@ -58,6 +58,6 @@ private:
     QSortFilterProxyModel *m_proxyModel;
     QTreeView *m_tree = nullptr;
     QLineEdit *m_filter = nullptr;
-    QHash<int, QModelIndex> m_pageToIndexMap;
+    QMultiMap<int, QModelIndex> m_pageToIndexMap;
     QModelIndex m_markedIndex;
 };

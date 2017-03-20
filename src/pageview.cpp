@@ -643,7 +643,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
     if (highlightMatch && !rectToBeVisibleInPoints.isNull()) {
         if (PdfViewer::document()->page(page)->text(adjustedRectToBeVisibleInPoints.adjusted(-5, -5, 5, 5)).isEmpty()) {
             // ensure the rectangle covers any text
-            for (int c = 1; c < 100; c+=5) {
+            for (int c = 1; c < 100; c += 5) {
                 QRectF r = adjustedRectToBeVisibleInPoints.translated(0, downwards ? c : -c);
                 QString text = PdfViewer::document()->page(page)->text(r.adjusted(-5, -5, 5, 5));
                 if (!text.isEmpty()) {
@@ -867,7 +867,7 @@ void PageView::slotCopyRequested(int page, const QRect &viewportRect)
             clipboard->setText(text, QClipboard::Clipboard);
             clipboard->setText(text, QClipboard::Selection);
 
-            text=text.toHtmlEscaped();
+            text = text.toHtmlEscaped();
             text.replace(QLatin1String("\n"), QLatin1String("<br>"));
 
             showHint(QStringLiteral("<b>Text copied:</b><br>%1").arg(text));
