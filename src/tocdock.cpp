@@ -228,7 +228,7 @@ void TocDock::pageChanged(int page)
     // still no item found? check previous pages
     while (!m_markedIndex.isValid() && page >= 0) {
         indices = m_pageToIndexMap.values(1 + page--);
-        m_markedIndex = (indices.count() > 0 ? indices.last() : QModelIndex());
+        m_markedIndex = (indices.count() > 0 ? indices.first() : QModelIndex());
     }
 
     // if there is a selected index with the same page use this index instead
