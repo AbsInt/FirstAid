@@ -215,7 +215,7 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     // determine last visible page for the current file
     QSettings settings;
     settings.beginGroup(QStringLiteral("Files"));
-    int page = settings.value(m_filePath, 0).toInt();
+    int page = settings.value(QString::fromUtf8(m_filePath.toUtf8().toPercentEncoding()), 0).toInt();
     settings.endGroup();
 
     // queue goto page request as on startup there may be some signals still flying around
@@ -232,7 +232,7 @@ void PdfViewer::closeDocument()
 
     QSettings settings;
     settings.beginGroup(QStringLiteral("Files"));
-    settings.setValue(m_filePath, m_view->currentPage());
+    settings.setValue(QString::fromUtf8(m_filePath.toUtf8().toPercentEncoding()), m_view->currentPage());
     settings.endGroup();
 
     m_document.setDocument(nullptr);
