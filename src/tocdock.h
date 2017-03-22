@@ -50,7 +50,8 @@ protected slots:
     void pageChanged(int page);
     void visibilityChanged(bool visible);
     void indexClicked(const QModelIndex &index);
-    void filterChanged(const QString &text);
+    void setFilter();
+    void expand();
 
 private:
     bool m_filled = false;
@@ -60,4 +61,5 @@ private:
     QLineEdit *m_filter = nullptr;
     QMultiMap<int, QModelIndex> m_pageToIndexMap;
     QModelIndex m_markedIndex;
+    QTimer *m_findStartTimer = nullptr;
 };

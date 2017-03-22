@@ -87,11 +87,17 @@ TocDock::TocDock(QWidget *parent)
 
     connect(this, SIGNAL(visibilityChanged(bool)), SLOT(visibilityChanged(bool)));
     connect(m_tree, SIGNAL(clicked(QModelIndex)), SLOT(indexClicked(QModelIndex)));
-    connect(m_filter, SIGNAL(textChanged(QString)), SLOT(filterChanged(QString)));
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(documentChanged()));
     connect(PdfViewer::view(), SIGNAL(pageChanged(int)), SLOT(pageChanged(int)));
     connect(PdfViewer::view(), SIGNAL(pageRequested(int)), SLOT(pageChanged(int)));
+
+    m_findStartTimer = new QTimer(this);
+    m_findStartTimer->setSingleShot(true);
+    m_findStartTimer->setInterval(1000);
+    connect(m_findStartTimer, SIGNAL(timeout()), SLOT(setFilter()));
+    connect(m_filter, SIGNAL(textChanged(QString)), m_findStartTimer, SLOT(start()));
+    connect(m_proxyModel, SIGNAL(layoutChanged()), SLOT(expand()));
 }
 
 TocDock::~TocDock()
@@ -275,7 +281,15 @@ void TocDock::indexClicked(const QModelIndex &index)
         PdfViewer::view()->gotoDestination(dest);
 }
 
-void TocDock::filterChanged(const QString &text)
+void TocDock::setFilter()
 {
-    m_proxyModel->setFilterRegExp(QRegExp(text, Qt::CaseInsensitive));
+    m_findStartTimer->stop();
+    m_proxyModel->setFilterRegExp(QRegExp(m_filter->text(), Qt::CaseInsensitive));
+    m_proxyModel->invalidate();
+}
+
+void TocDock::expand()
+{
+    if (!m_filter->text().isEmpty())
+        m_tree->expandAll();
 }
