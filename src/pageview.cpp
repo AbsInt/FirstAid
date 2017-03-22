@@ -504,7 +504,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
                 m_mousePressPageRect = QRectF(pageRect.width() * l->boundary().left(), pageRect.height() * l->boundary().top(), pageRect.width() * l->boundary().width(), pageRect.height() * l->boundary().height());
 
                 if (Poppler::Annotation::ALink == l->subType()) {
-                    Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l)->linkDestination();
+                    if (Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l)->linkDestination()) {
                     switch (link->linkType()) {
                         case Poppler::Link::Goto: {
                             Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
@@ -533,6 +533,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
 
                         default:
                             break;
+                    }
                     }
                     break;
                 }
