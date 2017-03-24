@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <QPointer>
 #include <QMetaObject>
 #include <QThread>
 #include <iostream>
@@ -49,13 +50,13 @@ public:
         /**
          * read until first error or closed stdin
          */
-        while (std::cin) {
+        while (std::cin && m_receiver) {
             /**
              * read line => queue it to main thread as command
              */
             std::string line;
             std::getline(std::cin, line);
-            if (!line.empty())
+            if (!line.empty() && m_receiver)
                 QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, QString::fromLocal8Bit(line.c_str()).trimmed()));
         }
 
@@ -63,12 +64,13 @@ public:
          * if we leave this, force close in any case
          * if we already are closing down, nothing will happen
          */
-        QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, QStringLiteral("close")));
+        if (m_receiver)
+            QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, QStringLiteral("close")));
     }
 
 private:
     /**
      * receiver for commands
      */
-    QObject *const m_receiver;
+    QPointer<QObject> m_receiver;
 };
