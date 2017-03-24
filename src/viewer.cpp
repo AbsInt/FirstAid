@@ -276,7 +276,7 @@ void PdfViewer::processCommand(const QString &command)
     }
 
     else if (command.startsWith(QLatin1String("close")))
-        qApp->quit();
+        QTimer::singleShot(0, qApp, SLOT(quit()));
 }
 
 void PdfViewer::closeEvent(QCloseEvent *event)

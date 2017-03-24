@@ -124,7 +124,8 @@ int main(int argc, char *argv[])
          * terminate / wait for done + delete
          * this is not nice, should be improved!
          */
-        stdinThread->terminate();
+        if (stdinThread->isRunning())
+            stdinThread->terminate();
         stdinThread->wait();
         delete stdinThread;
     }
