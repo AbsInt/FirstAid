@@ -80,8 +80,7 @@ int SearchEngine::matchesCount() const
 {
     // count matches
     int count = 0;
-    QList<QRectF> matches;
-    foreach (matches, m_matchesForPage)
+    for (const QList<QRectF> &matches : m_matchesForPage)
         count += matches.count();
 
     return count;

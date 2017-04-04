@@ -116,7 +116,7 @@ void TocDock::fillInfo()
         m_tree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
         // expand open indices
-        foreach (QModelIndex index, openIndices)
+        for (const QModelIndex &index : openIndices)
             m_tree->setExpanded(m_proxyModel->mapFromSource(index), true);
     } else {
         // tell we found no toc
@@ -240,7 +240,7 @@ void TocDock::pageChanged(int page)
     // if there is a selected index with the same page use this index instead
     if (m_tree->selectionModel()) {
         QModelIndexList selected = m_tree->selectionModel()->selectedIndexes();
-        foreach (QModelIndex idx, selected) {
+        for (const QModelIndex &idx : selected) {
             QModelIndex sourceIndex = m_proxyModel->mapToSource(idx);
             if (indices.contains(sourceIndex)) {
                 m_markedIndex = sourceIndex;

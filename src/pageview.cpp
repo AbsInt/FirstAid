@@ -362,7 +362,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     PdfViewer::searchEngine()->currentMatch(matchPage, matchRect);
 
     // paint all visible pages
-    foreach (int page, PdfViewer::document()->visiblePages(toPoints(paintEvent->rect().translated(offset())))) {
+    for (int page : PdfViewer::document()->visiblePages(toPoints(paintEvent->rect().translated(offset())))) {
         QRectF pageRect = PdfViewer::document()->pageRect(page);
         QRect displayRect = fromPoints(pageRect);
 
@@ -372,7 +372,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         p.setPen(Qt::NoPen);
 
         // paint any matches on the current page
-        foreach (QRectF rect, PdfViewer::searchEngine()->matchesFor(page)) {
+        for (const QRectF &rect : PdfViewer::searchEngine()->matchesFor(page)) {
             QColor matchColor = QColor(255, 255, 0, 64);
             if (page == matchPage && rect == matchRect)
                 matchColor = QColor(255, 128, 0, 128);

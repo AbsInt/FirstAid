@@ -148,7 +148,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomButton->setMenu(zoomMenu);
     m_zoomButton->setPopupMode(QToolButton::InstantPopup);
 
-    foreach (QAction *a, zoomMenu->actions())
+    for (QAction *a : zoomMenu->actions())
         connect(a, SIGNAL(triggered()), SLOT(slotZoomChanged()));
     addWidget(m_zoomButton);
 
