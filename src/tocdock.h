@@ -23,6 +23,7 @@
 #include <QHash>
 #include <QModelIndex>
 
+class QDomDocument;
 class QDomNode;
 class QLineEdit;
 class QSortFilterProxyModel;
@@ -62,4 +63,5 @@ private:
     QMultiMap<int, QModelIndex> m_pageToIndexMap;
     QModelIndex m_markedIndex;
     QTimer *m_findStartTimer = nullptr;
+    const QDomDocument *m_toc = nullptr;
 };
