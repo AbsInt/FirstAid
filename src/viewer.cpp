@@ -228,6 +228,7 @@ void PdfViewer::closeDocument()
         return;
 
     // drain the thread pool with the potential still running background renderers
+    QThreadPool::globalInstance()->clear();
     QThreadPool::globalInstance()->waitForDone();
 
     QSettings settings;
