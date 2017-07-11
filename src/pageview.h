@@ -148,7 +148,7 @@ private slots:
      */
     void slotClearImageCache();
 
-    void prerender();
+    void prerender(int firstPage, int lastPage, int numberOfPages);
 
 private:
     /**
