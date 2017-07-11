@@ -243,7 +243,7 @@ void PageView::slotClearImageCache()
     viewport()->update();
 }
 
-void PageView::prerender(int firstPage,int lastPage, int numberOfPages)
+void PageView::prerender(int firstPage, int lastPage, int numberOfPages)
 {
     for (int i = 1; i <= 3; ++i)
         if (numberOfPages > lastPage + i)
@@ -251,7 +251,7 @@ void PageView::prerender(int firstPage,int lastPage, int numberOfPages)
 
     for (int i = 1; i <= 3; ++i)
         if (firstPage - i >= 0)
-            getPage(firstPage- i);
+            getPage(firstPage - i);
 }
 
 void PageView::updateCurrentPage()
@@ -261,9 +261,8 @@ void PageView::updateCurrentPage()
     if (page != m_currentPage) {
         m_currentPage = page;
         QList<int> pages = PdfViewer::document()->visiblePages(toPoints(QRect(offset(), viewport()->size())));
-        if (!pages.isEmpty())
-        {
-            QtConcurrent::run(this, &PageView::prerender,pages.first(),pages.last(),PdfViewer::document()->numPages());
+        if (!pages.isEmpty()) {
+            QtConcurrent::run(this, &PageView::prerender, pages.first(), pages.last(), PdfViewer::document()->numPages());
         }
         emit pageChanged(m_currentPage);
     }
