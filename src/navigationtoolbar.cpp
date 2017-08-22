@@ -275,7 +275,7 @@ void NavigationToolBar::slotHideGoto()
     if (PdfViewer::document()->isValid())
         m_pageLabel->setText(QStringLiteral("%1 / %2").arg(1 + PdfViewer::view()->currentPage()).arg(PdfViewer::document()->numPages()));
     else
-        m_pageLabel->setText(QStringLiteral("n/a"));
+        m_pageLabel->clear();
 
     m_pageEditAct->setVisible(false);
 }
