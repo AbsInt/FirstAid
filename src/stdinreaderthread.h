@@ -56,8 +56,15 @@ public:
              */
             std::string line;
             std::getline(std::cin, line);
-            if (!line.empty() && m_receiver)
-                QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, QString::fromLocal8Bit(line.c_str()).trimmed()));
+
+            // get command, if close => end this loop, will emit close below!
+            const QString command = QString::fromLocal8Bit(line.c_str()).trimmed();
+            if (command == QStringLiteral("close"))
+                break;
+
+            // else pass command
+            if (!command.empty() && m_receiver)
+                QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, command));
         }
 
         /**
