@@ -24,13 +24,7 @@
 #include <QCommandLineParser>
 #include <QtPlugin>
 
-#ifdef _MSC_VER
-#include <io.h>
-#define fileclose _close
-#else
-#include <unistd.h>
-#define fileclose close
-#endif
+#include <stdio.h>
 
 int main(int argc, char *argv[])
 {
@@ -126,10 +120,10 @@ int main(int argc, char *argv[])
 
     /**
      * we might need to end our stdin thread!
-     * it should exit run because of close(0)
+     * we emit "close" on the stdout, the container application must close our stdin => we exit
      */
     if (stdinThread) {
-        fileclose(0);
+        fprintf(stdout, "close\n");
         stdinThread->wait();
         delete stdinThread;
     }

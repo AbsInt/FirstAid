@@ -50,7 +50,7 @@ public:
         /**
          * read until first error or closed stdin
          */
-        while (std::cin && m_receiver) {
+        while (!std::cin.eof() && m_receiver) {
             /**
              * read line => queue it to main thread as command
              */
