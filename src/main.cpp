@@ -22,9 +22,14 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QtPlugin>
-#include <QSocketNotifier>
 
+#ifdef Q_OS_WIN
+#include <QWinEventNotifier>
+#include <windows.h>
+#else
+#include <QSocketNotifier>
 #include <unistd.h>
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -98,8 +103,13 @@ int main(int argc, char *argv[])
     /**
      * we want to get info from stdin for commands
      */
+#ifdef Q_OS_WIN
+    QWinEventNotifier notifier(GetStdHandle(STD_INPUT_HANDLE));
+    QObject::connect(&notifier, SIGNAL(activated(HANDLE)), &viewer, SLOT(processCommand()));
+#else
     QSocketNotifier notifier(STDIN_FILENO, QSocketNotifier::Read);
     QObject::connect(&notifier, SIGNAL(activated(int)), &viewer, SLOT(processCommand()));
+#endif
 
     /**
      * => show widget + start event loop
