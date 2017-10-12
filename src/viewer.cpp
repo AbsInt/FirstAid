@@ -60,7 +60,7 @@
 #include <iostream>
 
 #ifdef Q_OS_WIN
-#include <windows.h>
+#include <conio.h>
 #endif
 
 PdfViewer *PdfViewer::s_instance = nullptr;
@@ -254,9 +254,7 @@ void PdfViewer::processCommand()
 {
 #ifdef Q_OS_WIN
     // try to avoid stall on windows
-    unsigned long n = 0;
-    INPUT_RECORD ir;
-    if (!PeekConsoleInput (GetStdHandle (STD_INPUT_HANDLE), &ir, 1, &n) || (n == 0))
+    if (!_kbhit())
         return;
 #endif
 
