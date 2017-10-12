@@ -58,6 +58,8 @@
 #include <QThreadPool>
 #include <QVBoxLayout>
 
+#include <iostream>
+
 PdfViewer *PdfViewer::s_instance = nullptr;
 
 PdfViewer::PdfViewer(const QString &file)
@@ -245,8 +247,15 @@ void PdfViewer::closeDocument()
     updateOnDocumentChange();
 }
 
-void PdfViewer::processCommand(const QString &command)
+void PdfViewer::processCommand()
 {
+    // read one line, without buffering
+    std::string line;
+    std::getline(std::cin, line);
+
+    // get command
+    const QString command = QString::fromLocal8Bit(line.c_str()).trimmed();
+
     if (command.startsWith(QLatin1String("open ")))
         loadDocument(command.mid(5));
 

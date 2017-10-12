@@ -23,8 +23,9 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QtPlugin>
+#include <QSocketNotifier>
 
-#include <stdio.h>
+#include <unistd.h>
 
 int main(int argc, char *argv[])
 {
@@ -87,7 +88,6 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument(QStringLiteral("file"), QCoreApplication::translate("main", "PDF file to open"));
-    parser.addOption(QCommandLineOption(QStringLiteral("stdin"), QCoreApplication::translate("main", "Read commands from stdin.")));
     parser.process(app);
 
     /**
@@ -97,36 +97,16 @@ int main(int argc, char *argv[])
     PdfViewer viewer(args.empty() ? QString() : args.at(0));
 
     /**
-     * should we handle commands from stdin?
+     * we want to get info from stdin for commands
      */
-    StdinReaderThread *stdinThread = nullptr;
-    if (parser.isSet(QStringLiteral("stdin"))) {
-        /**
-         * create our own thread for blocking read stdin, tell it to send the events to the viewer instance
-         */
-        stdinThread = new StdinReaderThread(&viewer);
-
-        /**
-         * delay start until even loop runs, we otherwise miss things like first goto command
-         */
-        QTimer::singleShot(0, stdinThread, SLOT(start()));
-    }
+    QSocketNotifier notifier(STDIN_FILENO, QSocketNotifier::Read);
+    QObject::connect(&notifier, SIGNAL(activated(int)), &viewer, SLOT(processCommand()));
 
     /**
      * => show widget + start event loop
      */
     viewer.show();
     const int returnValue = app.exec();
-
-    /**
-     * we might need to end our stdin thread!
-     * we emit "close" on the stdout, the container application must close our stdin => we exit
-     */
-    if (stdinThread) {
-        fprintf(stdout, "close\n");
-        stdinThread->wait();
-        delete stdinThread;
-    }
 
     /**
      * be done

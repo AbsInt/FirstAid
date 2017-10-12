@@ -106,7 +106,7 @@ public:
     QMenu *createPopupMenu() override;
 
 public slots:
-    void processCommand(const QString &command);
+    void processCommand();
 
 private slots:
     void slotOpenFile();
