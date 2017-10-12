@@ -63,7 +63,7 @@ public:
                 break;
 
             // else pass command
-            if (!command.empty() && m_receiver)
+            if (!command.isEmpty() && m_receiver)
                 QMetaObject::invokeMethod(m_receiver, "processCommand", Qt::QueuedConnection, Q_ARG(QString, command));
         }
 
