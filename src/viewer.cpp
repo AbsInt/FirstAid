@@ -29,7 +29,6 @@
 #include "navigationtoolbar.h"
 #include "pageview.h"
 #include "searchengine.h"
-#include "stdinreaderthread.h"
 #include "tocdock.h"
 
 #include <poppler-qt5.h>
