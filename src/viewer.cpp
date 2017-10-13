@@ -259,6 +259,8 @@ void PdfViewer::processCommand()
     if (error)
         return;
 
+    std::string line;
+
 #ifdef Q_OS_WIN
     // try to avoid stall on windows
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
@@ -268,23 +270,26 @@ void PdfViewer::processCommand()
         return;
     }
 
-    INPUT_RECORD buffer[1];
+    INPUT_RECORD eventBuffer[1];
     DWORD eventsRead;
-    if (PeekConsoleInput(hStdin, buffer, 1, &eventsRead)) {
+    if (PeekConsoleInput(hStdin, eventBuffer, 1, &eventsRead)) {
         if (1 != eventsRead) {
             printf("eventsRead = %d\n", eventsRead);
             return;
         }
 
-        if (KEY_EVENT != buffer[0].EventType) {
-            printf("no key event: %d\n", buffer[0].EventType);
+        if (KEY_EVENT != eventBuffer[0].EventType) {
+            printf("no key event: %d\n", eventBuffer[0].EventType);
 
             // get rid of non keyboard event
-            if (!ReadConsoleInput(hStdin, buffer, 1, &eventsRead))
+            if (!ReadConsoleInput(hStdin, eventBuffer, 1, &eventsRead))
                 printf("Failed to read\n");
 
             return;
         }
+
+        // read one line, without buffering
+        std::getline(std::cin, line);
     }
     else {
 #if 0
@@ -304,14 +309,15 @@ void PdfViewer::processCommand()
             return;
 
         printf("bytes left: %d\n", bytesLeft);
+
+        char fileBuffer[1024];
+        ReadFile(hStdin, fileBuffer, bytesLeft, NULL, NULL);
+        line = std::string(fileBuffer, bytesLeft - 1)
     }
-
-    printf("Object available!\n");
-#endif
-
+#else
     // read one line, without buffering
-    std::string line;
     std::getline(std::cin, line);
+#endif
 
     printf("Command read: %s\n", line.c_str());
 
