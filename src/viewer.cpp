@@ -252,6 +252,11 @@ void PdfViewer::closeDocument()
 
 void PdfViewer::processCommand()
 {
+    static bool error = false;
+
+    if (error)
+        return;
+
     printf("PdfViewer::processCommand()\n");
 
 #ifdef Q_OS_WIN
@@ -259,8 +264,18 @@ void PdfViewer::processCommand()
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
     if (hStdin == INVALID_HANDLE_VALUE)  {
         printf("invalid stdin handle\n");
+        error = true;
         return;
     }
+
+    DWORD mode;
+    if (!GetConsoleMode(hStdin, &mode)) {
+        printf("failed to determine mode\n");
+        error = true;
+        return;
+    }
+
+    printf("mode = 0x%x\n", mode);
 
     INPUT_RECORD buffer[1];
     DWORD eventsRead;
@@ -273,6 +288,7 @@ void PdfViewer::processCommand()
         LocalFree(messageBuffer);
 
         printf("Failed to peek: %s\n", message.c_str());
+        error = true;
         return;
     }
 
