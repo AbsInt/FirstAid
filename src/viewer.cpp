@@ -256,8 +256,28 @@ void PdfViewer::processCommand()
 
 #ifdef Q_OS_WIN
     // try to avoid stall on windows
-    if (WaitForSingleObject(GetStdHandle(STD_INPUT_HANDLE), 0) != WAIT_OBJECT_0)
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    if (hStdin == INVALID_HANDLE_VALUE)  {
+        printf("invalid stdin handle\n");
         return;
+    }
+
+    INPUT_RECORD buffer[1];
+    DWORD eventsRead;
+    if (!PeekConsoleInput(hStdin, buffer, 1, &eventsRead)) {
+        printf("Failed to peek\n");
+        return;
+    }
+
+    if (1 != eventsRead) {
+        printf("eventsRead = %d\n", eventsRead);
+        return;
+    }
+
+    if (KEY_EVENT != buffer[0].EventType) {
+        printf("no key event: %d\n", buffer[0].EventType);
+        return;
+    }
 
     printf("Object available!\n");
 #endif
