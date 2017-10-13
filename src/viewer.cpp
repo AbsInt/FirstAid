@@ -254,7 +254,7 @@ void PdfViewer::processCommand()
 {
 #ifdef Q_OS_WIN
     // try to avoid stall on windows
-    if (!_kbhit())
+    if (WaitForSingleObject(GetStdHandle(STD_INPUT_HANDLE), 0) != WAIT_OBJECT_0)
         return;
 #endif
 
