@@ -268,18 +268,26 @@ void PdfViewer::processCommand()
         return;
     }
 
-    DWORD mode;
-    if (!GetConsoleMode(hStdin, &mode)) {
-        printf("failed to determine mode\n");
-        error = true;
-        return;
-    }
-
-    printf("mode = 0x%x\n", mode);
-
     INPUT_RECORD buffer[1];
     DWORD eventsRead;
-    if (!PeekConsoleInput(hStdin, buffer, 1, &eventsRead)) {
+    if (PeekConsoleInput(hStdin, buffer, 1, &eventsRead)) {
+        if (1 != eventsRead) {
+            printf("eventsRead = %d\n", eventsRead);
+            return;
+        }
+
+        if (KEY_EVENT != buffer[0].EventType) {
+            printf("no key event: %d\n", buffer[0].EventType);
+
+            // get rid of non keyboard event
+            if (!ReadConsoleInput(hStdin, buffer, 1, &eventsRead))
+                printf("Failed to read\n");
+
+            return;
+        }
+    }
+    else {
+#if 0
         LPSTR messageBuffer = nullptr;
         size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                                      NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
@@ -288,23 +296,12 @@ void PdfViewer::processCommand()
         LocalFree(messageBuffer);
 
         printf("Failed to peek: %s\n", message.c_str());
-        error = true;
-        return;
-    }
+#endif
 
-    if (1 != eventsRead) {
-        printf("eventsRead = %d\n", eventsRead);
-        return;
-    }
-
-    if (KEY_EVENT != buffer[0].EventType) {
-        printf("no key event: %d\n", buffer[0].EventType);
-
-        // get rid of non keyboard event
-        if (!ReadConsoleInput(hStdin, buffer, 1, &eventsRead))
-            printf("Failed to read\n");
-
-        return;
+        DWORD bytesLeft;
+        PeekNamedPipe(hStdin, NULL, 0, NULL, &bytes_left, NULL);
+        if (!bytesLeft)
+            return;
     }
 
     printf("Object available!\n");
