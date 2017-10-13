@@ -252,15 +252,21 @@ void PdfViewer::closeDocument()
 
 void PdfViewer::processCommand()
 {
+    printf("PdfViewer::processCommand()\n");
+
 #ifdef Q_OS_WIN
     // try to avoid stall on windows
     if (WaitForSingleObject(GetStdHandle(STD_INPUT_HANDLE), 0) != WAIT_OBJECT_0)
         return;
+
+    printf("Object available!\n");
 #endif
 
     // read one line, without buffering
     std::string line;
     std::getline(std::cin, line);
+
+    printf("Command read: %s\n", line.c_str());
 
     // get command
     const QString command = QString::fromLocal8Bit(line.c_str()).trimmed();
