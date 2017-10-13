@@ -274,13 +274,13 @@ void PdfViewer::processCommand()
         return;
     }
 
-    if (!ReadConsoleInput(hStdin, buffer, 1, &eventsRead)) {
-        printf("Failed to read\n");
-        return;
-    }
-
     if (KEY_EVENT != buffer[0].EventType) {
         printf("no key event: %d\n", buffer[0].EventType);
+
+        // get rid of non keyboard event
+        if (!ReadConsoleInput(hStdin, buffer, 1, &eventsRead))
+            printf("Failed to read\n");
+
         return;
     }
 
