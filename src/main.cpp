@@ -33,6 +33,19 @@
 
 int main(int argc, char *argv[])
 {
+#if defined(Q_OS_WIN)
+    // for windows we like to get access to the console even if we are a GUI app
+    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+        // recreate stdout/stderr, do this only if invalid, to allow output even inside scripts
+        if (fileno(stdout) < 0)
+            freopen("CON", "w", stdout);
+        if (fileno(stderr) < 0)
+            freopen("CON", "w", stderr);
+        if (fileno(stdin) < 0)
+            freopen("CON", "r", stdin);
+    }
+#endif
+
 /**
  * if you want static binaries, init plugins
  */
