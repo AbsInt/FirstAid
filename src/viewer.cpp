@@ -60,7 +60,7 @@
 #include <iostream>
 
 #ifdef Q_OS_WIN
-#include <conio.h>
+#include <Windows.h>
 #endif
 
 PdfViewer *PdfViewer::s_instance = nullptr;
