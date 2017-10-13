@@ -254,10 +254,10 @@ void PdfViewer::processCommand()
 {
     static bool error = false;
 
+    printf("PdfViewer::processCommand(): error = %d\n", error);
+
     if (error)
         return;
-
-    printf("PdfViewer::processCommand()\n");
 
 #ifdef Q_OS_WIN
     // try to avoid stall on windows
@@ -302,6 +302,8 @@ void PdfViewer::processCommand()
         PeekNamedPipe(hStdin, NULL, 0, NULL, &bytesLeft, NULL);
         if (!bytesLeft)
             return;
+
+        printf("bytes left: %d\n", bytesLeft);
     }
 
     printf("Object available!\n");
