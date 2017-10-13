@@ -299,7 +299,7 @@ void PdfViewer::processCommand()
 #endif
 
         DWORD bytesLeft;
-        PeekNamedPipe(hStdin, NULL, 0, NULL, &bytes_left, NULL);
+        PeekNamedPipe(hStdin, NULL, 0, NULL, &bytesLeft, NULL);
         if (!bytesLeft)
             return;
     }
