@@ -311,8 +311,13 @@ void PdfViewer::processCommand()
         printf("bytes left: %d\n", bytesLeft);
 
         char fileBuffer[1024];
-        ReadFile(hStdin, fileBuffer, bytesLeft, NULL, NULL);
-        line = std::string(fileBuffer, bytesLeft - 1);
+        DWORD bytesRead;
+        if (!ReadFile(hStdin, fileBuffer, bytesLeft, &bytesRead, NULL)) {
+            printf("ReadFile failed\n");
+            return;
+        }
+
+        line = std::string(fileBuffer, bytesRead);
     }
 #else
     // read one line, without buffering
