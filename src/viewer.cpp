@@ -61,6 +61,8 @@
 
 #ifdef Q_OS_WIN
 #include <Windows.h>
+#include <QWinEventNotifier>
+extern QWinEventNotifier *winEventNotifier;
 #endif
 
 PdfViewer *PdfViewer::s_instance = nullptr;
@@ -319,8 +321,7 @@ void PdfViewer::processCommand()
 
         line = std::string(fileBuffer, bytesRead);
 
-        FlushFileBuffers(hStdin);
-        ResetEvent(hStdin);
+        winEventNotifier->setEnabled(true);
     }
 #else
     // read one line, without buffering

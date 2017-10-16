@@ -26,6 +26,7 @@
 #ifdef Q_OS_WIN
 #include <QWinEventNotifier>
 #include <windows.h>
+QWinEventNotifier *winEventNotifier = nullptr;
 #else
 #include <QSocketNotifier>
 #include <unistd.h>
@@ -106,6 +107,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_WIN
     QWinEventNotifier notifier(GetStdHandle(STD_INPUT_HANDLE));
     QObject::connect(&notifier, SIGNAL(activated(HANDLE)), &viewer, SLOT(processCommand()));
+    winEventNotifier = &notifier;
 #else
     QSocketNotifier notifier(STDIN_FILENO, QSocketNotifier::Read);
     QObject::connect(&notifier, SIGNAL(activated(int)), &viewer, SLOT(processCommand()));
