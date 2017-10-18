@@ -33,9 +33,9 @@
 
 int main(int argc, char *argv[])
 {
-    /**
-     * if you want static binaries, init plugins
-     */
+/**
+ * if you want static binaries, init plugins
+ */
 #ifdef AI_LINK_QT_STATIC_WINDOWS
     Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
     Q_IMPORT_PLUGIN(QSvgIconPlugin)

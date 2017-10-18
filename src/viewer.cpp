@@ -61,7 +61,6 @@
 
 #ifdef Q_OS_WIN
 #include <Windows.h>
-#include <QWinEventNotifier>
 #endif
 
 PdfViewer *PdfViewer::s_instance = nullptr;
@@ -253,70 +252,40 @@ void PdfViewer::closeDocument()
 
 void PdfViewer::processCommand()
 {
-    static bool error = false;
-
-    printf("PdfViewer::processCommand(): error = %d\n", error);
-
-    if (error)
-        return;
-
     std::string line;
 
 #ifdef Q_OS_WIN
+
     // try to avoid stall on windows
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    if (hStdin == INVALID_HANDLE_VALUE)  {
-        printf("invalid stdin handle\n");
-        error = true;
+    if (hStdin == INVALID_HANDLE_VALUE)
         return;
-    }
 
     INPUT_RECORD eventBuffer[1];
     DWORD eventsRead;
     if (PeekConsoleInput(hStdin, eventBuffer, 1, &eventsRead)) {
         if (1 != eventsRead) {
-            printf("eventsRead = %d\n", eventsRead);
             return;
         }
 
         if (KEY_EVENT != eventBuffer[0].EventType) {
-            printf("no key event: %d\n", eventBuffer[0].EventType);
-
             // get rid of non keyboard event
-            if (!ReadConsoleInput(hStdin, eventBuffer, 1, &eventsRead))
-                printf("Failed to read\n");
-
+            ReadConsoleInput(hStdin, eventBuffer, 1, &eventsRead);
             return;
         }
 
         // read one line, without buffering
         std::getline(std::cin, line);
-    }
-    else {
-#if 0
-        LPSTR messageBuffer = nullptr;
-        size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                     NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-
-        std::string message(messageBuffer, size);
-        LocalFree(messageBuffer);
-
-        printf("Failed to peek: %s\n", message.c_str());
-#endif
-
+    } else {
         DWORD bytesLeft;
         PeekNamedPipe(hStdin, NULL, 0, NULL, &bytesLeft, NULL);
         if (!bytesLeft)
             return;
 
-        printf("bytes left: %d\n", bytesLeft);
-
         char fileBuffer[1024];
         DWORD bytesRead;
-        if (!ReadFile(hStdin, fileBuffer, bytesLeft, &bytesRead, NULL)) {
-            printf("ReadFile failed\n");
+        if (!ReadFile(hStdin, fileBuffer, bytesLeft, &bytesRead, NULL))
             return;
-        }
 
         line = std::string(fileBuffer, bytesRead);
     }
@@ -324,8 +293,6 @@ void PdfViewer::processCommand()
     // read one line, without buffering
     std::getline(std::cin, line);
 #endif
-
-    printf("Command read: %s\n", line.c_str());
 
     // get command
     const QString command = QString::fromLocal8Bit(line.c_str()).trimmed();
