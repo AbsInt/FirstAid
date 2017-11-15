@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument(QStringLiteral("file"), QCoreApplication::translate("main", "PDF file to open"));
+    parser.addOption(QCommandLineOption(QStringLiteral("stdin"), QCoreApplication::translate("main", "Read commands from stdin.")));
     parser.process(app);
 
     /**
@@ -101,26 +102,29 @@ int main(int argc, char *argv[])
     PdfViewer viewer(args.empty() ? QString() : args.at(0));
 
     /**
-     * we want to get info from stdin for commands
+     * we want to get info from stdin for commands?
      */
+    if (parser.isSet(QStringLiteral("stdin"))) {
 #ifdef Q_OS_WIN
-    QTimer stdinPollTimer;
-    QObject::connect(&stdinPollTimer, SIGNAL(timeout()), &viewer, SLOT(processCommand()));
-    stdinPollTimer.start(500);
-    QTimer::singleShot(0, &viewer, SLOT(processCommand()));
+        QTimer stdinPollTimer;
+        QObject::connect(&stdinPollTimer, SIGNAL(timeout()), &viewer, SLOT(processCommand()));
+        stdinPollTimer.start(500);
+        QTimer::singleShot(0, &viewer, SLOT(processCommand()));
 #else
-    QSocketNotifier notifier(STDIN_FILENO, QSocketNotifier::Read);
-    QObject::connect(&notifier, SIGNAL(activated(int)), &viewer, SLOT(processCommand()));
+        QSocketNotifier notifier(STDIN_FILENO, QSocketNotifier::Read);
+        QObject::connect(&notifier, SIGNAL(activated(int)), &viewer, SLOT(processCommand()));
 #endif
 
-    /**
-     * => show widget + start event loop
-     */
-    viewer.show();
-    const int returnValue = app.exec();
+        /**
+         * => show widget + start event loop
+         */
+        viewer.show();
+        return app.exec();
+    }
 
     /**
-     * be done
+     * else: no input reading on stdin, just viewer
      */
-    return returnValue;
+    viewer.show();
+    return app.exec();
 }
