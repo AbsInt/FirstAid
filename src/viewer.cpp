@@ -71,8 +71,6 @@ PdfViewer::PdfViewer(const QString &file)
     // register singleton
     s_instance = this;
 
-    setWindowIcon(QIcon(QStringLiteral(":/firstaid.svg")));
-
     setStyleSheet(
         QStringLiteral("QToolButton { border-width: 1px; border-radius: 6px; border-style: none; padding: 2px }"
                        "QToolButton:hover { border-style: solid; border-color: gray; padding: 1px }"
