@@ -43,7 +43,7 @@ HelpDialog::HelpDialog(QWidget *parent)
     html += addShortcut(QStringList() << QStringLiteral("Crtl") << QStringLiteral("E"), tr("Open in external application"));
     html += addShortcut(fromStandardKey(QKeySequence::Print), tr("Print document"));
 #if defined(Q_OS_WIN)
-    html += addShortcut(QStringLiteral("Alt+F4"), tr("Quit application"));
+    html += addShortcut(QStringList() << QStringLiteral("Alt") << QStringLiteral("F4"), tr("Quit application"));
 #else
     html += addShortcut(fromStandardKey(QKeySequence::Quit), tr("Quit application"));
 #endif
