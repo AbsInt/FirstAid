@@ -42,7 +42,11 @@ HelpDialog::HelpDialog(QWidget *parent)
     html += addShortcut(fromStandardKey(QKeySequence::Find), tr("Find text in document"));
     html += addShortcut(QStringList() << QStringLiteral("Crtl") << QStringLiteral("E"), tr("Open in external application"));
     html += addShortcut(fromStandardKey(QKeySequence::Print), tr("Print document"));
+#if defined(Q_OS_WIN)
+    html += addShortcut(QStringLiteral("Alt+F4"), tr("Quit application"));
+#else
     html += addShortcut(fromStandardKey(QKeySequence::Quit), tr("Quit application"));
+#endif
     html += addShortcut(QStringList() << QStringLiteral("RightClick") << QStringLiteral("Drag"), tr("Copy text area"));
     html += addShortcut(QStringList() << QStringLiteral("Shift") << QStringLiteral("LeftClick") << QStringLiteral("Drag"), tr("Copy text area"));
     html += endTable();
