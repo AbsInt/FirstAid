@@ -19,6 +19,7 @@
 #include "helpdialog.h"
 
 #include <QLabel>
+#include <QRegularExpression>
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
@@ -98,7 +99,7 @@ QStringList HelpDialog::endTable()
 QStringList HelpDialog::addShortcut(const QStringList &keys, const QString &description)
 {
     QStringList quotedKeys = keys;
-    quotedKeys.replaceInStrings(QRegExp(QStringLiteral("(^.+$)")), QStringLiteral("<key>\\1</key>"));
+    quotedKeys.replaceInStrings(QRegularExpression(QStringLiteral("(^.+$)")), QStringLiteral("<key>\\1</key>"));
 
     return QStringList() << QStringLiteral("<tr><td>") + quotedKeys.join(QLatin1String(" + ")) + QStringLiteral("</td><td>") + description + QStringLiteral("</td></tr>");
 }
