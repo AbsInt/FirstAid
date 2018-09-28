@@ -166,7 +166,7 @@ private:
      */
     qreal resX() const
     {
-        return logicalDpiX() * m_zoom;
+        return physicalDpiX() * m_zoom * devicePixelRatioF();
     }
 
     /**
@@ -175,7 +175,7 @@ private:
      */
     qreal resY() const
     {
-        return logicalDpiY() * m_zoom;
+        return physicalDpiY() * m_zoom * devicePixelRatioF();
     }
 
     /**

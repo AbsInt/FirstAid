@@ -923,10 +923,10 @@ void PageView::updateViewSize(qreal zoom)
         emit zoomChanged(m_zoom);
     } else if (PdfViewer::document()->numPages() > 0) {
         if (FitWidth == m_zoomMode) {
-            m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * logicalDpiX());
+            m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * physicalDpiX());
         } else if (FitPage == m_zoomMode) {
-            const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * logicalDpiX());
-            const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * logicalDpiY());
+            const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * physicalDpiX());
+            const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * physicalDpiY());
             m_zoom = qMin(zx, zy);
         }
     }
@@ -975,16 +975,17 @@ QImage PageView::getPage(int pageNumber)
      * try to get poppler page => render
      */
     if (Poppler::Page *page = PdfViewer::document()->page(pageNumber)) {
+        // unlock to block less
         locker.unlock();
 
         /**
          * we render in too high resolution and then set the right ratio
          */
-        QImage *cachedPage = new QImage(page->renderToImage(resX() * devicePixelRatio(), resY() * devicePixelRatio(), -1, -1, -1, -1, Poppler::Page::Rotate0));
-        cachedPage->setDevicePixelRatio(devicePixelRatio());
+        QImage *cachedPage = new QImage(page->renderToImage(resX() * devicePixelRatioF(), resY() * devicePixelRatioF(), -1, -1, -1, -1, Poppler::Page::Rotate0));
+        cachedPage->setDevicePixelRatio(devicePixelRatioF());
 
+        // relock before we modify the cache
         locker.relock();
-
         m_imageCache.insert(pageNumber, cachedPage);
         return *cachedPage;
     }
