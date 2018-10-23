@@ -68,11 +68,13 @@ FindBar::FindBar(QWidget *parent)
     m_prevMatch = new QToolButton(this);
     m_prevMatch->setIcon(QIcon(QStringLiteral(":/icons/go-up.svg")));
     m_prevMatch->setToolTip(tr("Previous match"));
+    m_prevMatch->setShortcut(QKeySequence(QStringLiteral("Shift+F3")));
     hbl->addWidget(m_prevMatch);
 
     m_nextMatch = new QToolButton(this);
     m_nextMatch->setIcon(QIcon(QStringLiteral(":/icons/go-down.svg")));
     m_nextMatch->setToolTip(tr("Next match"));
+    m_nextMatch->setShortcut(Qt::Key_F3);
     hbl->addWidget(m_nextMatch);
 
     QAction *findAction = new QAction(parent);

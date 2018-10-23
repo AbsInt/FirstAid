@@ -63,6 +63,8 @@ HelpDialog::HelpDialog(QWidget *parent)
     html += addShortcut(fromStandardKey(QKeySequence::Back), tr("Go back in history"));
     html += addShortcut(fromStandardKey(QKeySequence::Forward), tr("Go forward in history"));
     html += addShortcut(QStringList() << QStringLiteral("Ctrl") << QStringLiteral("G"), tr("Go to page"));
+    html += addShortcut(QStringList() << QStringLiteral("F3"), tr("Next match"));
+    html += addShortcut(QStringList() << QStringLiteral("Shift") << QStringLiteral("F3"), tr("Previous match"));
     html += endTable();
 
     html += addTable(QStringLiteral("View"));
