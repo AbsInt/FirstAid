@@ -986,8 +986,10 @@ QImage PageView::getPage(int pageNumber)
 
         // relock before we modify the cache
         locker.relock();
-        m_imageCache.insert(pageNumber, cachedPage);
-        return *cachedPage;
+        if (m_imageCache.insert(pageNumber, cachedPage))
+            return *cachedPage;
+        else
+            return QImage();
     }
 
     /**
