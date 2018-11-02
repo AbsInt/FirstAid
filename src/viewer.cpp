@@ -222,7 +222,7 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     settings.endGroup();
 
     // queue goto page request as on startup there may be some signals still flying around
-    metaObject()->invokeMethod(m_view, "gotoPage", Qt::QueuedConnection, Q_ARG(int, page));
+    QMainWindow::metaObject()->invokeMethod(m_view, "gotoPage", Qt::QueuedConnection, Q_ARG(int, page));
 }
 
 void PdfViewer::closeDocument()
