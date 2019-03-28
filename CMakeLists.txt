@@ -11,7 +11,6 @@ project(firstaid)
 if(ABSINT)
     # this sets the right compile flags and exports macros like for code-signing
     find_package (UR REQUIRED)
-    find_package (AIWIDGETS REQUIRED)
     include (${UR_USE_FILE})
 
     # static linking
@@ -90,11 +89,11 @@ add_executable(firstaid ${firstaid_SRCS} ${firstaid_UI_SRCS} ${firstaid_QRC_SRCS
 
 # link, we assume static libs on Windows ATM
 if (WIN32)
-    target_link_libraries(firstaid poppler-qt5.lib poppler.lib freetype.lib Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml ${AIWIDGETS_EXTRA_STATIC_QT_LIBRARIES})
+    target_link_libraries(firstaid poppler-qt5.lib poppler.lib freetype.lib Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 elseif (APPLE)
-    target_link_libraries(firstaid -lpoppler-qt5 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml ${AIWIDGETS_EXTRA_STATIC_QT_LIBRARIES})
+    target_link_libraries(firstaid -lpoppler-qt5 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 else()
-    target_link_libraries(firstaid -lpoppler-qt5 -lpoppler Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml ${AIWIDGETS_EXTRA_STATIC_QT_LIBRARIES})
+    target_link_libraries(firstaid -lpoppler-qt5 -lpoppler Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 endif()
 
 # install viewer to prefix
