@@ -25,3 +25,4 @@ firstaid_automoc.cpp
 install_manifest.txt
 moc_*
 qrc_*
+*.cbp
