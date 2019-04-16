@@ -387,6 +387,8 @@ void PdfViewer::slotPrint()
     // let the user select the printer to use
     QPrinter printer(QPrinter::HighResolution);
     QPrintDialog printDialog(&printer, this);
+    printDialog.setMinMax(1, m_document.numPages());
+    printDialog.setFromTo(1, m_document.numPages());
     if (!printDialog.exec())
         return;
 
