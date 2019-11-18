@@ -19,7 +19,9 @@
  */
 
 #include "navigationtoolbar.h"
+
 #include "document.h"
+#include "main.h"
 #include "searchengine.h"
 #include "viewer.h"
 
@@ -58,13 +60,13 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     connect(lastShortcut, SIGNAL(activated()), this, SLOT(slotGoLast()));
 
     // left side is table of content action
-    tocAction->setIcon(QIcon(QStringLiteral(":/icons/bookmark-new.svg")));
+    tocAction->setIcon(createIcon(QStringLiteral(":/icons/bookmark-new.svg")));
     addAction(tocAction);
     QShortcut *tocShortcut = new QShortcut(Qt::Key_F7, this);
     connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
 
     // left side also holds the toggle button for facing pages mode
-    m_toggleFacingPagesAct = addAction(QIcon(QStringLiteral(":/icons/facing-pages.svg")), tr("Facing pages"));
+    m_toggleFacingPagesAct = addAction(createIcon(QStringLiteral(":/icons/facing-pages.svg")), tr("Facing pages"));
     m_toggleFacingPagesAct->setCheckable(true);
     m_toggleFacingPagesAct->setChecked(s.value(QStringLiteral("MainWindow/facingPages"), false).toBool());
     m_toggleFacingPagesAct->setShortcut(Qt::Key_D);
@@ -77,7 +79,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     addWidget(spacer);
 
     // previous page action
-    m_prevAct = addAction(QIcon(QStringLiteral(":/icons/go-previous.svg")), tr("Previous page"), this, SLOT(slotGoPrev()));
+    m_prevAct = addAction(createIcon(QStringLiteral(":/icons/go-previous.svg")), tr("Previous page"), this, SLOT(slotGoPrev()));
     QShortcut *previousShortcut = new QShortcut(QKeySequence::MoveToPreviousPage, this);
     connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
 
@@ -102,7 +104,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     connect(gotoShortCut, SIGNAL(activated()), SLOT(slotGoto()));
 
     // next page action
-    m_nextAct = addAction(QIcon(QStringLiteral(":/icons/go-next.svg")), tr("Next page"), this, SLOT(slotGoNext()));
+    m_nextAct = addAction(createIcon(QStringLiteral(":/icons/go-next.svg")), tr("Next page"), this, SLOT(slotGoNext()));
     QShortcut *nextShortcut = new QShortcut(QKeySequence::MoveToNextPage, this);
     connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
 
@@ -121,11 +123,11 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomButton->setFocusPolicy(Qt::NoFocus);
     m_zoomButton->setToolTip(tr("Zoom"));
     QMenu *zoomMenu = new QMenu(this);
-    QAction *a = zoomMenu->addAction(QIcon(QStringLiteral(":/icons/zoom-fit-width.svg")), tr("Fit width"));
+    QAction *a = zoomMenu->addAction(createIcon(QStringLiteral(":/icons/zoom-fit-width.svg")), tr("Fit width"));
     a->setShortcut(Qt::Key_W);
     a->setShortcutContext(Qt::ApplicationShortcut);
 
-    a = zoomMenu->addAction(QIcon(QStringLiteral(":/icons/zoom-fit-best.svg")), tr("Fit page"));
+    a = zoomMenu->addAction(createIcon(QStringLiteral(":/icons/zoom-fit-best.svg")), tr("Fit page"));
     a->setShortcut(Qt::Key_F);
     a->setShortcutContext(Qt::ApplicationShortcut);
 
@@ -156,7 +158,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QToolButton *menuButton = new QToolButton();
     menuButton->setToolTip(tr("Application menu"));
     menuButton->setFocusPolicy(Qt::NoFocus);
-    menuButton->setIcon(QIcon(QStringLiteral(":/icons/application-menu.svg")));
+    menuButton->setIcon(createIcon(QStringLiteral(":/icons/application-menu.svg")));
     menuButton->setMenu(menu);
     menuButton->setPopupMode(QToolButton::InstantPopup);
     addWidget(menuButton);
@@ -293,16 +295,16 @@ void NavigationToolBar::slotZoomChanged()
 
     if (QLatin1String("Fit width") == text) {
         m_zoomLabelAct->setVisible(false);
-        m_zoomButton->setIcon(QIcon(QStringLiteral(":/icons/zoom-fit-width.svg")));
+        m_zoomButton->setIcon(createIcon(QStringLiteral(":/icons/zoom-fit-width.svg")));
         PdfViewer::view()->setZoomMode(PageView::FitWidth);
     } else if (QLatin1String("Fit page") == text) {
         m_zoomLabelAct->setVisible(false);
-        m_zoomButton->setIcon(QIcon(QStringLiteral(":/icons/zoom-fit-best.svg")));
+        m_zoomButton->setIcon(createIcon(QStringLiteral(":/icons/zoom-fit-best.svg")));
         PdfViewer::view()->setZoomMode(PageView::FitPage);
     } else {
         m_zoomLabelAct->setVisible(true);
         m_zoomLabel->setText(text);
-        m_zoomButton->setIcon(QIcon(QStringLiteral(":/icons/zoom.svg")));
+        m_zoomButton->setIcon(createIcon(QStringLiteral(":/icons/zoom.svg")));
 
         text.remove(QLatin1Char('%'));
         bool ok;
@@ -317,7 +319,7 @@ void NavigationToolBar::slotChangeZoom(qreal currentZoom)
 {
     m_zoomLabelAct->setVisible(true);
     m_zoomLabel->setText(QStringLiteral("%1%").arg(qRound(currentZoom * 100)));
-    m_zoomButton->setIcon(QIcon(QStringLiteral(":/icons/zoom.svg")));
+    m_zoomButton->setIcon(createIcon(QStringLiteral(":/icons/zoom.svg")));
 
     // save nearest zoom
     QList<QAction *> actions = m_zoomButton->menu()->actions();

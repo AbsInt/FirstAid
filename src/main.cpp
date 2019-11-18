@@ -20,9 +20,11 @@
 #include "viewer.h"
 
 #include <QApplication>
+#include <QBitmap>
 #include <QCommandLineParser>
-#include <QtPlugin>
+#include <QPixmap>
 #include <QTimer>
+#include <QtPlugin>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -142,4 +144,19 @@ int main(int argc, char *argv[])
      */
     viewer.show();
     return app.exec();
+}
+
+QIcon createIcon(const QString &iconName)
+{
+    QIcon icon(iconName);
+
+    if (auto guiApp = qobject_cast<QGuiApplication *>(QCoreApplication::instance()); guiApp && guiApp->palette().color(QPalette::Base).lightness() < 125) {
+        QPixmap px = icon.pixmap(128, 128);
+        QPixmap pxr(px.size());
+        pxr.fill(Qt::lightGray);
+        pxr.setMask(px.createMaskFromColor(Qt::transparent));
+        icon = QIcon(pxr);
+    }
+
+    return icon;
 }

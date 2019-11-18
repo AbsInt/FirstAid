@@ -48,7 +48,6 @@
 #include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QGestureEvent>
-#include <QIcon>
 #include <QImage>
 #include <QLabel>
 #include <QLinearGradient>
