@@ -38,6 +38,7 @@
  */
 
 #include "pageview.h"
+#include "main.h"
 #include "viewer.h"
 
 #include <QApplication>
@@ -348,7 +349,7 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // fill background
-    p.fillRect(paintEvent->rect(), Qt::gray);
+    p.fillRect(paintEvent->rect(), appIsDarkThemed ? palette().color(QPalette::Window) : Qt::gray);
 
     // move the desired offset
     p.translate(-offset());

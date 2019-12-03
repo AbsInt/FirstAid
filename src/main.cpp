@@ -38,6 +38,8 @@
 #pragma warning(disable : 4930) // 'const QStaticPlugin qt_static_plugin_QSvgIconPlugin(void)': prototyped function not called (was a variable definition intended?)
 #endif
 
+bool appIsDarkThemed = false;
+
 int main(int argc, char *argv[])
 {
 /**
@@ -113,6 +115,12 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     /**
+     * Try to detect dark themed applications
+     */
+
+    appIsDarkThemed = QPalette().color(QPalette::Base).lightness() < 128;
+
+    /**
      * Construct our main window, perhaps open document passed on command line
      */
     const QStringList args = parser.positionalArguments();
@@ -150,7 +158,7 @@ QIcon createIcon(const QString &iconName)
 {
     QIcon icon(iconName);
 
-    if (auto guiApp = qobject_cast<QGuiApplication *>(QCoreApplication::instance()); guiApp && guiApp->palette().color(QPalette::Base).lightness() < 125) {
+    if (appIsDarkThemed) {
         QPixmap px = icon.pixmap(128, 128);
         QPixmap pxr(px.size());
         pxr.fill(Qt::lightGray);
