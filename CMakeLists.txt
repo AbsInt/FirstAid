@@ -1,7 +1,7 @@
 #
 # Basics: Right cmake version and right path for modules
 #
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.16)
 set (CMAKE_MODULE_PATH "${CMAKE_INSTALL_PREFIX}/share/cmake/modules")
 
 # FirstAid - PDF Help Viewer
