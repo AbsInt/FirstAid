@@ -186,7 +186,7 @@ void Document::relayout()
                 leftMaxWidth = qMax(leftMaxWidth, pageRect.width());
                 currentPage++;
 
-                // check right side
+                // check right side, center last page if single
                 if (currentPage < numPages()) {
                     p = page(currentPage);
                     pageRect = QRectF(QPointF(), p->pageSizeF()).translated(offset + QPointF(pageRect.width(), 0));
@@ -199,7 +199,8 @@ void Document::relayout()
                         pageRect.translate(0, (m_pageRects.last().height() - pageRect.height()) / 2.0);
 
                     m_pageRects << pageRect;
-                }
+                } else
+                    m_pageRects[m_pageRects.count() - 1].translate(pageRect.width() / 2, 0);
             }
 
             currentPage++;
@@ -220,7 +221,6 @@ void Document::relayout()
 
             if (leftPageWidth < leftMaxWidth) {
                 m_pageRects[currentPage].translate(leftMaxWidth - leftPageWidth, 0);
-                currentPage++;
 
                 if (currentPage + 1 < numPages())
                     m_pageRects[currentPage + 1].translate(leftMaxWidth - leftPageWidth, 0);
