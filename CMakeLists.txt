@@ -77,6 +77,10 @@ set(firstaid_SRCS
   src/viewer.h
 )
 
+set(link_checker_SRCS
+    link_checker/main.cpp
+)
+
 qt5_add_resources(firstaid_QRC_SRCS firstaid.qrc)
 
 # embedd icon on Windows
@@ -96,8 +100,21 @@ else()
     target_link_libraries(firstaid -lpoppler-qt5 -lpoppler Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
 endif()
 
+# build linkChecker binary
+add_executable(linkChecker ${link_checker_SRCS})
+
+# link, we assume static libs on Windows ATM
+if (WIN32)
+    target_link_libraries(linkChecker poppler-qt5.lib poppler.lib  freetype.lib zlib.lib Qt5::Core Qt5::PrintSupport Qt5::Xml)
+elseif (APPLE)
+    target_link_libraries(linkChecker -lpoppler-qt5 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat Qt5::Core Qt5::PrintSupport Qt5::Xml)
+else()
+    target_link_libraries(linkChecker -lpoppler-qt5 -lpoppler Qt5::Core Qt5::PrintSupport Qt5::Xml)
+endif()
+
 # install viewer to prefix
 install(TARGETS firstaid DESTINATION bin)
+install(TARGETS linkChecker DESTINATION bin)
 
 # AbsInt internal stuff
 if(ABSINT)
