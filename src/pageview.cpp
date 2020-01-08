@@ -923,10 +923,10 @@ void PageView::updateViewSize(qreal zoom)
         emit zoomChanged(m_zoom);
     } else if (PdfViewer::document()->numPages() > 0) {
         if (FitWidth == m_zoomMode) {
-            m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * physicalDpiX());
+            m_zoom = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
         } else if (FitPage == m_zoomMode) {
-            const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * physicalDpiX());
-            const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * physicalDpiY());
+            const qreal zx = qreal(viewport()->width()) / (PdfViewer::document()->layoutSize().width() / 72.0 * m_dpiX);
+            const qreal zy = qreal(viewport()->height()) / (PdfViewer::document()->pageRect(0).height() / 72.0 * m_dpiY);
             m_zoom = qMin(zx, zy);
         }
     }

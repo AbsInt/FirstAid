@@ -166,7 +166,7 @@ private:
      */
     qreal resX() const
     {
-        return physicalDpiX() * m_zoom;
+        return m_dpiX * m_zoom;
     }
 
     /**
@@ -175,7 +175,7 @@ private:
      */
     qreal resY() const
     {
-        return physicalDpiY() * m_zoom;
+        return m_dpiY * m_zoom;
     }
 
     /**
@@ -253,6 +253,20 @@ signals:
 
 private:
     /**
+     * DPI x, remember it, as we might have that changing but don't want to flicker/jump
+     * bug 27933
+     * one could improve this later and watch for screen/... changes and update it + recompute positions
+     */
+    qreal m_dpiX = physicalDpiX();
+
+    /**
+     * DPI y, remember it, as we might have that changing but don't want to flicker/jump
+     * bug 27933
+     * one could improve this later and watch for screen/... changes and update it + recompute positions
+     */
+    qreal m_dpiY = physicalDpiY();
+
+    /**
      * members to handle zooming
      */
     ZoomMode m_zoomMode = Absolute;
@@ -267,11 +281,6 @@ private:
      * cache for already created images, key is the page number
      */
     QCache<int, QImage> m_imageCache;
-
-    /**
-     * current offset of viewport
-     */
-    QPoint m_offset;
 
     /**
      * members for handling the rubber band
