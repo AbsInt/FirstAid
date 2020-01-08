@@ -1,5 +1,6 @@
 *.depends
 *.plist
+*.cbp
 .clang-format
 /.cproject
 /.project
@@ -20,7 +21,7 @@ config.h
 doc/
 env.sh
 firstaid
-firstaid_autogen/
+/*_autogen/
 firstaid_automoc.cpp
 install_manifest.txt
 moc_*
