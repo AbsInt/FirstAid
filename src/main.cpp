@@ -120,6 +120,10 @@ int main(int argc, char *argv[])
 
     appIsDarkThemed = QPalette().color(QPalette::Base).lightness() < 128;
 
+    QApplication::setStyle(QStringLiteral("fusion"));
+    if (appIsDarkThemed)
+        QIcon::setThemeName(QStringLiteral("breeze-dark"));
+
     /**
      * Construct our main window, perhaps open document passed on command line
      */
