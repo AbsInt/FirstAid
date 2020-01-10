@@ -18,7 +18,6 @@
 
 #include <QCoreApplication>
 
-
 #include <poppler-qt5.h>
 #include <QCommandLineParser>
 
@@ -39,25 +38,25 @@ int main(int argc, char **argv)
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("FirstAid - Link checker - PDF Help Viewer"));
     parser.addPositionalArgument(QStringLiteral("file"), QCoreApplication::translate("main", "PDF file to open"));
-    parser.addOption(QCommandLineOption(QStringLiteral("link-file"), QCoreApplication::translate("main", "File with the links to check."),QStringLiteral("file")));
-    parser.addOption(QCommandLineOption(QStringLiteral("output-file"), QCoreApplication::translate("main", "File to which the invalid links are printed."),QStringLiteral("file")));
+    parser.addOption(QCommandLineOption(QStringLiteral("link-file"), QCoreApplication::translate("main", "File with the links to check."), QStringLiteral("file")));
+    parser.addOption(QCommandLineOption(QStringLiteral("output-file"), QCoreApplication::translate("main", "File to which the invalid links are printed."), QStringLiteral("file")));
     parser.process(app);
 
     const QStringList args = parser.positionalArguments();
     QString fileName = (args.empty() ? QString() : args.at(0));
 
-    if (fileName.isEmpty()){
+    if (fileName.isEmpty()) {
         printf("No pdf file specified.\n");
         return 1;
     }
 
     QString outputFileName;
-    if (parser.isSet(QStringLiteral("output-file"))){
+    if (parser.isSet(QStringLiteral("output-file"))) {
         outputFileName = parser.value(QStringLiteral("output-file"));
     }
 
     QString linkFileName;
-    if (parser.isSet(QStringLiteral("link-file"))){
+    if (parser.isSet(QStringLiteral("link-file"))) {
         linkFileName = parser.value(QStringLiteral("link-file"));
     } else {
         printf("No link file specified.\n");
@@ -75,7 +74,7 @@ int main(int argc, char **argv)
             return 5;
         }
 
-    }else {
+    } else {
         printf("File %s does not exist or is empty.\n", qPrintable(pdfFile.fileName()));
         return 2;
     }
@@ -106,7 +105,7 @@ int main(int argc, char **argv)
                         outputFile.write(line.toUtf8().constData());
                 }
             }
-                           
+
             linkFile.close();
             if (write)
                 outputFile.close();
@@ -116,7 +115,7 @@ int main(int argc, char **argv)
             if (write)
                 outputFile.close();
             printf("Cannot open file %s for reading.\n", qPrintable(linkFile.fileName()));
-        return 3;
+            return 3;
         }
     } else {
         delete document;
