@@ -263,8 +263,10 @@ private:
      * DPI y, remember it, as we might have that changing but don't want to flicker/jump
      * bug 27933
      * one could improve this later and watch for screen/... changes and update it + recompute positions
+     *
+     * for bug 26284 we atm assume that is equal the X DPI
      */
-    qreal m_dpiY = physicalDpiY();
+    qreal m_dpiY = m_dpiX;
 
     /**
      * members to handle zooming
