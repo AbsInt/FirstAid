@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
      * Use high dpi pixmaps
      */
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
 
     /**
      * We do not want the context help button in dialogs per default.
