@@ -78,17 +78,25 @@ int main(int argc, char *argv[])
     Q_IMPORT_PLUGIN(QComposePlatformInputContextPlugin) // ensure compose keys work, bug 25999
 #endif
 
+    // clean env before we construct application to avoid wrong plugin loading!
+    qunsetenv("QT_PLUGIN_PATH");
+
     /**
      * Use high dpi pixmaps
      */
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
 
     /**
-     * Enables high-DPI scaling in Qt on supported platforms (see also High DPI Displays).
-     * Supported platforms are X11, Windows and Android.
-     * new in Qt 5.6
+     * We do not want the context help button in dialogs per default.
+     * new in Qt 5.10
      */
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
+    QCoreApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton, true);
+
+    /**
+     * allow fractional scaling
+     * new in Qt 5.14
+     */
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
     /**
      * Application with widgets
