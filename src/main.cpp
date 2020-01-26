@@ -96,8 +96,12 @@ int main(int argc, char *argv[])
     /**
      * allow fractional scaling
      * new in Qt 5.14
+     * do that only on Windows, leads to artifacts on unices
+     * see bug 27948
      */
+#if defined(Q_OS_WIN)
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+#endif
 
     /**
      * Application with widgets
