@@ -310,7 +310,7 @@ void PdfViewer::processCommand()
         if (ok)
             m_view->gotoPage(pageNumber - 1);
         else {
-            for (const QString &t : target.split(QLatin1Char(','), QString::SkipEmptyParts)) {
+            for (const QString &t : target.split(QLatin1Char(','), Qt::SkipEmptyParts)) {
                 bool valid = false;
                 if (Poppler::LinkDestination *linkDest = (document()->linkDestination(t))) {
                     valid = linkDest->pageNumber() > 0;

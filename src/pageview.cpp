@@ -221,9 +221,9 @@ void PageView::setZoom(qreal zoom)
 void PageView::wheelEvent(QWheelEvent *wheelEvent)
 {
     if (wheelEvent->modifiers() & Qt::ControlModifier) {
-        if (wheelEvent->delta() > 0)
+        if (wheelEvent->angleDelta().y() > 0)
             setZoom(m_zoom + 0.1);
-        else
+        else if (wheelEvent->angleDelta().y() < 0)
             setZoom(m_zoom - 0.1);
         return;
     }
