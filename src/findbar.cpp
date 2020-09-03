@@ -108,6 +108,10 @@ FindBar::FindBar(QWidget *parent)
 
     connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
 
+    // redo search on option changes
+    connect(m_acCaseSensitive, SIGNAL(triggered()), SLOT(slotFindActionTriggered()));
+    connect(m_acWholeWords, SIGNAL(triggered()), SLOT(slotFindActionTriggered()));
+
     slotDocumentChanged();
 }
 
