@@ -240,6 +240,7 @@ void PageView::slotClearImageCache()
 {
     QMutexLocker locker(m_mutex);
     m_imageCache.clear();
+    m_usePageRect = false;
     viewport()->update();
 }
 
@@ -365,7 +366,10 @@ void PageView::paintEvent(QPaintEvent *paintEvent)
         QRect displayRect = fromPoints(pageRect);
 
         QImage cachedPage = getPage(page);
-        p.drawImage(displayRect, cachedPage);
+        if (m_usePageRect)
+            p.drawImage(displayRect, cachedPage);
+        else
+            p.drawImage(displayRect.topLeft(), cachedPage);
 
         p.setPen(Qt::NoPen);
 
@@ -908,6 +912,7 @@ void PageView::updateViewSize(qreal zoom)
      * we might alter sizes
      */
     m_clearImageCacheTimer.start();
+    m_usePageRect = true;
 
     /**
      * remember current center of viewport

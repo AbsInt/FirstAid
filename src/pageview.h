@@ -320,7 +320,6 @@ private:
      * delayed clearing of image cache
      */
     QTimer m_clearImageCacheTimer;
-    ;
 
     /**
      * area in the viewport to highlight via animation
@@ -335,4 +334,9 @@ private:
      */
     QLabel *m_hintLabel = nullptr;
     QTimer *m_hintLabelTimer = nullptr;
+
+    /**
+     * bool set during zooming, reset when m_clearImageCacheTimer triggers
+     */
+    bool m_usePageRect = false;
 };
