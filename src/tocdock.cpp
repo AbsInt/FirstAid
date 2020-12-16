@@ -102,16 +102,13 @@ TocDock::TocDock(QWidget *parent)
 
 TocDock::~TocDock()
 {
-    delete m_toc;
 }
 
 void TocDock::fillInfo()
 {
-    if (const QDomDocument *toc = PdfViewer::document()->toc()) {
-        QSet<QModelIndex> openIndices = fillToc(*toc);
-        if (m_toc)
-            delete m_toc;
-        m_toc = toc;
+    const auto toc = PdfViewer::document()->toc();
+    if (!toc.isEmpty()) {
+        QSet<QModelIndex> openIndices; // FIXME = fillToc(*toc);
 
         // inform tree about new model
         m_tree->setModel(m_proxyModel);

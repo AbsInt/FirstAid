@@ -81,12 +81,12 @@ void Document::setDocument(Poppler::Document *document)
     emit documentChanged();
 }
 
-const QDomDocument *Document::toc() const
+QVector<Poppler::OutlineItem> Document::toc() const
 {
     if (!m_document)
-        return nullptr;
+        return QVector<Poppler::OutlineItem>();
 
-    return m_document->toc();
+    return m_document->outline();
 }
 
 QList<int> Document::visiblePages(const QRectF &rect) const

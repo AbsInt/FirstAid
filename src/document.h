@@ -47,8 +47,8 @@ public:
         return m_title;
     }
 
-    /*! Returns the table of contents of nullptr. */
-    const QDomDocument *toc() const;
+    /*! Returns the table of contents. */
+    QVector<Poppler::OutlineItem> toc() const;
 
     /*! Returns the required size of a viewport. */
     QSizeF layoutSize() const
