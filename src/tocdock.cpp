@@ -108,7 +108,7 @@ void TocDock::fillInfo()
 {
     const auto toc = PdfViewer::document()->toc();
     if (!toc.isEmpty()) {
-        QSet<QModelIndex> openIndices; // FIXME = fillToc(*toc);
+        QSet<QModelIndex> openIndices = fillToc(toc);
 
         // inform tree about new model
         m_tree->setModel(m_proxyModel);
@@ -128,26 +128,22 @@ void TocDock::fillInfo()
     }
 }
 
-QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parentItem)
+QSet<QModelIndex> TocDock::fillToc(const QVector<Poppler::OutlineItem> &items, QStandardItem *parentItem)
 {
     QSet<QModelIndex> openIndices;
 
-    for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
-        QDomElement e = node.toElement();
-
+    for (const auto &item : items) {
         // tag name == link name, strange enough
-        QStandardItem *labelItem = new QStandardItem(e.tagName());
+        QStandardItem *labelItem = new QStandardItem(item.name());
         labelItem->setFlags(labelItem->flags() & ~Qt::ItemIsEditable);
 
         /**
          * use raw string for destination or convert the named one
          */
-        QString destination = e.attribute(QStringLiteral("Destination"));
-        if (!e.attribute(QStringLiteral("DestinationName")).isNull()) {
-            Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(e.attribute(QStringLiteral("DestinationName")));
-            if (link && link->pageNumber() > 0)
-                destination = link->toString();
-            delete link;
+        QString destination;
+        if (item.destination()) {
+            if (item.destination()->pageNumber() > 0)
+                destination = item.destination()->toString();
         }
 
         // skip destination building if not there
@@ -171,13 +167,11 @@ QSet<QModelIndex> TocDock::fillToc(const QDomNode &parent, QStandardItem *parent
 
         m_pageToIndexMap.insert(pageNumber, labelItem->index());
 
-        if (e.hasAttribute(QStringLiteral("Open"))) {
-            if (QVariant(e.attribute(QStringLiteral("Open"))).toBool())
-                openIndices << labelItem->index();
-        }
+        if (item.isOpen())
+            openIndices << labelItem->index();
 
-        if (e.hasChildNodes())
-            openIndices += fillToc(node, labelItem);
+        if (item.hasChildren())
+            openIndices += fillToc(item.children(), labelItem);
 
         // adjust filter role
         QStringList filterRoles;

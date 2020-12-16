@@ -23,6 +23,8 @@
 #include <QHash>
 #include <QModelIndex>
 
+#include <poppler-qt5.h>
+
 class QDomDocument;
 class QDomNode;
 class QLineEdit;
@@ -44,7 +46,7 @@ signals:
 
 protected:
     void fillInfo();
-    QSet<QModelIndex> fillToc(const QDomNode &parent, QStandardItem *parentItem = nullptr);
+    QSet<QModelIndex> fillToc(const QVector<Poppler::OutlineItem> &items, QStandardItem *parentItem = nullptr);
 
 protected slots:
     void documentChanged();
