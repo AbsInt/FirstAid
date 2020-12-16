@@ -25,8 +25,6 @@
 
 #include <poppler-qt5.h>
 
-class QDomDocument;
-class QDomNode;
 class QLineEdit;
 class QSortFilterProxyModel;
 class QStandardItem;
