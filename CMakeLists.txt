@@ -13,17 +13,8 @@ if(ABSINT)
     find_package (UR REQUIRED)
     include (${UR_USE_FILE})
 
-    # static linking
-    if (WIN32)
-        add_definitions (-DAI_LINK_QT_STATIC_WINDOWS)
-    elseif (APPLE)
-        add_definitions (-DAI_LINK_QT_STATIC_APPLE)
-    else()
-        add_definitions (-DAI_LINK_QT_STATIC_LINUX)
-    endif()
-
     # prefer local poppler
-    include_directories(${CMAKE_INSTALL_PREFIX}/include/poppler/qt5)
+    include_directories(${CMAKE_INSTALL_PREFIX}/include/poppler/qt6)
 
     # setup AbsInt release info
     set (FIRSTAID_BUILD ${UR_BUILD})
@@ -31,7 +22,7 @@ if(ABSINT)
     set (FIRSTAID_RELEASE ${UR_RELEASE})
 else()
     # prefer system poppler
-    include_directories(/usr/include/poppler/qt5)
+    include_directories(/usr/include/poppler/qt6)
 
     # setup public release info, fill in values if you like to have this in About
     set (FIRSTAID_BUILD "")
@@ -49,11 +40,11 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
 
 # needed Qt parts
-find_package(Qt5Concurrent)
-find_package(Qt5Core)
-find_package(Qt5Widgets)
-find_package(Qt5PrintSupport)
-find_package(Qt5Xml)
+find_package(Qt6Concurrent)
+find_package(Qt6Core)
+find_package(Qt6Widgets)
+find_package(Qt6PrintSupport)
+find_package(Qt6Xml)
 
 set(firstaid_SRCS
   src/document.cpp
@@ -81,7 +72,7 @@ set(link_checker_SRCS
     link_checker/main.cpp
 )
 
-qt5_add_resources(firstaid_QRC_SRCS firstaid.qrc)
+qt6_add_resources(firstaid_QRC_SRCS firstaid.qrc)
 
 # embedd icon on Windows
 IF(WIN32)
@@ -93,11 +84,11 @@ add_executable(firstaid ${firstaid_SRCS} ${firstaid_UI_SRCS} ${firstaid_QRC_SRCS
 
 # link, we assume static libs on Windows ATM
 if (WIN32)
-    target_link_libraries(firstaid poppler-qt5.lib poppler.lib freetype.lib zlib.lib Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
+    target_link_libraries(firstaid poppler-qt6.lib poppler.lib freetype.lib zlib.lib Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 elseif (APPLE)
-    target_link_libraries(firstaid -lpoppler-qt5 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
+    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 else()
-    target_link_libraries(firstaid -lpoppler-qt5 -lpoppler Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Concurrent Qt5::Xml)
+    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 endif()
 
 # build linkChecker binary
@@ -105,11 +96,11 @@ add_executable(linkChecker ${link_checker_SRCS})
 
 # link, we assume static libs on Windows ATM
 if (WIN32)
-    target_link_libraries(linkChecker poppler-qt5.lib poppler.lib  freetype.lib zlib.lib Qt5::Core Qt5::PrintSupport Qt5::Xml)
+    target_link_libraries(linkChecker poppler-qt6.lib poppler.lib  freetype.lib zlib.lib Qt6::Core Qt6::PrintSupport Qt6::Xml)
 elseif (APPLE)
-    target_link_libraries(linkChecker -lpoppler-qt5 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat Qt5::Core Qt5::PrintSupport Qt5::Xml)
+    target_link_libraries(linkChecker -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat Qt6::Core Qt6::PrintSupport Qt6::Xml)
 else()
-    target_link_libraries(linkChecker -lpoppler-qt5 -lpoppler Qt5::Core Qt5::PrintSupport Qt5::Xml)
+    target_link_libraries(linkChecker -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype Qt6::Core Qt6::PrintSupport Qt6::Xml)
 endif()
 
 # install viewer to prefix

@@ -21,7 +21,7 @@
 #include "pageview.h"
 #include "viewer.h"
 
-#include <poppler-qt5.h>
+#include <poppler-qt6.h>
 
 #include <QHeaderView>
 #include <QLineEdit>

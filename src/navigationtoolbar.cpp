@@ -25,7 +25,7 @@
 #include "searchengine.h"
 #include "viewer.h"
 
-#include <poppler-qt5.h>
+#include <poppler-qt6.h>
 
 #include <QAction>
 #include <QComboBox>
@@ -100,7 +100,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_pageLabelAct = addWidget(m_pageLabel);
 
     // got is accessible by ctrl+g
-    QShortcut *gotoShortCut = new QShortcut(Qt::ControlModifier + Qt::Key_G, this);
+    QShortcut *gotoShortCut = new QShortcut(Qt::ControlModifier | Qt::Key_G, this);
     connect(gotoShortCut, SIGNAL(activated()), SLOT(slotGoto()));
 
     // next page action
@@ -139,7 +139,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     zoomMenu->addAction(tr("75%"));
 
     a = zoomMenu->addAction(tr("100%"));
-    a->setShortcut(Qt::ControlModifier + Qt::Key_0);
+    a->setShortcut(Qt::ControlModifier | Qt::Key_0);
     a->setShortcutContext(Qt::ApplicationShortcut);
 
     zoomMenu->addAction(tr("125%"));

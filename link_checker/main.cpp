@@ -18,7 +18,7 @@
 
 #include <QCoreApplication>
 
-#include <poppler-qt5.h>
+#include <poppler-qt6.h>
 #include <QCommandLineParser>
 
 #include <QFileInfo>

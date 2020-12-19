@@ -30,7 +30,7 @@
 class QMutex;
 #include <QTimer>
 
-#include <poppler-qt5.h>
+#include <poppler-qt6.h>
 
 #include "document.h"
 #include "historystack.h"

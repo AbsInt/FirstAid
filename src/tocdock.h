@@ -23,7 +23,7 @@
 #include <QHash>
 #include <QModelIndex>
 
-#include <poppler-qt5.h>
+#include <poppler-qt6.h>
 
 class QLineEdit;
 class QSortFilterProxyModel;

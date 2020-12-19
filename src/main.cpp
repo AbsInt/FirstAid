@@ -24,7 +24,6 @@
 #include <QCommandLineParser>
 #include <QPixmap>
 #include <QTimer>
-#include <QtPlugin>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -33,65 +32,12 @@
 #include <unistd.h>
 #endif
 
-#ifdef AI_LINK_QT_STATIC_WINDOWS
-#pragma warning(disable : 4101) // 'qt_static_plugin_QSvgIconPlugin' : unreferenced local variable
-#pragma warning(disable : 4930) // 'const QStaticPlugin qt_static_plugin_QSvgIconPlugin(void)': prototyped function not called (was a variable definition intended?)
-#endif
-
 bool appIsDarkThemed = false;
 
 int main(int argc, char *argv[])
 {
-/**
- * if you want static binaries, init plugins
- */
-#ifdef AI_LINK_QT_STATIC_WINDOWS
-    // import here all plugins we need, patches to Qt5GuiConfig.cmake ensure we link against enough stuff
-    Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-    Q_IMPORT_PLUGIN(QOffscreenIntegrationPlugin) // for GUI batch mode testing in MF/TF
-    Q_IMPORT_PLUGIN(QSvgIconPlugin)
-    Q_IMPORT_PLUGIN(QICOPlugin)
-    Q_IMPORT_PLUGIN(QSvgPlugin)
-    Q_IMPORT_PLUGIN(QGifPlugin)
-    Q_IMPORT_PLUGIN(QWindowsPrinterSupportPlugin)
-#endif
-
-#ifdef AI_LINK_QT_STATIC_APPLE
-    // import here all plugins we need, patches to Qt5GuiConfig.cmake ensure we link against enough stuff
-    Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
-    Q_IMPORT_PLUGIN(QSvgIconPlugin)
-    Q_IMPORT_PLUGIN(QICOPlugin)
-    Q_IMPORT_PLUGIN(QSvgPlugin)
-    Q_IMPORT_PLUGIN(QGifPlugin)
-    Q_IMPORT_PLUGIN(QCocoaPrinterSupportPlugin)
-#endif
-
-#ifdef AI_LINK_QT_STATIC_LINUX
-    // import here all plugins we need, patches to Qt5GuiConfig.cmake ensure we link against enough stuff
-    Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
-    Q_IMPORT_PLUGIN(QOffscreenIntegrationPlugin) // for GUI batch mode testing in MF/TF
-    Q_IMPORT_PLUGIN(QSvgIconPlugin)
-    Q_IMPORT_PLUGIN(QICOPlugin)
-    Q_IMPORT_PLUGIN(QSvgPlugin)
-    Q_IMPORT_PLUGIN(QGifPlugin)
-    Q_IMPORT_PLUGIN(QCupsPrinterSupportPlugin)
-    Q_IMPORT_PLUGIN(QComposePlatformInputContextPlugin) // ensure compose keys work, bug 25999
-#endif
-
     // clean env before we construct application to avoid wrong plugin loading!
     qunsetenv("QT_PLUGIN_PATH");
-
-    /**
-     * Use high dpi pixmaps
-     */
-    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
-
-    /**
-     * We do not want the context help button in dialogs per default.
-     * new in Qt 5.10
-     */
-    QCoreApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton, true);
 
     /**
      * allow fractional scaling
