@@ -44,7 +44,7 @@ public:
 
     QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
     {
-        if (Qt::BackgroundRole == role && filterRegularExpression().isValid()) {
+        if (Qt::BackgroundRole == role && !filterRegularExpression().pattern().isEmpty()) {
             if (-1 != proxyIndex.data().toString().indexOf(filterRegularExpression()))
                 return QVariant::fromValue(PageView::matchColor());
         }
