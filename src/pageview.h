@@ -27,7 +27,7 @@
 #include <QAbstractScrollArea>
 #include <QCache>
 #include <QImage>
-class QMutex;
+#include <QRecursiveMutex>
 #include <QTimer>
 
 #include <poppler-qt6.h>
@@ -327,7 +327,7 @@ private:
     QRect m_highlightRect;
     int m_highlightValue = 0;
 
-    QMutex *m_mutex;
+    QRecursiveMutex *m_mutex;
 
     /**
      * a hint label displayed for small help texts

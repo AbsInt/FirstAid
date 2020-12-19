@@ -40,7 +40,6 @@
 #include <QDesktopServices>
 #include <QAction>
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFileDialog>
@@ -100,7 +99,7 @@ PdfViewer::PdfViewer(const QString &file)
     menu->addSeparator();
 
     m_fileOpenExternalAct = menu->addAction(createIcon(QStringLiteral(":/icons/acrobat.svg")), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
-    m_fileOpenExternalAct->setShortcut(Qt::CTRL + Qt::Key_E);
+    m_fileOpenExternalAct->setShortcut(Qt::CTRL | Qt::Key_E);
 
     m_filePrintAct = menu->addAction(createIcon(QStringLiteral(":/icons/document-print.svg")), tr("&Print..."), this, SLOT(slotPrint()));
     m_filePrintAct->setShortcut(QKeySequence::Print);

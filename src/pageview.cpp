@@ -47,7 +47,6 @@
 #include <QCursor>
 #include <QDebug>
 #include <QDesktopServices>
-#include <QDesktopWidget>
 #include <QGestureEvent>
 #include <QImage>
 #include <QLabel>
@@ -69,7 +68,7 @@
 PageView::PageView(QWidget *parent)
     : QAbstractScrollArea(parent)
     , m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
-    , m_mutex(new QMutex(QMutex::Recursive))
+    , m_mutex(new QRecursiveMutex())
 {
     /**
      * allow 64 cached pages
@@ -121,7 +120,7 @@ PageView::PageView(QWidget *parent)
     new QShortcut(Qt::Key_Backspace, this, SLOT(stepBack()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(Qt::Key_Space, this, SLOT(advance()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::ZoomIn, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(Qt::ControlModifier + Qt::Key_Equal, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::ControlModifier | Qt::Key_Equal, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::ZoomOut, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::Back, this, SLOT(historyPrev()), nullptr, Qt::ApplicationShortcut);
     new QShortcut(QKeySequence::Forward, this, SLOT(historyNext()), nullptr, Qt::ApplicationShortcut);
@@ -263,7 +262,7 @@ void PageView::updateCurrentPage()
         m_currentPage = page;
         QList<int> pages = PdfViewer::document()->visiblePages(toPoints(QRect(offset(), viewport()->size())));
         if (!pages.isEmpty()) {
-            QtConcurrent::run(this, &PageView::prerender, pages.first(), pages.last(), PdfViewer::document()->numPages());
+            const auto future = QtConcurrent::run(&PageView::prerender, this, pages.first(), pages.last(), PdfViewer::document()->numPages());
         }
         emit pageChanged(m_currentPage);
     }
@@ -423,24 +422,24 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
     if (!m_panStartPoint.isNull()) {
         // keep mouse in viewport while panning, wrap at the borders
         if (!viewport()->rect().contains(event->pos())) {
-            QPoint newStart = event->globalPos();
-            if (event->x() < 0) {
+            QPoint newStart = event->globalPosition().toPoint();
+            if (event->position().x() < 0) {
                 newStart += QPoint(viewport()->width(), 0);
-            } else if (event->x() > viewport()->width()) {
+            } else if (event->position().x() > viewport()->width()) {
                 newStart -= QPoint(viewport()->width(), 0);
             }
-            if (event->y() < 0) {
+            if (event->position().y() < 0) {
                 newStart += QPoint(0, viewport()->height());
-            } else if (event->y() > viewport()->height()) {
+            } else if (event->position().y() > viewport()->height()) {
                 newStart -= QPoint(0, viewport()->height());
             }
             m_panStartPoint = newStart;
             m_panOldOffset = QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
-            QApplication::desktop()->cursor().setPos(newStart);
+          // FIXME  QApplication::desktop()->cursor().setPos(newStart);
         }
 
         setCursor(Qt::ClosedHandCursor);
-        setOffset(m_panOldOffset + m_panStartPoint - event->globalPos());
+        setOffset(m_panOldOffset + m_panStartPoint - event->globalPosition().toPoint());
         return;
     }
 
@@ -454,8 +453,8 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
     int page = PdfViewer::document()->pageForPoint(toPoints(offset() + event->pos()));
     if (-1 != page) {
         QRect pageRect = fromPoints(PdfViewer::document()->pageRect(page));
-        qreal xPos = (offset().x() + event->x() - pageRect.x()) / (qreal)pageRect.width();
-        qreal yPos = (offset().y() + event->y() - pageRect.y()) / (qreal)pageRect.height();
+        qreal xPos = (offset().x() + event->position().x() - pageRect.x()) / (qreal)pageRect.width();
+        qreal yPos = (offset().y() + event->position().y() - pageRect.y()) / (qreal)pageRect.height();
         QPointF p = QPointF(xPos, yPos);
 
         for (auto &l : PdfViewer::document()->links(page)) {
@@ -496,8 +495,8 @@ void PageView::mousePressEvent(QMouseEvent *event)
     if (-1 != page) {
         QRectF pageRect = PdfViewer::document()->pageRect(page);
         QRect pixelPageRect = fromPoints(pageRect);
-        qreal xPos = (offset().x() + event->x() - pixelPageRect.x()) / (qreal)pixelPageRect.width();
-        qreal yPos = (offset().y() + event->y() - pixelPageRect.y()) / (qreal)pixelPageRect.height();
+        qreal xPos = (offset().x() + event->position().x() - pixelPageRect.x()) / (qreal)pixelPageRect.width();
+        qreal yPos = (offset().y() + event->position().y() - pixelPageRect.y()) / (qreal)pixelPageRect.height();
         QPointF p = QPointF(xPos, yPos);
 
         for (auto &l : PdfViewer::document()->links(page)) {
@@ -541,7 +540,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
                 }
 
                 else if (Poppler::Annotation::AText == l->subType() || Poppler::Annotation::ACaret == l->subType()) {
-                    QWhatsThis::showText(event->globalPos(), l->contents());
+                    QWhatsThis::showText(event->globalPosition().toPoint(), l->contents());
                     return;
                 }
             }
@@ -551,7 +550,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
     // if there is no Shift pressed we start panning
     if (!event->modifiers().testFlag(Qt::ShiftModifier)) {
         m_panOldOffset = QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
-        m_panStartPoint = event->globalPos();
+        m_panStartPoint = event->globalPosition().toPoint();
 
         if (-1 == m_mousePressLinkPage && m_mousePressLinkUrl.isEmpty())
             setCursor(Qt::ClosedHandCursor);
@@ -564,7 +563,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
     setCursor(Qt::ArrowCursor);
 
     // reset pan information
-    if (!m_panStartPoint.isNull() && m_panStartPoint != event->globalPos()) {
+    if (!m_panStartPoint.isNull() && m_panStartPoint != event->globalPosition()) {
         m_panStartPoint = QPoint(0, 0);
         return;
     }

@@ -44,8 +44,8 @@ public:
 
     QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
     {
-        if (Qt::BackgroundRole == role && !filterRegExp().isEmpty()) {
-            if (-1 != filterRegExp().indexIn(proxyIndex.data().toString()))
+        if (Qt::BackgroundRole == role && filterRegularExpression().isValid()) {
+            if (-1 != proxyIndex.data().toString().indexOf(filterRegularExpression()))
                 return QVariant::fromValue(PageView::matchColor());
         }
 
@@ -194,7 +194,7 @@ void TocDock::documentChanged()
 {
     // reset old data
     m_model->clear();
-    m_proxyModel->setFilterRegExp(QRegExp());
+    m_proxyModel->setFilterRegularExpression(QRegularExpression());
     m_tree->setModel(nullptr);
     m_filter->clear();
     m_pageToIndexMap.clear();
@@ -279,7 +279,7 @@ void TocDock::indexClicked(const QModelIndex &index)
 void TocDock::setFilter()
 {
     m_findStartTimer->stop();
-    m_proxyModel->setFilterRegExp(QRegExp(m_filter->text(), Qt::CaseInsensitive));
+    m_proxyModel->setFilterRegularExpression(QRegularExpression(m_filter->text(), QRegularExpression::CaseInsensitiveOption));
     m_proxyModel->invalidate();
 }
 
