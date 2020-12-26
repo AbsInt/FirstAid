@@ -435,7 +435,7 @@ void PageView::mouseMoveEvent(QMouseEvent *event)
             }
             m_panStartPoint = newStart;
             m_panOldOffset = QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
-          // FIXME  QApplication::desktop()->cursor().setPos(newStart);
+            QCursor::setPos(newStart);
         }
 
         setCursor(Qt::ClosedHandCursor);
