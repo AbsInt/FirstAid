@@ -1,8 +1,6 @@
 FirstAid - PDF Help Viewer
 ============================
 
-[![Build Status](https://travis-ci.org/AbsInt/FirstAid.svg?branch=master)](https://travis-ci.org/AbsInt/FirstAid)
-
 ### About
 
 FirstAid is a simple PDF viewer based on libpoppler - https://poppler.freedesktop.org/
@@ -14,7 +12,7 @@ If you look for a full-fledged PDF viewer, head over to other projects like Okul
 
 ### Dependencies
 
-Compilation requirements are Qt 5.7 and a recent libpoppler (e.g. 0.50) and dependencies of that like FreeType/FontConfig/...
+Compilation requirements are Qt 6.x and a recent libpoppler and dependencies of that like FreeType/FontConfig/...
 
 ### Licensing
 
