@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName(QStringLiteral("AbsInt"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("absint.com"));
     QCoreApplication::setApplicationName(QStringLiteral("FirstAid"));
-    QApplication::setWindowIcon(QIcon(QStringLiteral(":/firstaid.svg")));
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/firstaid.png")));
 
     /**
      * define & parse our command line

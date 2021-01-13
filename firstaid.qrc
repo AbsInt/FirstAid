@@ -1,25 +1,25 @@
 <RCC>
     <qresource>
-        <file>firstaid.svg</file>
-        <file>icons/acrobat.svg</file>
-        <file>icons/application-exit.svg</file>
-        <file>icons/application-menu.svg</file>
-        <file>icons/bookmark-new.svg</file>
-        <file>icons/document-open.svg</file>
-        <file>icons/document-print.svg</file>
-        <file>icons/edit-copy.svg</file>
-        <file>icons/facing-pages.svg</file>
-        <file>icons/go-down.svg</file>
-        <file>icons/go-next.svg</file>
-        <file>icons/go-previous.svg</file>
-        <file>icons/go-up.svg</file>
-        <file>icons/help-about.svg</file>
-        <file>icons/help-keybord-shortcuts.svg</file>
-        <file>icons/view-filter.svg</file>
-        <file>icons/view-refresh.svg</file>
-        <file>icons/window-close.svg</file>
-        <file>icons/zoom-fit-best.svg</file>
-        <file>icons/zoom-fit-width.svg</file>
-        <file>icons/zoom.svg</file>
+        <file>firstaid.png</file>
+        <file>icons/acrobat.png</file>
+        <file>icons/application-exit.png</file>
+        <file>icons/application-menu.png</file>
+        <file>icons/bookmark-new.png</file>
+        <file>icons/document-open.png</file>
+        <file>icons/document-print.png</file>
+        <file>icons/edit-copy.png</file>
+        <file>icons/facing-pages.png</file>
+        <file>icons/go-down.png</file>
+        <file>icons/go-next.png</file>
+        <file>icons/go-previous.png</file>
+        <file>icons/go-up.png</file>
+        <file>icons/help-about.png</file>
+        <file>icons/help-keybord-shortcuts.png</file>
+        <file>icons/view-filter.png</file>
+        <file>icons/view-refresh.png</file>
+        <file>icons/window-close.png</file>
+        <file>icons/zoom-fit-best.png</file>
+        <file>icons/zoom-fit-width.png</file>
+        <file>icons/zoom.png</file>
     </qresource>
 </RCC>

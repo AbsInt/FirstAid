@@ -91,28 +91,28 @@ PdfViewer::PdfViewer(const QString &file)
     // setup the menu action
     QMenu *menu = new QMenu(this);
 
-    QAction *fileOpen = menu->addAction(createIcon(QStringLiteral(":/icons/document-open.svg")), tr("&Open..."), this, SLOT(slotOpenFile()));
+    QAction *fileOpen = menu->addAction(createIcon(QStringLiteral(":/icons/document-open.png")), tr("&Open..."), this, SLOT(slotOpenFile()));
     fileOpen->setShortcut(QKeySequence::Open);
 
-    m_fileReloadAct = menu->addAction(createIcon(QStringLiteral(":/icons/view-refresh.svg")), tr("&Reload"), this, SLOT(slotReload()));
+    m_fileReloadAct = menu->addAction(createIcon(QStringLiteral(":/icons/view-refresh.png")), tr("&Reload"), this, SLOT(slotReload()));
     m_fileReloadAct->setShortcut(QKeySequence::Refresh);
     menu->addSeparator();
 
-    m_fileOpenExternalAct = menu->addAction(createIcon(QStringLiteral(":/icons/acrobat.svg")), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
+    m_fileOpenExternalAct = menu->addAction(createIcon(QStringLiteral(":/icons/acrobat.png")), tr("&Open in external PDF viewer"), this, SLOT(slotOpenFileExternal()));
     m_fileOpenExternalAct->setShortcut(Qt::CTRL | Qt::Key_E);
 
-    m_filePrintAct = menu->addAction(createIcon(QStringLiteral(":/icons/document-print.svg")), tr("&Print..."), this, SLOT(slotPrint()));
+    m_filePrintAct = menu->addAction(createIcon(QStringLiteral(":/icons/document-print.png")), tr("&Print..."), this, SLOT(slotPrint()));
     m_filePrintAct->setShortcut(QKeySequence::Print);
     menu->addSeparator();
 
-    QAction *act = menu->addAction(createIcon(QStringLiteral(":/icons/help-keybord-shortcuts.svg")), tr("&Keyboard shortcuts..."), this, SLOT(slotHelp()));
+    QAction *act = menu->addAction(createIcon(QStringLiteral(":/icons/help-keybord-shortcuts.png")), tr("&Keyboard shortcuts..."), this, SLOT(slotHelp()));
     act->setShortcut(QKeySequence::HelpContents);
 
-    act = menu->addAction(createIcon(QStringLiteral(":/icons/help-about.svg")), tr("&About"), this, SLOT(slotAbout()));
+    act = menu->addAction(createIcon(QStringLiteral(":/icons/help-about.png")), tr("&About"), this, SLOT(slotAbout()));
     act->setShortcut(QKeySequence::WhatsThis);
     menu->addSeparator();
 
-    act = menu->addAction(createIcon(QStringLiteral(":/icons/application-exit.svg")), tr("&Quit"), qApp, SLOT(closeAllWindows()));
+    act = menu->addAction(createIcon(QStringLiteral(":/icons/application-exit.png")), tr("&Quit"), qApp, SLOT(closeAllWindows()));
     act->setShortcut(QKeySequence::Quit);
 
     QWidget *w = new QWidget(this);

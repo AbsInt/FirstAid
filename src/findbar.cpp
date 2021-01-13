@@ -38,7 +38,7 @@ FindBar::FindBar(QWidget *parent)
     hbl->setContentsMargins(0, 0, 0, 0);
 
     QToolButton *tb = new QToolButton(this);
-    tb->setIcon(createIcon(QStringLiteral(":/icons/window-close.svg")));
+    tb->setIcon(createIcon(QStringLiteral(":/icons/window-close.png")));
     connect(tb, SIGNAL(clicked()), SLOT(slotHide()));
     hbl->addWidget(tb);
 
@@ -50,7 +50,7 @@ FindBar::FindBar(QWidget *parent)
     hbl->addWidget(m_findEdit);
 
     tb = new QToolButton(this);
-    tb->setIcon(createIcon(QStringLiteral(":/icons/view-filter.svg")));
+    tb->setIcon(createIcon(QStringLiteral(":/icons/view-filter.png")));
     tb->setToolTip(tr("Options"));
     hbl->addWidget(tb);
 
@@ -68,13 +68,13 @@ FindBar::FindBar(QWidget *parent)
     hbl->addWidget(m_statusLabel);
 
     m_prevMatch = new QToolButton(this);
-    m_prevMatch->setIcon(createIcon(QStringLiteral(":/icons/go-up.svg")));
+    m_prevMatch->setIcon(createIcon(QStringLiteral(":/icons/go-up.png")));
     m_prevMatch->setToolTip(tr("Previous match"));
     m_prevMatch->setShortcut(QKeySequence(QStringLiteral("Shift+F3")));
     hbl->addWidget(m_prevMatch);
 
     m_nextMatch = new QToolButton(this);
-    m_nextMatch->setIcon(createIcon(QStringLiteral(":/icons/go-down.svg")));
+    m_nextMatch->setIcon(createIcon(QStringLiteral(":/icons/go-down.png")));
     m_nextMatch->setToolTip(tr("Next match"));
     m_nextMatch->setShortcut(Qt::Key_F3);
     hbl->addWidget(m_nextMatch);
