@@ -54,16 +54,16 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 
     // some shortcuts for first/last page
     QShortcut *firstShortcut = new QShortcut(QKeySequence::MoveToStartOfLine, this);
-    connect(firstShortcut, SIGNAL(activated()), this, SLOT(slotGoFirst()));
+    connect(firstShortcut, &QShortcut::activated, this, &NavigationToolBar::slotGoFirst);
 
     QShortcut *lastShortcut = new QShortcut(QKeySequence::MoveToEndOfLine, this);
-    connect(lastShortcut, SIGNAL(activated()), this, SLOT(slotGoLast()));
+    connect(lastShortcut, &QShortcut::activated, this, &NavigationToolBar::slotGoLast);
 
     // left side is table of content action
     tocAction->setIcon(createIcon(QStringLiteral(":/icons/bookmark-new.png")));
     addAction(tocAction);
     QShortcut *tocShortcut = new QShortcut(Qt::Key_F7, this);
-    connect(tocShortcut, SIGNAL(activated()), tocAction, SLOT(trigger()));
+    connect(tocShortcut, &QShortcut::activated, tocAction, &QAction::trigger);
 
     // left side also holds the toggle button for facing pages mode
     m_toggleFacingPagesAct = addAction(createIcon(QStringLiteral(":/icons/facing-pages.png")), tr("Facing pages"));
@@ -71,7 +71,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_toggleFacingPagesAct->setChecked(s.value(QStringLiteral("MainWindow/facingPages"), false).toBool());
     m_toggleFacingPagesAct->setShortcut(Qt::Key_D);
     m_toggleFacingPagesAct->setShortcutContext(Qt::ApplicationShortcut);
-    connect(m_toggleFacingPagesAct, SIGNAL(toggled(bool)), SLOT(slotToggleFacingPages()));
+    connect(m_toggleFacingPagesAct, &QAction::toggled, this, &NavigationToolBar::slotToggleFacingPages);
 
     // add some space so next widget group is centered
     QWidget *spacer = new QWidget(this);
@@ -79,16 +79,16 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     addWidget(spacer);
 
     // previous page action
-    m_prevAct = addAction(createIcon(QStringLiteral(":/icons/go-previous.png")), tr("Previous page"), this, SLOT(slotGoPrev()));
+    m_prevAct = addAction(createIcon(QStringLiteral(":/icons/go-previous.png")), tr("Previous page"), this, &NavigationToolBar::slotGoPrev);
     QShortcut *previousShortcut = new QShortcut(QKeySequence::MoveToPreviousPage, this);
-    connect(previousShortcut, SIGNAL(activated()), m_prevAct, SLOT(trigger()));
+    connect(previousShortcut, &QShortcut::activated, m_prevAct, &QAction::trigger);
 
     // combined line edit for goto action and status label
     m_pageEdit = new QLineEdit(this);
     m_pageEdit->setMaxLength(6);
     m_pageEdit->setFixedWidth(50);
-    connect(m_pageEdit, SIGNAL(returnPressed()), this, SLOT(slotPageSet()));
-    connect(m_pageEdit, SIGNAL(editingFinished()), this, SLOT(slotHideGoto()));
+    connect(m_pageEdit, &QLineEdit::returnPressed, this, &NavigationToolBar::slotPageSet);
+    connect(m_pageEdit, &QLineEdit::editingFinished, this, &NavigationToolBar::slotHideGoto);
     m_pageEditAct = addWidget(m_pageEdit);
 
     m_intValidator = new QIntValidator(this);
@@ -101,12 +101,12 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
 
     // got is accessible by ctrl+g
     QShortcut *gotoShortCut = new QShortcut(Qt::ControlModifier | Qt::Key_G, this);
-    connect(gotoShortCut, SIGNAL(activated()), SLOT(slotGoto()));
+    connect(gotoShortCut, &QShortcut::activated, this, &NavigationToolBar::slotGoto);
 
     // next page action
-    m_nextAct = addAction(createIcon(QStringLiteral(":/icons/go-next.png")), tr("Next page"), this, SLOT(slotGoNext()));
+    m_nextAct = addAction(createIcon(QStringLiteral(":/icons/go-next.png")), tr("Next page"), this, &NavigationToolBar::slotGoNext);
     QShortcut *nextShortcut = new QShortcut(QKeySequence::MoveToNextPage, this);
-    connect(nextShortcut, SIGNAL(activated()), m_nextAct, SLOT(trigger()));
+    connect(nextShortcut, &QShortcut::activated, m_nextAct, &QAction::trigger);
 
     // more space for centering
     spacer = new QWidget(this);
@@ -151,7 +151,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_zoomButton->setPopupMode(QToolButton::InstantPopup);
 
     for (QAction *a : zoomMenu->actions())
-        connect(a, SIGNAL(triggered()), SLOT(slotZoomChanged()));
+        connect(a, &QAction::triggered, this, &NavigationToolBar::slotZoomChanged);
     addWidget(m_zoomButton);
 
     // add menu replacement action to right side
@@ -166,7 +166,7 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     // esc to hide goto widgets
     QShortcut *closeGoto = new QShortcut(Qt::Key_Escape, this);
     closeGoto->setContext(Qt::WidgetWithChildrenShortcut);
-    connect(closeGoto, SIGNAL(activated()), SLOT(slotHideGoto()));
+    connect(closeGoto, &QShortcut::activated, this, &NavigationToolBar::slotHideGoto);
 
     // init widgets' state
     m_pageEditAct->setVisible(false);
@@ -174,16 +174,16 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     m_nextAct->setEnabled(false);
 
     // triggere these slots so view gets redrawn with stored settings
-    QTimer::singleShot(0, this, SLOT(slotToggleFacingPages()));
+    QTimer::singleShot(0, this, &NavigationToolBar::slotToggleFacingPages);
 
     int index = s.value(QStringLiteral("MainWindow/zoom"), 8).toInt();
     QList<QAction *> zoomActions = zoomMenu->actions();
     if (index >= 0 && index < zoomActions.count())
-        QTimer::singleShot(0, zoomActions.at(index), SLOT(trigger()));
+        QTimer::singleShot(0, zoomActions.at(index), &QAction::trigger);
 
-    connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
-    connect(PdfViewer::view(), SIGNAL(pageChanged(int)), SLOT(slotPageChanged(int)));
-    connect(PdfViewer::view(), SIGNAL(zoomChanged(qreal)), SLOT(slotChangeZoom(qreal)));
+    connect(PdfViewer::document(), &Document::documentChanged, this, &NavigationToolBar::slotDocumentChanged);
+    connect(PdfViewer::view(), &PageView::pageChanged, this, &NavigationToolBar::slotPageChanged);
+    connect(PdfViewer::view(), &PageView::zoomChanged, this, &NavigationToolBar::slotChangeZoom);
 
     // init page label
     slotHideGoto();
@@ -200,11 +200,11 @@ bool NavigationToolBar::eventFilter(QObject *object, QEvent *event)
 {
     // clicking on the status label displaying the current page number will trigger goto action
     if (object == m_pageLabel && QEvent::MouseButtonPress == event->type() && PdfViewer::document()->isValid())
-        QTimer::singleShot(0, this, SLOT(slotGoto()));
+        QTimer::singleShot(0, this, &NavigationToolBar::slotGoto);
 
     // clicking on the zoom label displaying the current scale factor will trigger zoom menu
     if (object == m_zoomLabel && QEvent::MouseButtonPress == event->type() && PdfViewer::document()->isValid())
-        QTimer::singleShot(0, m_zoomButton, SLOT(showMenu()));
+        QTimer::singleShot(0, m_zoomButton, &QToolButton::showMenu);
 
     return QToolBar::eventFilter(object, event);
 }

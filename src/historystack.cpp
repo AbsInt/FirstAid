@@ -127,7 +127,3 @@ bool HistoryStack::HistoryStack::next(HistoryEntry &entry)
     } else
         return false;
 }
-
-/*
- * eof
- */

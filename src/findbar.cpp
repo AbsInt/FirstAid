@@ -39,14 +39,14 @@ FindBar::FindBar(QWidget *parent)
 
     QToolButton *tb = new QToolButton(this);
     tb->setIcon(createIcon(QStringLiteral(":/icons/window-close.png")));
-    connect(tb, SIGNAL(clicked()), SLOT(slotHide()));
+    connect(tb, &QToolButton::clicked, this, &FindBar::slotHide);
     hbl->addWidget(tb);
 
     m_findEdit = new QLineEdit(this);
     m_findEdit->setPlaceholderText(tr("Find"));
     m_findEdit->setClearButtonEnabled(true);
-    connect(m_findEdit, SIGNAL(returnPressed()), SLOT(slotReturnPressed()));
-    connect(m_findEdit, SIGNAL(textChanged(QString)), SLOT(slotResetStyle()));
+    connect(m_findEdit, &QLineEdit::returnPressed, this, &FindBar::slotReturnPressed);
+    connect(m_findEdit, &QLineEdit::textChanged, this, &FindBar::slotResetStyle);
     hbl->addWidget(m_findEdit);
 
     tb = new QToolButton(this);
@@ -83,34 +83,34 @@ FindBar::FindBar(QWidget *parent)
     findAction->setShortcutContext(Qt::ApplicationShortcut);
     findAction->setShortcut(QKeySequence::Find);
     parent->addAction(findAction);
-    connect(findAction, SIGNAL(triggered()), SLOT(slotFindActionTriggered()));
+    connect(findAction, &QAction::triggered, this, &FindBar::slotFindActionTriggered);
 
     QAction *closeAction = new QAction(this);
     closeAction->setShortcut(Qt::Key_Escape);
     closeAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     addAction(closeAction);
-    connect(closeAction, SIGNAL(triggered()), SLOT(slotHide()));
+    connect(closeAction, &QAction::triggered, this, &FindBar::slotHide);
 
     SearchEngine *se = PdfViewer::searchEngine();
-    connect(se, SIGNAL(started()), SLOT(slotUpdateStatus()));
-    connect(se, SIGNAL(progress(qreal)), SLOT(slotFindProgress(qreal)));
-    connect(se, SIGNAL(finished()), SLOT(slotFindDone()));
-    connect(se, SIGNAL(highlightMatch(int, QRectF)), SLOT(slotUpdateStatus()));
-    connect(se, SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotUpdateStatus()));
-    connect(m_prevMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(previousMatch()));
-    connect(m_nextMatch, SIGNAL(clicked()), PdfViewer::searchEngine(), SLOT(nextMatch()));
+    connect(se, &SearchEngine::started, this, &FindBar::slotUpdateStatus);
+    connect(se, &SearchEngine::progress, this, &FindBar::slotFindProgress);
+    connect(se, &SearchEngine::finished, this, &FindBar::slotFindDone);
+    connect(se, &SearchEngine::highlightMatch, this, &FindBar::slotUpdateStatus);
+    connect(se, &SearchEngine::matchesFound, this, &FindBar::slotUpdateStatus);
+    connect(m_prevMatch, &QToolButton::clicked, PdfViewer::searchEngine(), &SearchEngine::previousMatch);
+    connect(m_nextMatch, &QToolButton::clicked, PdfViewer::searchEngine(), &SearchEngine::nextMatch);
 
     m_findStartTimer = new QTimer(this);
     m_findStartTimer->setSingleShot(true);
     m_findStartTimer->setInterval(1000);
-    connect(m_findStartTimer, SIGNAL(timeout()), SLOT(slotFind()));
-    connect(m_findEdit, SIGNAL(textChanged(QString)), m_findStartTimer, SLOT(start()));
+    connect(m_findStartTimer, &QTimer::timeout, this, &FindBar::slotFind);
+    connect(m_findEdit, &QLineEdit::textChanged, m_findStartTimer, qOverload<>(&QTimer::start));
 
-    connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
+    connect(PdfViewer::document(), &Document::documentChanged, this, &FindBar::slotDocumentChanged);
 
     // redo search on option changes
-    connect(m_acCaseSensitive, SIGNAL(triggered()), SLOT(slotFindActionTriggered()));
-    connect(m_acWholeWords, SIGNAL(triggered()), SLOT(slotFindActionTriggered()));
+    connect(m_acCaseSensitive, &QAction::triggered, this, &FindBar::slotFindActionTriggered);
+    connect(m_acWholeWords, &QAction::triggered, this, &FindBar::slotFindActionTriggered);
 
     slotDocumentChanged();
 }
@@ -128,7 +128,7 @@ void FindBar::slotDocumentChanged()
     m_findEdit->setEnabled(on);
 
     // delay this as the search engine might still react to the documentChanged() signal
-    QTimer::singleShot(0, this, SLOT(slotUpdateStatus()));
+    QTimer::singleShot(0, this, &FindBar::slotUpdateStatus);
 }
 
 void FindBar::slotFindActionTriggered()
@@ -175,7 +175,7 @@ void FindBar::slotFindDone()
         else
             m_findEdit->setStyleSheet(QStringLiteral("background-color: #a0f0a0"));
 
-        QTimer::singleShot(5000, this, SLOT(slotResetStyle()));
+        QTimer::singleShot(5000, this, &FindBar::slotResetStyle);
     }
 }
 

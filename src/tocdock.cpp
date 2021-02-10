@@ -85,19 +85,19 @@ TocDock::TocDock(QWidget *parent)
     m_filter->setClearButtonEnabled(true);
     vbl->addWidget(m_filter);
 
-    connect(this, SIGNAL(visibilityChanged(bool)), SLOT(visibilityChanged(bool)));
-    connect(m_tree, SIGNAL(clicked(QModelIndex)), SLOT(indexClicked(QModelIndex)));
+    connect(this, &TocDock::visibilityChanged, this, &TocDock::slotVisibilityChanged);
+    connect(m_tree, &QTreeView::clicked, this, &TocDock::indexClicked);
 
-    connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(documentChanged()));
-    connect(PdfViewer::view(), SIGNAL(pageChanged(int)), SLOT(pageChanged(int)));
-    connect(PdfViewer::view(), SIGNAL(pageRequested(int)), SLOT(pageChanged(int)));
+    connect(PdfViewer::document(), &Document::documentChanged, this, &TocDock::documentChanged);
+    connect(PdfViewer::view(), &PageView::pageChanged, this, &TocDock::pageChanged);
+    connect(PdfViewer::view(), &PageView::pageRequested, this, &TocDock::pageChanged);
 
     m_findStartTimer = new QTimer(this);
     m_findStartTimer->setSingleShot(true);
     m_findStartTimer->setInterval(1000);
-    connect(m_findStartTimer, SIGNAL(timeout()), SLOT(setFilter()));
-    connect(m_filter, SIGNAL(textChanged(QString)), m_findStartTimer, SLOT(start()));
-    connect(m_proxyModel, SIGNAL(layoutChanged()), SLOT(expand()));
+    connect(m_findStartTimer, &QTimer::timeout, this, &TocDock::setFilter);
+    connect(m_filter, &QLineEdit::textChanged, m_findStartTimer, qOverload<>(&QTimer::start));
+    connect(m_proxyModel, &MySortFilterProxyModel::layoutChanged, this, &TocDock::expand);
 }
 
 TocDock::~TocDock()
@@ -260,7 +260,7 @@ void TocDock::pageChanged(int page)
     }
 }
 
-void TocDock::visibilityChanged(bool visible)
+void TocDock::slotVisibilityChanged(bool visible)
 {
     if (visible && !m_filled) {
         fillInfo();

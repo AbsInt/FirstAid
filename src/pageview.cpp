@@ -82,15 +82,15 @@ PageView::PageView(QWidget *parent)
     // add scroller
     QScroller::grabGesture(viewport(), QScroller::TouchGesture);
 
-    connect(PdfViewer::searchEngine(), SIGNAL(started()), SLOT(slotFindStarted()));
-    connect(PdfViewer::searchEngine(), SIGNAL(highlightMatch(int, QRectF)), SLOT(slotHighlightMatch(int, QRectF)));
-    connect(PdfViewer::searchEngine(), SIGNAL(matchesFound(int, QList<QRectF>)), SLOT(slotMatchesFound(int, QList<QRectF>)));
+    connect(PdfViewer::searchEngine(), &SearchEngine::started, this, &PageView::slotFindStarted);
+    connect(PdfViewer::searchEngine(), &SearchEngine::highlightMatch, this, &PageView::slotHighlightMatch);
+    connect(PdfViewer::searchEngine(), &SearchEngine::matchesFound, this, &PageView::slotMatchesFound);
 
-    connect(PdfViewer::document(), SIGNAL(documentChanged()), SLOT(slotDocumentChanged()));
-    connect(PdfViewer::document(), SIGNAL(layoutChanged()), SLOT(slotLayoutChanged()));
+    connect(PdfViewer::document(), &Document::documentChanged, this, &PageView::slotDocumentChanged);
+    connect(PdfViewer::document(), &Document::layoutChanged, this, &PageView::slotLayoutChanged);
 
-    connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(updateCurrentPage()));
-    connect(verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(updateCurrentPage()));
+    connect(horizontalScrollBar(), &QScrollBar::valueChanged, this, &PageView::updateCurrentPage);
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &PageView::updateCurrentPage);
 
     // we have static content that can be scrolled like an image
     setAttribute(Qt::WA_StaticContents);
@@ -117,13 +117,13 @@ PageView::PageView(QWidget *parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     // add some shortcuts
-    new QShortcut(Qt::Key_Backspace, this, SLOT(stepBack()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(Qt::Key_Space, this, SLOT(advance()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(QKeySequence::ZoomIn, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(Qt::ControlModifier | Qt::Key_Equal, this, SLOT(zoomIn()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(QKeySequence::ZoomOut, this, SLOT(zoomOut()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(QKeySequence::Back, this, SLOT(historyPrev()), nullptr, Qt::ApplicationShortcut);
-    new QShortcut(QKeySequence::Forward, this, SLOT(historyNext()), nullptr, Qt::ApplicationShortcut);
+    new QShortcut(Qt::Key_Backspace, this, this, &PageView::stepBack, Qt::ApplicationShortcut);
+    new QShortcut(Qt::Key_Space, this, this, &PageView::advance, Qt::ApplicationShortcut);
+    new QShortcut(QKeySequence::ZoomIn, this, this, &PageView::zoomIn, Qt::ApplicationShortcut);
+    new QShortcut(Qt::ControlModifier | Qt::Key_Equal, this, this, &PageView::zoomIn, Qt::ApplicationShortcut);
+    new QShortcut(QKeySequence::ZoomOut, this, this, &PageView::zoomOut, Qt::ApplicationShortcut);
+    new QShortcut(QKeySequence::Back, this, this, &PageView::historyPrev, Qt::ApplicationShortcut);
+    new QShortcut(QKeySequence::Forward, this, this, &PageView::historyNext, Qt::ApplicationShortcut);
 
     // prepare hint label
     m_hintLabel = new QLabel(viewport());
@@ -664,7 +664,7 @@ void PageView::gotoPage(int page, const QRectF &rectToBeVisibleInPoints, bool hi
 
         // start animation
         QVariantAnimation *va = new QVariantAnimation(this);
-        connect(va, SIGNAL(valueChanged(QVariant)), SLOT(slotAnimationValueChanged(QVariant)));
+        connect(va, &QVariantAnimation::valueChanged, this, &PageView::slotAnimationValueChanged);
         va->setDuration(1000);
         va->setStartValue(0);
         va->setEndValue(100);

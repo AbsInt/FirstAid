@@ -95,12 +95,12 @@ int main(int argc, char *argv[])
     if (parser.isSet(QStringLiteral("stdin"))) {
 #ifdef Q_OS_WIN
         QTimer stdinPollTimer;
-        QObject::connect(&stdinPollTimer, SIGNAL(timeout()), &viewer, SLOT(processCommand()));
+        QObject::connect(&stdinPollTimer, &QTimer::timeout, &viewer, &PdfViewer::processCommand);
         stdinPollTimer.start(500);
-        QTimer::singleShot(0, &viewer, SLOT(processCommand()));
+        QTimer::singleShot(0, &viewer, &PdfViewer::processCommand);
 #else
         QSocketNotifier notifier(STDIN_FILENO, QSocketNotifier::Read);
-        QObject::connect(&notifier, SIGNAL(activated(int)), &viewer, SLOT(processCommand()));
+        QObject::connect(&notifier, &QSocketNotifier::activated, &viewer, &PdfViewer::processCommand);
 #endif
 
         /**

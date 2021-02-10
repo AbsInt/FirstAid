@@ -16,8 +16,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef HISTORYSTACK_H
-#define HISTORYSTACK_H
+#pragma once
 
 #include <QList>
 #include <QRectF>
@@ -68,5 +67,3 @@ private:
     //! current index in history stack
     int m_index = -1;
 };
-
-#endif // #ifndef HISTORYSTACK_H

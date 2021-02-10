@@ -262,9 +262,5 @@ void SearchEngine::find()
         emit progress(m_findPagesScanned / (qreal)PdfViewer::document()->numPages());
     }
 
-    QTimer::singleShot(delayAfterFirstMatch ? 10 : 0, this, SLOT(find()));
+    QTimer::singleShot(delayAfterFirstMatch ? 10 : 0, this, qOverload<>(&SearchEngine::find));
 }
-
-/*
- * eof
- */

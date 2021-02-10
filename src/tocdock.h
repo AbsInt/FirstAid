@@ -49,7 +49,7 @@ protected:
 protected slots:
     void documentChanged();
     void pageChanged(int page);
-    void visibilityChanged(bool visible);
+    void slotVisibilityChanged(bool visible);
     void indexClicked(const QModelIndex &index);
     void setFilter();
     void expand();
