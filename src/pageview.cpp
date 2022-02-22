@@ -505,7 +505,7 @@ void PageView::mousePressEvent(QMouseEvent *event)
                 m_mousePressPageRect = QRectF(pageRect.width() * l->boundary().left(), pageRect.height() * l->boundary().top(), pageRect.width() * l->boundary().width(), pageRect.height() * l->boundary().height());
 
                 if (Poppler::Annotation::ALink == l->subType()) {
-                    if (Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l)->linkDestination()) {
+                    if (Poppler::Link *link = static_cast<Poppler::LinkAnnotation *>(l.get())->linkDestination()) {
                         switch (link->linkType()) {
                             case Poppler::Link::Goto: {
                                 Poppler::LinkDestination gotoLink = static_cast<Poppler::LinkGoto *>(link)->destination();
@@ -822,11 +822,10 @@ void PageView::historyNext()
 void PageView::gotoDestinationName(const QString &destination, bool updateHistory, bool downwards)
 {
     // try to lookup
-    if (Poppler::LinkDestination *link = PdfViewer::document()->linkDestination(destination)) {
+    if (auto link = PdfViewer::document()->linkDestination(destination)) {
         // call function that takes description, skip that if page is already bogus
         if (link->pageNumber() > 0)
             gotoDestination(link->toString(), updateHistory, downwards);
-        delete link;
     }
 }
 void PageView::gotoDestination(const QString &destination, bool updateHistory, bool downwards)

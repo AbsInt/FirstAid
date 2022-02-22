@@ -35,11 +35,11 @@ public:
     /*! Returns true if we are holding a valid Poppler document. */
     bool isValid() const
     {
-        return m_document;
+        return m_document.get();
     }
 
     /*! Set Poppler document to use, any old data will be deleted. */
-    void setDocument(Poppler::Document *document);
+    void setDocument(std::unique_ptr<Poppler::Document> &&document);
 
     /*! Returns document title */
     QString title() const
@@ -78,10 +78,10 @@ public:
     Poppler::Page *page(int page) const;
 
     /*! Returns a list of links found on the given page number. */
-    const QList<Poppler::Annotation *> &links(int page) const;
+    const std::vector<std::unique_ptr<Poppler::Annotation>> &links(int page) const;
 
     /*! Returns a link destination for the given name or nullptr. */
-    Poppler::LinkDestination *linkDestination(const QString &destination) const;
+    std::unique_ptr<Poppler::LinkDestination> linkDestination(const QString &destination) const;
 
     /**
      * double sided mode on?
@@ -113,7 +113,7 @@ private:
     /**
      * current open poppler document
      */
-    Poppler::Document *m_document = nullptr;
+    std::unique_ptr<Poppler::Document> m_document;
 
     /**
      * document title
@@ -133,12 +133,12 @@ private:
     /**
      * vector of cached poppler pages, index == page
      */
-    QVector<Poppler::Page *> m_pages;
+    std::vector<std::unique_ptr<Poppler::Page>> m_pages;
 
     /**
      * vector of cached poppler annotation of type link, index == page
      */
-    QVector<QList<Poppler::Annotation *>> m_links;
+    std::vector<std::vector<std::unique_ptr<Poppler::Annotation>>> m_links;
 
     /**
      * spacing between pages and the margin around the document

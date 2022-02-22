@@ -202,15 +202,14 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     closeDocument();
 
     // try to load the document
-    Poppler::Document *newdoc = Poppler::Document::load(file);
+    auto newdoc = Poppler::Document::load(file);
     if (!newdoc || newdoc->isLocked()) {
-        delete newdoc;
         QMessageBox::critical(this, tr("Cannot open file"), tr("Cannot open file '%1'.").arg(file));
         return;
     }
 
     // pass loaded poppler document to our internal one
-    m_document.setDocument(newdoc);
+    m_document.setDocument(std::move(newdoc));
 
     // set file + watch
     m_filePath = file;
@@ -311,9 +310,8 @@ void PdfViewer::processCommand()
         else {
             for (const QString &t : target.split(QLatin1Char(','), Qt::SkipEmptyParts)) {
                 bool valid = false;
-                if (Poppler::LinkDestination *linkDest = (document()->linkDestination(t))) {
+                if (auto linkDest = (document()->linkDestination(t))) {
                     valid = linkDest->pageNumber() > 0;
-                    delete linkDest;
                 }
 
                 if (valid) {

@@ -64,12 +64,11 @@ int main(int argc, char **argv)
     }
 
     // load pdf
-    Poppler::Document *document = nullptr;
+    std::unique_ptr<Poppler::Document> document;
     QFile pdfFile(fileName);
     if (pdfFile.exists() && pdfFile.size()) {
         document = Poppler::Document::load(fileName);
         if (!document || document->isLocked()) {
-            delete document;
             printf("Cannot open file %s.\n", qPrintable(pdfFile.fileName()));
             return 5;
         }
@@ -93,9 +92,8 @@ int main(int argc, char **argv)
                 QString line = QString::fromUtf8(linkFile.readLine());
                 printf("  Processing link '%s'...", qPrintable(line.trimmed()));
                 bool valid = false;
-                if (Poppler::LinkDestination *linkDest = (document->linkDestination(line.trimmed()))) {
+                if (auto linkDest = (document->linkDestination(line.trimmed()))) {
                     valid = linkDest->pageNumber() > 0;
-                    delete linkDest;
                 }
                 if (valid)
                     printf(" ok\n");
@@ -109,16 +107,13 @@ int main(int argc, char **argv)
             linkFile.close();
             if (write)
                 outputFile.close();
-            delete document;
         } else {
-            delete document;
             if (write)
                 outputFile.close();
             printf("Cannot open file %s for reading.\n", qPrintable(linkFile.fileName()));
             return 3;
         }
     } else {
-        delete document;
         if (write)
             outputFile.close();
         printf("File %s does not exist or is empty.\n", qPrintable(linkFile.fileName()));

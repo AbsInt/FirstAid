@@ -31,13 +31,13 @@ Document::~Document()
     reset();
 }
 
-void Document::setDocument(Poppler::Document *document)
+void Document::setDocument(std::unique_ptr<Poppler::Document> &&document)
 {
     // reset old content
     reset();
 
     // remember new poppler document
-    m_document = document;
+    m_document = std::move(document);
 
     // passing a nullptr is valid as it only resets the object
     if (m_document) {
@@ -49,24 +49,19 @@ void Document::setDocument(Poppler::Document *document)
         m_document->setRenderHint(Poppler::Document::Antialiasing, true);
         m_document->setRenderBackend(Poppler::Document::SplashBackend);
 
-        // reserve space for vectors
-        const int count = m_document->numPages();
-        m_pages.reserve(count);
-        m_pageRects.reserve(count);
-        m_links.reserve(count);
-
         // create all poppler pages and collect links on them
-        for (int i = 0; i < count; ++i) {
+        for (int i = 0; i < m_document->numPages(); ++i) {
             // skip invalid pages
-            Poppler::Page *page = m_document->page(i);
+            std::unique_ptr<Poppler::Page> page = m_document->page(i);
             if (!page)
                 continue;
 
-            // remember the page
-            m_pages.append(page);
-
             // extract links from the page
-            m_links.append(page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink << Poppler::Annotation::AText << Poppler::Annotation::ACaret));
+            auto links = page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink << Poppler::Annotation::AText << Poppler::Annotation::ACaret);
+            m_links.emplace_back(std::move(links));
+
+            // remember the page
+            m_pages.emplace_back(std::move(page));
         }
     }
 
@@ -133,16 +128,19 @@ int Document::pageForRect(const QRectF &rect) const
 
 Poppler::Page *Document::page(int page) const
 {
-    return m_pages.value(page, nullptr);
+    if (page >= 0 && size_t(page) < m_pages.size())
+        return m_pages.at(page).get();
+
+    return nullptr;
 }
 
-const QList<Poppler::Annotation *> &Document::links(int page) const
+const std::vector<std::unique_ptr<Poppler::Annotation>> &Document::links(int page) const
 {
-    Q_ASSERT(page >= 0 && page < m_links.length());
+    Q_ASSERT(page >= 0 && size_t(page) < m_links.size());
     return m_links.at(page);
 }
 
-Poppler::LinkDestination *Document::linkDestination(const QString &destination) const
+std::unique_ptr<Poppler::LinkDestination> Document::linkDestination(const QString &destination) const
 {
     return m_document->linkDestination(destination);
 }
@@ -267,15 +265,8 @@ void Document::relayout()
 
 void Document::reset()
 {
-    // free memory
-    for (int i = 0; i < m_links.length(); ++i)
-        qDeleteAll(m_links.at(i));
     m_links.clear();
-    qDeleteAll(m_pages);
     m_pages.clear();
     m_title.clear();
-
-    // free old one
-    delete m_document;
-    m_document = nullptr;
+    m_document.reset();
 }
