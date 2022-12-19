@@ -54,8 +54,8 @@ HelpDialog::HelpDialog(QWidget *parent)
 
     html += addTable(QStringLiteral("Navigation"));
 
-    html += addShortcut(fromStandardKey(QKeySequence::MoveToStartOfLine), tr("Go to first page"));
-    html += addShortcut(fromStandardKey(QKeySequence::MoveToEndOfLine), tr("Go to last page"));
+    html += addShortcut(fromStandardKey(QKeySequence::MoveToStartOfDocument), tr("Go to first page"));
+    html += addShortcut(fromStandardKey(QKeySequence::MoveToEndOfDocument), tr("Go to last page"));
     html += addShortcut(fromStandardKey(QKeySequence::MoveToNextPage), tr("Go to next page"));
     html += addShortcut(fromStandardKey(QKeySequence::MoveToPreviousPage), tr("Go to previous page"));
     html += addShortcut(QStringList() << QStringLiteral("Space"), tr("Scroll to next part of document"));

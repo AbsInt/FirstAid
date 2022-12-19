@@ -53,10 +53,10 @@ NavigationToolBar::NavigationToolBar(QAction *tocAction, QMenu *menu, QWidget *p
     QSettings s;
 
     // some shortcuts for first/last page
-    QShortcut *firstShortcut = new QShortcut(QKeySequence::MoveToStartOfLine, this);
+    QShortcut *firstShortcut = new QShortcut(QKeySequence::MoveToStartOfDocument, this);
     connect(firstShortcut, &QShortcut::activated, this, &NavigationToolBar::slotGoFirst);
 
-    QShortcut *lastShortcut = new QShortcut(QKeySequence::MoveToEndOfLine, this);
+    QShortcut *lastShortcut = new QShortcut(QKeySequence::MoveToEndOfDocument, this);
     connect(lastShortcut, &QShortcut::activated, this, &NavigationToolBar::slotGoLast);
 
     // left side is table of content action
