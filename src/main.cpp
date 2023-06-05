@@ -22,7 +22,10 @@
 #include <QApplication>
 #include <QBitmap>
 #include <QCommandLineParser>
+#include <QDir>
 #include <QPixmap>
+#include <QSaveFile>
+#include <QStandardPaths>
 #include <QTimer>
 
 #ifdef Q_OS_WIN
@@ -31,6 +34,43 @@
 #include <QSocketNotifier>
 #include <unistd.h>
 #endif
+
+static void setApplicationIcon(const QString &pngIcon)
+{
+    // Wayland icon handling
+    if (qApp->platformName() == QStringLiteral("wayland")) {
+        // use name we have in prefix
+        const QString applicationName = QStringLiteral("com.absint.firstaid");
+
+        // create a desktop file to note down our icon
+        if (const auto appDir = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation); !appDir.isEmpty()) {
+            QDir().mkpath(appDir);
+            QSaveFile desktopFile(appDir + QStringLiteral("/") + applicationName + QStringLiteral(".desktop"));
+            if (!QFile::exists(desktopFile.fileName()) && desktopFile.open(QSaveFile::WriteOnly)) {
+                desktopFile.write(QStringLiteral("[Desktop Entry]\nNoDisplay=true\nIcon=%1\n").arg(applicationName).toUtf8().constData());
+                desktopFile.commit();
+            }
+        }
+
+        // create a matching icon
+        if (const auto dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation); !dataDir.isEmpty()) {
+            const QString iconDir = dataDir + QStringLiteral("/icons");
+            QDir().mkpath(iconDir);
+            QSaveFile iconFile(iconDir + QStringLiteral("/") + applicationName + QStringLiteral(".png"));
+            if (!QFile::exists(iconFile.fileName()) && iconFile.open(QSaveFile::WriteOnly)) {
+                QFile sourceIcon(pngIcon);
+                sourceIcon.open(QFile::ReadOnly);
+                iconFile.write(sourceIcon.readAll());
+                iconFile.commit();
+            }
+        }
+        qApp->setDesktopFileName(applicationName);
+    }
+
+    // all other systems just need this
+    // do this always to have the icon available via QApplication::windowIcon
+    QApplication::setWindowIcon(QIcon(pngIcon));
+}
 
 bool appIsDarkThemed = false;
 
@@ -60,7 +100,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName(QStringLiteral("AbsInt"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("absint.com"));
     QCoreApplication::setApplicationName(QStringLiteral("FirstAid"));
-    QApplication::setWindowIcon(QIcon(QStringLiteral(":/firstaid.png")));
+    setApplicationIcon(QStringLiteral(":/firstaid.png"));
 
     /**
      * define & parse our command line
