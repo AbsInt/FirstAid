@@ -1,8 +1,7 @@
 #
-# Basics: Right cmake version and right path for modules
+# Basics: Right cmake version
 #
 cmake_minimum_required (VERSION 3.16)
-set (CMAKE_MODULE_PATH "${CMAKE_INSTALL_PREFIX}/share/cmake/modules")
 
 # FirstAid - PDF Help Viewer
 project(firstaid)
@@ -14,7 +13,7 @@ if(ABSINT)
     include (${UR_USE_FILE})
 
     # prefer local poppler
-    include_directories(${CMAKE_INSTALL_PREFIX}/include/poppler/qt6)
+    include_directories(${UR_INCLUDE_DIR}/poppler/qt6)
 
     # setup AbsInt release info
     set (FIRSTAID_BUILD ${UR_BUILD})
