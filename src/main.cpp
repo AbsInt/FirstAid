@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "config.h"
 #include "viewer.h"
 
 #include <QApplication>
@@ -100,6 +101,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName(QStringLiteral("AbsInt"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("absint.com"));
     QCoreApplication::setApplicationName(QStringLiteral("FirstAid"));
+    QCoreApplication::setApplicationVersion(QString::fromUtf8(FIRSTAID_RELEASE_STRING));
     setApplicationIcon(QStringLiteral(":/firstaid.png"));
 
     /**
