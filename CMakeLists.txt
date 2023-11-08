@@ -85,9 +85,9 @@ add_executable(firstaid ${firstaid_SRCS} ${firstaid_UI_SRCS} ${firstaid_QRC_SRCS
 if (WIN32)
     target_link_libraries(firstaid poppler-qt6.lib poppler.lib freetype.lib zlib.lib Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 elseif (APPLE)
-    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
+    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lexpat -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 else()
-    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
+    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lexpat -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 endif()
 
 # build linkChecker binary
@@ -95,11 +95,11 @@ add_executable(linkChecker ${link_checker_SRCS})
 
 # link, we assume static libs on Windows ATM
 if (WIN32)
-    target_link_libraries(linkChecker poppler-qt6.lib poppler.lib  freetype.lib zlib.lib Qt6::Core Qt6::PrintSupport Qt6::Xml)
+    target_link_libraries(linkChecker poppler-qt6.lib poppler.lib freetype.lib zlib.lib Qt6::Core Qt6::PrintSupport Qt6::Xml)
 elseif (APPLE)
-    target_link_libraries(linkChecker -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat -lz Qt6::Core Qt6::PrintSupport Qt6::Xml)
+    target_link_libraries(linkChecker -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lexpat -lz Qt6::Core Qt6::PrintSupport Qt6::Xml)
 else()
-    target_link_libraries(linkChecker -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lz Qt6::Core Qt6::PrintSupport Qt6::Xml)
+    target_link_libraries(linkChecker -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lexpat -lz Qt6::Core Qt6::PrintSupport Qt6::Xml)
 endif()
 
 # install viewer to prefix
