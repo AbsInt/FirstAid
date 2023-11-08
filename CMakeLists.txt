@@ -87,7 +87,7 @@ if (WIN32)
 elseif (APPLE)
     target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 else()
-    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
+    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 endif()
 
 # build linkChecker binary
@@ -99,7 +99,7 @@ if (WIN32)
 elseif (APPLE)
     target_link_libraries(linkChecker -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lbz2 -lexpat -lz Qt6::Core Qt6::PrintSupport Qt6::Xml)
 else()
-    target_link_libraries(linkChecker -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype Qt6::Core Qt6::PrintSupport Qt6::Xml)
+    target_link_libraries(linkChecker -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lz Qt6::Core Qt6::PrintSupport Qt6::Xml)
 endif()
 
 # install viewer to prefix
