@@ -93,7 +93,7 @@ int main(int argc, char **argv)
                 printf("  Processing link '%s'...", qPrintable(line.trimmed()));
                 bool valid = false;
                 if (auto linkDest = (document->linkDestination(line.trimmed()))) {
-                    valid = linkDest->pageNumber() > 0;
+                    valid = linkDest->pageNumber() > 1;
                 }
                 if (valid)
                     printf(" ok\n");
