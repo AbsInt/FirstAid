@@ -1013,5 +1013,5 @@ QSize PageView::sizeHint() const
     /**
      * else: normal hint
      */
-    return QWidget::sizeHint();
+    return QAbstractScrollArea::sizeHint();
 }
