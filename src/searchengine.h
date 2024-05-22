@@ -21,6 +21,7 @@
 #include <QHash>
 #include <QList>
 #include <QObject>
+#include <poppler-qt6.h>
 
 class SearchEngine : public QObject
 {
@@ -57,7 +58,7 @@ protected slots:
 private:
     // members for finding text
     QString m_findText;
-    int m_findFlags = 0;
+    Poppler::Page::SearchFlags m_findFlags = Poppler::Page::NoSearchFlags;
     int m_findCurrentPage = 0;
     int m_findStopAfterPage = 0;
     int m_findPagesScanned = 0;

@@ -103,7 +103,7 @@ void SearchEngine::reset()
 void SearchEngine::find(const QString &text, bool caseSensitive, bool wholeWords)
 {
     // compose flags first
-    int flags = 0;
+    Poppler::Page::SearchFlags flags = Poppler::Page::NoSearchFlags;
     if (!caseSensitive)
         flags |= Poppler::Page::IgnoreCase;
     if (wholeWords)
@@ -226,7 +226,7 @@ void SearchEngine::find()
     for (int count = 0; count < PagePileSize; count++) {
         // find our text on the current search page
         Poppler::Page *p = PdfViewer::document()->page(m_findCurrentPage);
-        QList<QRectF> matches = p->search(m_findText, static_cast<Poppler::Page::SearchFlag>(m_findFlags));
+        QList<QRectF> matches = p->search(m_findText, m_findFlags);
 
         // signal matches and remember them
         if (!matches.isEmpty()) {
