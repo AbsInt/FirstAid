@@ -114,7 +114,7 @@ public slots:
     void slotCopyRequested(int page, const QRect &viewportRect);
 
     void slotFindStarted();
-    void slotHighlightMatch(int page, const QRectF &rect);
+    void slotHighlightMatch(int page, const QRectF &rect, bool searchWrapped);
     void slotMatchesFound(int page, const QList<QRectF> &matches);
     void updateCurrentPage();
 

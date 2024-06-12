@@ -49,7 +49,7 @@ signals:
     void started();
     void progress(qreal progress);
     void finished();
-    void highlightMatch(int page, const QRectF &match);
+    void highlightMatch(int page, const QRectF &match, bool searchWrapped = false);
     void matchesFound(int page, const QList<QRectF> &matches);
 
 protected slots:

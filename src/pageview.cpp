@@ -882,9 +882,12 @@ void PageView::slotFindStarted()
     viewport()->update();
 }
 
-void PageView::slotHighlightMatch(int page, const QRectF &rect)
+void PageView::slotHighlightMatch(int page, const QRectF &rect, bool searchWrapped)
 {
     gotoPage(page, rect, false);
+
+    if (searchWrapped)
+        showHint(QStringLiteral("<b>Search wrapped</b>"));
 }
 
 void PageView::slotMatchesFound(int page, const QList<QRectF> &)

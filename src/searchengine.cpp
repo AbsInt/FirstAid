@@ -167,7 +167,7 @@ void SearchEngine::nextMatch()
         if (!matches.isEmpty()) {
             m_currentMatchPage = page;
             m_currentMatchPageIndex = 0;
-            emit highlightMatch(m_currentMatchPage, matches.first());
+            emit highlightMatch(m_currentMatchPage, matches.first(), true);
             return;
         }
     }
@@ -206,7 +206,7 @@ void SearchEngine::previousMatch()
         if (!matches.isEmpty()) {
             m_currentMatchPage = page;
             m_currentMatchPageIndex = matches.count() - 1;
-            emit highlightMatch(m_currentMatchPage, matches.last());
+            emit highlightMatch(m_currentMatchPage, matches.last(), true);
             return;
         }
     }
@@ -230,12 +230,18 @@ void SearchEngine::find()
 
         // signal matches and remember them
         if (!matches.isEmpty()) {
+            // first match? highlight it
             if (m_matchesForPage.isEmpty()) {
                 m_currentMatchPage = m_findCurrentPage;
                 m_currentMatchPageIndex = 0;
                 m_currentMatchIndex = 1;
                 emit highlightMatch(m_currentMatchPage, matches.first());
                 delayAfterFirstMatch = true;
+            }
+
+            // increment the match index if current page in front of start page
+            if (m_findCurrentPage <= m_findStopAfterPage) {
+                m_currentMatchIndex += matches.length();
             }
 
             m_matchesForPage.insert(m_findCurrentPage, matches);
