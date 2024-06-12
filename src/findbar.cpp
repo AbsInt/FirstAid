@@ -112,6 +112,14 @@ FindBar::FindBar(QWidget *parent)
     connect(m_acCaseSensitive, &QAction::triggered, this, &FindBar::slotFindActionTriggered);
     connect(m_acWholeWords, &QAction::triggered, this, &FindBar::slotFindActionTriggered);
 
+    // prepare indicator colors for status visualization
+    m_notFoundColor = QColor("#f0a0a0");
+    m_foundColor = QColor("#a0f0a0");
+    if (palette().color(QPalette::Base).lightness() < 128) {
+        m_notFoundColor = m_notFoundColor.darker();
+        m_foundColor = m_foundColor.darker();
+    }
+
     slotDocumentChanged();
 }
 
@@ -171,9 +179,9 @@ void FindBar::slotFindDone()
 
     if (isVisible()) {
         if (PdfViewer::searchEngine()->matches().isEmpty())
-            m_findEdit->setStyleSheet(QStringLiteral("background-color: #f0a0a0"));
+            m_findEdit->setStyleSheet(QStringLiteral("background-color: %1").arg(m_notFoundColor.name()));
         else
-            m_findEdit->setStyleSheet(QStringLiteral("background-color: #a0f0a0"));
+            m_findEdit->setStyleSheet(QStringLiteral("background-color: %1").arg(m_foundColor.name()));
 
         QTimer::singleShot(5000, this, &FindBar::slotResetStyle);
     }

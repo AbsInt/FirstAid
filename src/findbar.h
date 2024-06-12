@@ -57,4 +57,6 @@ private:
     QToolButton *m_prevMatch = nullptr;
     QToolButton *m_nextMatch = nullptr;
     QTimer *m_findStartTimer = nullptr;
+    QColor m_foundColor;
+    QColor m_notFoundColor;
 };
