@@ -478,6 +478,15 @@ void PageView::mousePressEvent(QMouseEvent *event)
         return;
     }
 
+    // handle history buttons early
+    if (event->button() == Qt::BackButton) {
+        historyPrev();
+        return;
+    } else if (event->button() == Qt::ForwardButton) {
+        historyNext();
+        return;
+    }
+
     int page = PdfViewer::document()->pageForPoint(toPoints(offset() + event->pos()));
 
     // start rubber band with right click or shift+left click
