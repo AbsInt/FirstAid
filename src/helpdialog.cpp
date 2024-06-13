@@ -41,7 +41,7 @@ HelpDialog::HelpDialog(QWidget *parent)
     html += addShortcut(fromStandardKey(QKeySequence::Open), tr("Open file"));
     html += addShortcut(fromStandardKey(QKeySequence::Refresh), tr("Reload document"));
     html += addShortcut(fromStandardKey(QKeySequence::Find), tr("Find text in document"));
-    html += addShortcut(QStringList() << QStringLiteral("Crtl") << QStringLiteral("E"), tr("Open in external application"));
+    html += addShortcut(QStringList() << QStringLiteral("Ctrl") << QStringLiteral("E"), tr("Open in external application"));
     html += addShortcut(fromStandardKey(QKeySequence::Print), tr("Print document"));
 #if defined(Q_OS_WIN)
     html += addShortcut(QStringList() << QStringLiteral("Alt") << QStringLiteral("F4"), tr("Quit application"));
@@ -70,7 +70,7 @@ HelpDialog::HelpDialog(QWidget *parent)
     html += addTable(QStringLiteral("View"));
     html += addShortcut(QStringList() << QStringLiteral("W"), tr("Fit page width"));
     html += addShortcut(QStringList() << QStringLiteral("F"), tr("Fit full page"));
-    html += addShortcut(QStringList() << QStringLiteral("Crtl") << QStringLiteral("0"), tr("Zoom 100%"));
+    html += addShortcut(QStringList() << QStringLiteral("Ctrl") << QStringLiteral("0"), tr("Zoom 100%"));
     html += addShortcut(fromStandardKey(QKeySequence::ZoomIn), tr("Zoom in"));
     html += addShortcut(fromStandardKey(QKeySequence::ZoomOut), tr("Zoom out"));
     html += addShortcut(QStringList() << QStringLiteral("F7"), tr("Toggle table of contents"));
@@ -101,6 +101,9 @@ QStringList HelpDialog::endTable()
 QStringList HelpDialog::addShortcut(const QStringList &keys, const QString &description)
 {
     QStringList quotedKeys = keys;
+#if defined(Q_OS_MACOS)
+    quotedKeys.replaceInStrings(QStringLiteral("Ctrl"), QChar(0x2318));
+#endif
     quotedKeys.replaceInStrings(QRegularExpression(QStringLiteral("(^.+$)")), QStringLiteral("<key>\\1</key>"));
 
     return QStringList() << QStringLiteral("<tr><td>") + quotedKeys.join(QLatin1String(" + ")) + QStringLiteral("</td><td>") + description + QStringLiteral("</td></tr>");
