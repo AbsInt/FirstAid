@@ -20,6 +20,7 @@
 
 #include <QLabel>
 #include <QRegularExpression>
+#include <QShortcut>
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
@@ -80,6 +81,14 @@ HelpDialog::HelpDialog(QWidget *parent)
     html << QStringLiteral("</tr></table>");
 
     label->setText(html.join(QString()));
+
+    // ensure we can be closed via the Escape key
+    new QShortcut(Qt::Key_Escape, this, this, &HelpDialog::accept, Qt::ApplicationShortcut);
+}
+
+void HelpDialog::mousePressEvent(QMouseEvent *)
+{
+    accept();
 }
 
 QStringList HelpDialog::addTable(const QString &title)

@@ -28,6 +28,9 @@ class HelpDialog : public QDialog
 public:
     HelpDialog(QWidget *parent = nullptr);
 
+protected:
+    void mousePressEvent(QMouseEvent *e) override;
+
 private:
     QStringList addTable(const QString &title);
     QStringList endTable();
