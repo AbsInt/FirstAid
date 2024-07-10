@@ -289,7 +289,7 @@ void PdfViewer::processCommand()
         if (!ReadFile(hStdin, fileBuffer.data(), bytesLeft, &bytesRead, NULL))
             return;
 
-        line = std::string(fileBuffer, bytesRead);
+        line = std::string(fileBuffer.data(), bytesRead);
     }
 #else
     // read one line, without buffering
