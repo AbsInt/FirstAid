@@ -58,6 +58,7 @@
 #include <QVBoxLayout>
 
 #include <iostream>
+#include <vector>
 
 #ifdef Q_OS_WIN
 #include <Windows.h>
@@ -263,7 +264,7 @@ void PdfViewer::processCommand()
         return;
 
     INPUT_RECORD eventBuffer[1];
-    DWORD eventsRead;
+    DWORD eventsRead = 0;
     if (PeekConsoleInput(hStdin, eventBuffer, 1, &eventsRead)) {
         if (1 != eventsRead) {
             return;
@@ -278,14 +279,14 @@ void PdfViewer::processCommand()
         // read one line, without buffering
         std::getline(std::cin, line);
     } else {
-        DWORD bytesLeft;
+        DWORD bytesLeft = 0;
         PeekNamedPipe(hStdin, NULL, 0, NULL, &bytesLeft, NULL);
         if (!bytesLeft)
             return;
 
-        char fileBuffer[1024];
-        DWORD bytesRead;
-        if (!ReadFile(hStdin, fileBuffer, bytesLeft, &bytesRead, NULL))
+        std::vector<char> fileBuffer(bytesLeft);
+        DWORD bytesRead = 0;
+        if (!ReadFile(hStdin, fileBuffer.data(), bytesLeft, &bytesRead, NULL))
             return;
 
         line = std::string(fileBuffer, bytesRead);
