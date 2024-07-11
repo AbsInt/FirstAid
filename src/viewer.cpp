@@ -205,6 +205,7 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     closeDocument();
 
     // try to load the document
+    m_loadingFile = true;
     QtConcurrent::run([file]() { return Poppler::Document::load(file); }).then(this, [this, file](std::unique_ptr<Poppler::Document> newdoc) {
         if (!newdoc || newdoc->isLocked()) {
             QMessageBox::critical(this, tr("Cannot open file"), tr("Cannot open file '%1'.").arg(file));
@@ -229,6 +230,12 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
 
         // queue goto page request as on startup there may be some signals still flying around
         QMainWindow::metaObject()->invokeMethod(m_view, "gotoPage", Qt::QueuedConnection, Q_ARG(int, page));
+
+        // we are no longer loading
+        m_loadingFile = true;
+
+        // check of there are command to process
+        processCommand();
     });
 }
 
@@ -257,6 +264,11 @@ void PdfViewer::closeDocument()
 
 void PdfViewer::processCommand()
 {
+    // do not process commands if we are loading a PDF file
+    // upon setting the loaded PDF file processCommand() will be called again
+    if (m_loadingFile)
+        return;
+
     std::string line;
 
 #ifdef Q_OS_WIN

@@ -177,4 +177,9 @@ private:
      * PDF view, renders the pages
      */
     PageView *m_view = nullptr;
+
+    /**
+     * Flag set while a document is being loaded.
+     */
+    bool m_loadingFile = false;
 };
