@@ -57,6 +57,8 @@
 #include <QThreadPool>
 #include <QVBoxLayout>
 
+#include <QtConcurrent>
+
 #include <iostream>
 #include <vector>
 
@@ -203,30 +205,31 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     closeDocument();
 
     // try to load the document
-    auto newdoc = Poppler::Document::load(file);
-    if (!newdoc || newdoc->isLocked()) {
-        QMessageBox::critical(this, tr("Cannot open file"), tr("Cannot open file '%1'.").arg(file));
-        return;
-    }
+    QtConcurrent::run([file]() { return Poppler::Document::load(file); }).then(this, [this, file](std::unique_ptr<Poppler::Document> newdoc) {
+        if (!newdoc || newdoc->isLocked()) {
+            QMessageBox::critical(this, tr("Cannot open file"), tr("Cannot open file '%1'.").arg(file));
+            return;
+        }
 
-    // pass loaded poppler document to our internal one
-    m_document.setDocument(std::move(newdoc));
+        // pass loaded poppler document to our internal one
+        m_document.setDocument(std::move(newdoc));
 
-    // set file + watch
-    m_filePath = file;
-    m_fileWatcher.addPath(m_filePath);
+        // set file + watch
+        m_filePath = file;
+        m_fileWatcher.addPath(m_filePath);
 
-    // update action state & co.
-    updateOnDocumentChange();
+        // update action state & co.
+        updateOnDocumentChange();
 
-    // determine last visible page for the current file
-    QSettings settings;
-    settings.beginGroup(QStringLiteral("Files"));
-    int page = settings.value(QString::fromUtf8(m_filePath.toUtf8().toPercentEncoding()), 0).toInt();
-    settings.endGroup();
+        // determine last visible page for the current file
+        QSettings settings;
+        settings.beginGroup(QStringLiteral("Files"));
+        int page = settings.value(QString::fromUtf8(m_filePath.toUtf8().toPercentEncoding()), 0).toInt();
+        settings.endGroup();
 
-    // queue goto page request as on startup there may be some signals still flying around
-    QMainWindow::metaObject()->invokeMethod(m_view, "gotoPage", Qt::QueuedConnection, Q_ARG(int, page));
+        // queue goto page request as on startup there may be some signals still flying around
+        QMainWindow::metaObject()->invokeMethod(m_view, "gotoPage", Qt::QueuedConnection, Q_ARG(int, page));
+    });
 }
 
 void PdfViewer::closeDocument()
