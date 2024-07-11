@@ -153,9 +153,10 @@ PdfViewer::PdfViewer(const QString &file)
     /**
      * load document if one is passed
      * useful to have initial geometry based on content
+     * BUG 37368: delay loading a bit so the window is almost immeadiately visible
      */
     if (!file.isEmpty())
-        loadDocument(file);
+        QTimer::singleShot(0, this, [this, file]() { loadDocument(file); });
 
     /**
      * restore old geometry & dock widget state, will handle "bad geometries", see http://doc.qt.io/qt-5.7/qmainwindow.html#restoreState
