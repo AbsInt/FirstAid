@@ -204,16 +204,29 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
     // cleanup old document
     closeDocument();
 
+    QProgressDialog *pd = new QProgressDialog(this);
+    pd->setWindowModality(Qt::WindowModal);
+    pd->setMinimumDuration(2000);
+    pd->setLabelText(QStringLiteral("Loading document..."));
+    pd->setRange(0, 0);
+
     // try to load the document
     m_loadingFile = true;
-    QtConcurrent::run([file]() { return Poppler::Document::load(file); }).then(this, [this, file](std::unique_ptr<Poppler::Document> newdoc) {
+    QtConcurrent::run([file]() { return Poppler::Document::load(file); }).then(this, [this, file, pd](std::unique_ptr<Poppler::Document> newdoc) {
         if (!newdoc || newdoc->isLocked()) {
+            // delete progress dialog
+            delete pd;
+
+            // show message
             QMessageBox::critical(this, tr("Cannot open file"), tr("Cannot open file '%1'.").arg(file));
             return;
         }
 
         // pass loaded poppler document to our internal one
-        m_document.setDocument(std::move(newdoc));
+        m_document.setDocument(std::move(newdoc), pd);
+
+        // delete progress dialog
+        delete pd;
 
         // set file + watch
         m_filePath = file;

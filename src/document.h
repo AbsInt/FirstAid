@@ -24,6 +24,8 @@
 
 #include <QObject>
 
+class QProgressDialog;
+
 class Document : public QObject
 {
     Q_OBJECT
@@ -39,7 +41,7 @@ public:
     }
 
     /*! Set Poppler document to use, any old data will be deleted. */
-    void setDocument(std::unique_ptr<Poppler::Document> &&document);
+    void setDocument(std::unique_ptr<Poppler::Document> &&document, QProgressDialog *pd = nullptr);
 
     /*! Returns document title */
     QString title() const

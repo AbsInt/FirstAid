@@ -21,6 +21,9 @@
 #include "document.h"
 #include "viewer.h"
 
+#include <QApplication>
+#include <QProgressDialog>
+
 Document::Document()
 {
 }
@@ -31,7 +34,7 @@ Document::~Document()
     reset();
 }
 
-void Document::setDocument(std::unique_ptr<Poppler::Document> &&document)
+void Document::setDocument(std::unique_ptr<Poppler::Document> &&document, QProgressDialog *pd)
 {
     // reset old content
     reset();
@@ -49,8 +52,23 @@ void Document::setDocument(std::unique_ptr<Poppler::Document> &&document)
         m_document->setRenderHint(Poppler::Document::Antialiasing, true);
         m_document->setRenderBackend(Poppler::Document::SplashBackend);
 
+        // init progress dialog
+        if (pd) {
+            pd->setLabelText(QStringLiteral("Processing pages..."));
+            pd->setRange(0, m_document->numPages());
+        }
+
+        // reserve space for data
+        m_pages.resize(m_document->numPages());
+        m_links.resize(m_document->numPages());
+        m_pageRects.resize(m_document->numPages());
+
         // create all poppler pages and collect links on them
         for (int i = 0; i < m_document->numPages(); ++i) {
+            // update progress dialog
+            if (pd)
+                pd->setValue(i);
+
             // skip invalid pages
             std::unique_ptr<Poppler::Page> page = m_document->page(i);
             if (!page)
@@ -58,10 +76,10 @@ void Document::setDocument(std::unique_ptr<Poppler::Document> &&document)
 
             // extract links from the page
             auto links = page->annotations(QSet<Poppler::Annotation::SubType>() << Poppler::Annotation::ALink << Poppler::Annotation::AText << Poppler::Annotation::ACaret);
-            m_links.emplace_back(std::move(links));
+            m_links[i] = std::move(links);
 
             // remember the page
-            m_pages.emplace_back(std::move(page));
+            m_pages[i] = std::move(page);
         }
     }
 
