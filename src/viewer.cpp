@@ -245,10 +245,10 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
         QMainWindow::metaObject()->invokeMethod(m_view, "gotoPage", Qt::QueuedConnection, Q_ARG(int, page));
 
         // we are no longer loading
-        m_loadingFile = true;
+        m_loadingFile = false;
 
         // check of there are command to process
-        processCommand();
+        QTimer::singleShot(0, this, [this]() { processCommands(); });
     });
 }
 
@@ -275,13 +275,8 @@ void PdfViewer::closeDocument()
     updateOnDocumentChange();
 }
 
-void PdfViewer::processCommand()
+void PdfViewer::receiveCommand()
 {
-    // do not process commands if we are loading a PDF file
-    // upon setting the loaded PDF file processCommand() will be called again
-    if (m_loadingFile)
-        return;
-
     std::string line;
 
 #ifdef Q_OS_WIN
@@ -324,8 +319,22 @@ void PdfViewer::processCommand()
     std::getline(std::cin, line);
 #endif
 
-    // get command
-    const QString command = QString::fromLocal8Bit(line.c_str()).trimmed();
+    // queue the command
+    m_pendingCommands << QString::fromLocal8Bit(line.c_str()).trimmed();
+
+    // when not loading a document we can process the command
+    if (!m_loadingFile)
+        QTimer::singleShot(0, this, &PdfViewer::processCommands);
+}
+
+void PdfViewer::processCommands()
+{
+    // any command at all?
+    if (m_pendingCommands.isEmpty())
+        return;
+
+    // get next command
+    const QString command = m_pendingCommands.takeFirst();
 
     if (command.startsWith(QLatin1String("open ")))
         loadDocument(command.mid(5));
@@ -357,6 +366,9 @@ void PdfViewer::processCommand()
 
     else if (command.startsWith(QLatin1String("close")))
         QTimer::singleShot(0, qApp, &QApplication::quit);
+
+    // try to process other pending commands
+    QTimer::singleShot(0, this, &PdfViewer::processCommands);
 }
 
 void PdfViewer::closeEvent(QCloseEvent *event)

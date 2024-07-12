@@ -106,7 +106,8 @@ public:
     QMenu *createPopupMenu() override;
 
 public slots:
-    void processCommand();
+    void receiveCommand();
+    void processCommands();
 
 private slots:
     void slotOpenFile();
@@ -179,7 +180,12 @@ private:
     PageView *m_view = nullptr;
 
     /**
+     * A list of pending commands.
+     */
+    QStringList m_pendingCommands;
+
+    /**
      * Flag set while a document is being loaded.
      */
-    bool m_loadingFile = false;
+    bool m_loadingFile = true;
 };
