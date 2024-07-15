@@ -206,6 +206,7 @@ void PdfViewer::loadDocument(QString file, bool forceReload)
 
     QProgressDialog *pd = new QProgressDialog(this);
     pd->setWindowModality(Qt::WindowModal);
+    pd->setCancelButton(nullptr);
     pd->setMinimumDuration(2000);
     pd->setLabelText(QStringLiteral("Loading document..."));
     pd->setRange(0, 0);
