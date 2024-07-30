@@ -38,35 +38,42 @@
 
 static void setApplicationIcon(const QString &pngIcon)
 {
-    // Wayland icon handling
-    if (qApp->platformName() == QStringLiteral("wayland")) {
-        // use name we have in prefix
-        const QString applicationName = QStringLiteral("com.absint.firstaid");
+#if defined(Q_OS_LINUX)
+    /*
+     * Wayland and GNOME icon handling
+     */
 
-        // create a desktop file to note down our icon
-        if (const auto appDir = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation); !appDir.isEmpty()) {
-            QDir().mkpath(appDir);
-            QSaveFile desktopFile(appDir + QStringLiteral("/") + applicationName + QStringLiteral(".desktop"));
-            if (!QFile::exists(desktopFile.fileName()) && desktopFile.open(QSaveFile::WriteOnly)) {
-                desktopFile.write(QStringLiteral("[Desktop Entry]\nNoDisplay=true\nIcon=%1\n").arg(applicationName).toUtf8().constData());
-                desktopFile.commit();
-            }
-        }
+    // use name we have in prefix
+    const QString applicationName = QStringLiteral("com.absint.firstaid");
 
-        // create a matching icon
-        if (const auto dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation); !dataDir.isEmpty()) {
-            const QString iconDir = dataDir + QStringLiteral("/icons");
-            QDir().mkpath(iconDir);
-            QSaveFile iconFile(iconDir + QStringLiteral("/") + applicationName + QStringLiteral(".png"));
-            if (!QFile::exists(iconFile.fileName()) && iconFile.open(QSaveFile::WriteOnly)) {
-                QFile sourceIcon(pngIcon);
-                sourceIcon.open(QFile::ReadOnly);
-                iconFile.write(sourceIcon.readAll());
-                iconFile.commit();
-            }
+    // create a desktop file to note down our icon
+    if (const auto appDir = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation); !appDir.isEmpty()) {
+        QDir().mkpath(appDir);
+        QSaveFile desktopFile(appDir + QStringLiteral("/") + applicationName + QStringLiteral(".desktop"));
+        if (!QFile::exists(desktopFile.fileName()) && desktopFile.open(QSaveFile::WriteOnly)) {
+            desktopFile.write(QStringLiteral("[Desktop Entry]\nEncoding=UTF-8\nType=Application\nNoDisplay=true\nIcon=%1\nName=firstaid\n")
+                                  .arg(applicationName)
+                                  .toUtf8()
+                                  .constData());
+            desktopFile.commit();
         }
-        qApp->setDesktopFileName(applicationName);
     }
+
+    // create a matching icon
+    if (const auto dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation); !dataDir.isEmpty()) {
+        const QString iconDir = dataDir + QStringLiteral("/icons");
+        QDir().mkpath(iconDir);
+        QSaveFile iconFile(iconDir + QStringLiteral("/") + applicationName + QStringLiteral(".png"));
+        if (!QFile::exists(iconFile.fileName()) && iconFile.open(QSaveFile::WriteOnly)) {
+            QFile sourceIcon(pngIcon);
+            sourceIcon.open(QFile::ReadOnly);
+            iconFile.write(sourceIcon.readAll());
+            iconFile.commit();
+        }
+    }
+
+    qApp->setDesktopFileName(applicationName);
+#endif
 
     // all other systems just need this
     // do this always to have the icon available via QApplication::windowIcon
