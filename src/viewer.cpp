@@ -160,6 +160,11 @@ PdfViewer::PdfViewer(const QString &file)
         loadDocument(file);
 
     /**
+     * set default size
+     */
+    resize(800, 600);
+
+    /**
      * restore old geometry & dock widget state, will handle "bad geometries", see http://doc.qt.io/qt-5.7/qmainwindow.html#restoreState
      */
     QSettings settings;
