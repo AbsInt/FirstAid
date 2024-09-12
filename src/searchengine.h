@@ -60,7 +60,7 @@ private:
     QString m_findText;
     Poppler::Page::SearchFlags m_findFlags = Poppler::Page::NoSearchFlags;
     int m_findCurrentPage = 0;
-    int m_findStopAfterPage = 0;
+    int m_findStartPage = 0;
     int m_findPagesScanned = 0;
 
     // members for navigating in find results

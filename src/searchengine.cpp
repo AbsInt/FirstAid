@@ -125,11 +125,8 @@ void SearchEngine::find(const QString &text, bool caseSensitive, bool wholeWords
     }
 
     m_findCurrentPage = PdfViewer::view()->currentPage();
+    m_findStartPage = m_findCurrentPage;
     m_findPagesScanned = 0;
-
-    m_findStopAfterPage = m_findCurrentPage - 1;
-    if (m_findStopAfterPage < 0)
-        m_findStopAfterPage = PdfViewer::document()->numPages() - 1;
 
     find();
 }
@@ -240,7 +237,7 @@ void SearchEngine::find()
             }
 
             // increment the match index if current page in front of start page
-            if (m_findCurrentPage <= m_findStopAfterPage) {
+            if (m_findCurrentPage < m_findStartPage) {
                 m_currentMatchIndex += matches.length();
             }
 
@@ -250,22 +247,23 @@ void SearchEngine::find()
         }
 
         // are we done with our search
-        if (m_findCurrentPage == m_findStopAfterPage) {
+        m_findPagesScanned++;
+        int documentPages = PdfViewer::document()->numPages();
+        if (m_findPagesScanned >= documentPages) {
             emit finished();
             return;
         }
 
         // no? proceed with next page or wrap around
         m_findCurrentPage++;
-        if (m_findCurrentPage >= PdfViewer::document()->numPages())
+        if (m_findCurrentPage >= documentPages)
             m_findCurrentPage = 0;
 
         if (delayAfterFirstMatch)
             break;
 
         // emit progress
-        m_findPagesScanned++;
-        emit progress(m_findPagesScanned / (qreal)PdfViewer::document()->numPages());
+        emit progress(m_findPagesScanned / (qreal)documentPages);
     }
 
     QTimer::singleShot(delayAfterFirstMatch ? 10 : 0, this, qOverload<>(&SearchEngine::find));
