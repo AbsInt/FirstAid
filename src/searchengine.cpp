@@ -234,10 +234,8 @@ void SearchEngine::find()
                 m_currentMatchIndex = 1;
                 emit highlightMatch(m_currentMatchPage, matches.first());
                 delayAfterFirstMatch = true;
-            }
-
-            // increment the match index if current page in front of start page
-            if (m_findCurrentPage < m_findStartPage) {
+            } else if (m_findCurrentPage < m_findStartPage) {
+                // increment the match index if current page in front of start page
                 m_currentMatchIndex += matches.length();
             }
 
