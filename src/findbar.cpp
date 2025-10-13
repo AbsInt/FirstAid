@@ -198,8 +198,8 @@ void FindBar::slotUpdateStatus()
     int count = PdfViewer::searchEngine()->matchesCount();
 
     m_statusLabel->setText(QStringLiteral("%1 of %2").arg(index).arg(count));
-    m_nextMatch->setEnabled(count > 1);
-    m_prevMatch->setEnabled(count > 1);
+    m_nextMatch->setEnabled(count >= 1);
+    m_prevMatch->setEnabled(count >= 1);
 }
 
 void FindBar::slotReturnPressed()
