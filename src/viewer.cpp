@@ -433,12 +433,15 @@ void PdfViewer::slotDelayedReload()
 
 void PdfViewer::slotPrint()
 {
+    const int currentPage = m_view->currentPage() + 1;
+
     // let the user select the printer to use
     QPrinter printer(QPrinter::HighResolution);
     QPrintDialog printDialog(&printer, this);
     printDialog.setMinMax(1, m_document.numPages());
     printDialog.setFromTo(1, m_document.numPages());
     printDialog.setOption(QAbstractPrintDialog::PrintSelection, false);
+    printDialog.setOption(QAbstractPrintDialog::PrintCurrentPage, currentPage >= 1 && currentPage <= m_document.numPages());
     printDialog.setOption(QAbstractPrintDialog::PrintCollateCopies, false);
     printDialog.setOption(QAbstractPrintDialog::PrintShowPageSize, false);
     if (!printDialog.exec())
@@ -464,7 +467,7 @@ void PdfViewer::slotPrint()
             break;
 
         case QAbstractPrintDialog::CurrentPage:
-            fromPage = toPage = 1 + m_view->currentPage();
+            fromPage = toPage = currentPage;
             break;
     }
 
