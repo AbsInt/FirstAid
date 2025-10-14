@@ -438,13 +438,40 @@ void PdfViewer::slotPrint()
     QPrintDialog printDialog(&printer, this);
     printDialog.setMinMax(1, m_document.numPages());
     printDialog.setFromTo(1, m_document.numPages());
+    printDialog.setOption(QAbstractPrintDialog::PrintSelection, false);
+    printDialog.setOption(QAbstractPrintDialog::PrintCollateCopies, false);
+    printDialog.setOption(QAbstractPrintDialog::PrintShowPageSize, false);
     if (!printDialog.exec())
         return;
 
     // determine range
-    int fromPage = qMax(printer.fromPage(), 1);
-    int toPage = qMin(printer.toPage(), m_document.numPages());
-    if (0 == toPage)
+    int fromPage = 0;
+    int toPage = 0;
+
+    switch (printDialog.printRange()) {
+        case QAbstractPrintDialog::AllPages:
+            fromPage = 1;
+            toPage = m_document.numPages();
+            break;
+
+        case QAbstractPrintDialog::Selection:
+            // should never happen
+            return;
+
+        case QAbstractPrintDialog::PageRange:
+            fromPage = printer.fromPage();
+            toPage = printer.toPage();
+            break;
+
+        case QAbstractPrintDialog::CurrentPage:
+            fromPage = toPage = 1 + m_view->currentPage();
+            break;
+    }
+
+    // some sanity checks
+    fromPage = qMax(fromPage, 1);
+    toPage = qMin(toPage, m_document.numPages());
+    if (toPage == 0)
         toPage = m_document.numPages();
 
     // provide some feedback
