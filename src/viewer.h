@@ -187,5 +187,5 @@ private:
     /**
      * Flag set while a document is being loaded.
      */
-    bool m_loadingFile = true;
+    bool m_loadingFile = false;
 };
