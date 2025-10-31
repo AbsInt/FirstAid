@@ -342,8 +342,13 @@ void PdfViewer::processCommands()
     // get next command
     const QString command = m_pendingCommands.takeFirst();
 
-    if (command.startsWith(QLatin1String("open ")))
+    if (command.startsWith(QLatin1String("open "))) {
         loadDocument(command.mid(5));
+
+        // the user should take note of us
+        raise();
+        activateWindow();
+    }
 
     else if (command.startsWith(QLatin1String("goto "))) {
         const QString target = command.mid(5);
