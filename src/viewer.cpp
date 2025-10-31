@@ -339,15 +339,15 @@ void PdfViewer::processCommands()
     if (m_pendingCommands.isEmpty())
         return;
 
+    // shall we activate the window?
+    bool activate = false;
+
     // get next command
     const QString command = m_pendingCommands.takeFirst();
 
     if (command.startsWith(QLatin1String("open "))) {
         loadDocument(command.mid(5));
-
-        // the user should take note of us
-        raise();
-        activateWindow();
+        activate = true;
     }
 
     else if (command.startsWith(QLatin1String("goto "))) {
@@ -370,13 +370,18 @@ void PdfViewer::processCommands()
             }
         }
 
-        // the user should take note of us
-        raise();
-        activateWindow();
+        activate = true;
     }
 
     else if (command.startsWith(QLatin1String("close")))
         QTimer::singleShot(0, qApp, &QApplication::quit);
+
+    // no else as we also check the local variable
+    if (command.startsWith(QLatin1String("activate")) || activate) {
+        // the user should take note of us
+        raise();
+        activateWindow();
+    }
 
     // try to process other pending commands
     QTimer::singleShot(0, this, &PdfViewer::processCommands);
