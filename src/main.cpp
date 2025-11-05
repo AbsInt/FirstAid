@@ -66,8 +66,8 @@ static void setApplicationIcon(const QString &pngIcon)
         QSaveFile iconFile(iconDir + QStringLiteral("/") + applicationName + QStringLiteral(".png"));
         if (!QFile::exists(iconFile.fileName()) && iconFile.open(QSaveFile::WriteOnly)) {
             QFile sourceIcon(pngIcon);
-            sourceIcon.open(QFile::ReadOnly);
-            iconFile.write(sourceIcon.readAll());
+            if (sourceIcon.open(QFile::ReadOnly))
+                iconFile.write(sourceIcon.readAll());
             iconFile.commit();
         }
     }
