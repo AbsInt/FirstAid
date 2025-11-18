@@ -394,6 +394,8 @@ void PdfViewer::processCommands()
 #else
         qputenv("XDG_ACTIVATION_TOKEN", activateToken.toUtf8());
 #endif
+
+	setWindowState(windowState() & ~Qt::WindowMinimized);
         raise();
         activateWindow();
     }
