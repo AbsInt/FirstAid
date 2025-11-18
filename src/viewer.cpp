@@ -341,6 +341,7 @@ void PdfViewer::processCommands()
 
     // shall we activate the window?
     bool activate = false;
+    QString activateToken;
 
     // get next command
     const QString command = m_pendingCommands.takeFirst();
@@ -376,9 +377,14 @@ void PdfViewer::processCommands()
     else if (command.startsWith(QLatin1String("close")))
         QTimer::singleShot(0, qApp, &QApplication::quit);
 
-    // no else as we also check the local variable
-    if (command.startsWith(QLatin1String("activate")) || activate) {
-        // the user should take note of us
+    else if (command.startsWith(QLatin1String("activate"))) {
+        activate = true;
+        activateToken = command.mid(9);
+    }
+
+    // now check if we should activate the window
+    if (activate) {
+        qputenv("XDG_ACTIVATION_TOKEN", activateToken.toUtf8());
         raise();
         activateWindow();
     }
