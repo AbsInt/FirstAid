@@ -56,6 +56,7 @@
 #include <QStackedWidget>
 #include <QThreadPool>
 #include <QVBoxLayout>
+#include <QWindow>
 
 #include <QtConcurrent>
 
@@ -385,7 +386,11 @@ void PdfViewer::processCommands()
     // now check if we should activate the window
     if (activate) {
 #if defined(Q_OS_WIN)
-	SetActiveWindow(reinterpret_cast<HWND>(effectiveWinId()));
+        const auto winHandle = (HWND)windowHandle()->winId();
+        if (::IsIconic(winHandle)) {
+            ::ShowWindow(winHandle, SW_RESTORE);
+        }
+        ::SetForegroundWindow(winHandle);
 #else
         qputenv("XDG_ACTIVATION_TOKEN", activateToken.toUtf8());
 #endif
