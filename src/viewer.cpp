@@ -384,7 +384,11 @@ void PdfViewer::processCommands()
 
     // now check if we should activate the window
     if (activate) {
+#if defined(Q_OS_WIN)
+	SetActiveWindow(reinterpret_cast<HWND>(effectiveWinId()));
+#else
         qputenv("XDG_ACTIVATION_TOKEN", activateToken.toUtf8());
+#endif
         raise();
         activateWindow();
     }
