@@ -64,7 +64,6 @@
 
 #ifdef Q_OS_WIN
 #include <Windows.h>
-#include <winuser.h>
 #endif
 
 PdfViewer *PdfViewer::s_instance = nullptr;
@@ -376,11 +375,6 @@ void PdfViewer::processCommands()
 
     else if (command.startsWith(QLatin1String("close")))
         QTimer::singleShot(0, qApp, &QApplication::quit);
-
-#if defined(Q_OS_WIN)
-    else if (command.startsWith(QLatin1String("pid ")))
-        AllowSetForegroundWindow((DWORD)command.mid(4).toUInt());
-#endif
 
     // no else as we also check the local variable
     if (command.startsWith(QLatin1String("activate")) || activate) {
