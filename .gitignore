@@ -2,6 +2,7 @@
 *.depends
 *.plist
 /*_autogen/
+/.cache/
 /.clang-format
 /.cproject
 /.project
