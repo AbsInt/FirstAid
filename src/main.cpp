@@ -87,14 +87,22 @@ int main(int argc, char *argv[])
     // clean env before we construct application to avoid wrong plugin loading!
     qunsetenv("QT_PLUGIN_PATH");
 
-    /**
-     * allow fractional scaling
-     * new in Qt 5.14
-     * do that only on Windows, leads to artifacts on unices
-     * see bug 27948
-     */
 #if defined(Q_OS_WIN)
-    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+    // we are a GUI app but need the console for command IO
+    const bool noStdOut = _fileno(stdout) < 0;
+    const bool noStdErr = _fileno(stderr) < 0;
+    if (noStdOut || noStdErr) {
+        if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+            // recreate stdout/stderr
+            if (noStdOut && freopen("CONOUT$", "w", stdout))
+                _dup2(_fileno(stdout), 1);
+            if (noStdErr && freopen("CONOUT$", "w", stderr))
+                _dup2(_fileno(stderr), 2);
+
+            // fix C++ streams
+            std::ios::sync_with_stdio();
+        }
+    }
 #endif
 
     /**
