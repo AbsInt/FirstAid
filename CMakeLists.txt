@@ -67,19 +67,15 @@ set(firstaid_SRCS
   src/viewer.h
 )
 
-set(link_checker_SRCS
-    link_checker/main.cpp
-)
+# build FirstAid binary, GUI app & embed icon on Windows
+if (WIN32)
+    add_executable(firstaid WIN32 ${firstaid_SRCS} firstaid.rc)
+else ()
+    add_executable(firstaid ${firstaid_SRCS})
+endif ()
 
-qt6_add_resources(firstaid_QRC_SRCS firstaid.qrc)
-
-# embedd icon on Windows
-IF(WIN32)
-    SET(firstaid_SRCS ${firstaid_SRCS} firstaid.rc)
-ENDIF(WIN32)
-
-# build FirstAid binary
-add_executable(firstaid ${firstaid_SRCS} ${firstaid_UI_SRCS} ${firstaid_QRC_SRCS})
+# add resource to target
+qt_add_resources(firstaid firstaid.qrc)
 
 # link, we assume static libs on Windows ATM
 if (WIN32)
@@ -89,6 +85,10 @@ elseif (APPLE)
 else()
     target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lexpat -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 endif()
+
+set(link_checker_SRCS
+    link_checker/main.cpp
+)
 
 # build linkChecker binary
 add_executable(linkChecker ${link_checker_SRCS})
