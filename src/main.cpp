@@ -17,6 +17,14 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <io.h>
+#else
+#include <QSocketNotifier>
+#include <unistd.h>
+#endif
+
 #include "config.h"
 #include "viewer.h"
 
@@ -28,13 +36,6 @@
 #include <QSaveFile>
 #include <QStandardPaths>
 #include <QTimer>
-
-#ifdef Q_OS_WIN
-#include <windows.h>
-#else
-#include <QSocketNotifier>
-#include <unistd.h>
-#endif
 
 static void setApplicationIcon(const QString &pngIcon)
 {
