@@ -326,8 +326,13 @@ void PdfViewer::receiveCommand()
     std::getline(std::cin, line);
 #endif
 
-    // queue the command
-    m_pendingCommands << QString::fromLocal8Bit(line.c_str()).trimmed();
+    // just to be sure: if we packed x lines into one string, split it
+    const auto lines = QString::fromStdString(line).split(QLatin1Char('\n'));
+    for (const auto &line : lines) {
+        // queue the command if not empty
+        if (const auto trimmedLine = line.trimmed(); !trimmedLine.isEmpty())
+            m_pendingCommands << trimmedLine;
+    }
 
     // when not loading a document we can process the command
     if (!m_loadingFile)
@@ -395,7 +400,7 @@ void PdfViewer::processCommands()
         qputenv("XDG_ACTIVATION_TOKEN", activateToken.toUtf8());
 #endif
 
-	setWindowState(windowState() & ~Qt::WindowMinimized);
+        setWindowState(windowState() & ~Qt::WindowMinimized);
         raise();
         activateWindow();
     }
