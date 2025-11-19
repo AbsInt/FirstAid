@@ -107,14 +107,9 @@ install(TARGETS linkChecker DESTINATION bin)
 
 # AbsInt internal stuff
 if(ABSINT)
-    # sign result binary for AbsInt internal compilation
+    # install pdbs
     ur_install_win_executable (firstaid)
-
-    #
-    # generate "make reformat" target for given 'file-list bash expression'
-    # here: all *.cpp + *.h files
-    #
-    ur_reformat ("`git ls-files | grep -e \".*\\\\.cpp$\" -e \".*\\\\.h$\" | xargs`")
+    ur_install_win_executable (linkChecker)
 
     #
     # generate documentation
