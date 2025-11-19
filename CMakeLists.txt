@@ -35,8 +35,9 @@ configure_file (config.h.cmake config.h)
 # Find includes in corresponding build directories
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# Instruct CMake to run moc automatically when needed.
+# Instruct CMake to run moc & rcc automatically when needed.
 set (CMAKE_AUTOMOC ON)
+set (CMAKE_AUTORCC ON)
 
 # needed Qt parts
 find_package(Qt6Concurrent)
@@ -65,6 +66,7 @@ set(firstaid_SRCS
   src/tocdock.h
   src/viewer.cpp
   src/viewer.h
+  firstaid.qrc
 )
 
 # build FirstAid binary, GUI app & embed icon on Windows
@@ -73,9 +75,6 @@ if (WIN32)
 else ()
     add_executable(firstaid ${firstaid_SRCS})
 endif ()
-
-# add resource to target
-qt_add_resources(firstaid firstaid.qrc)
 
 # link, we assume static libs on Windows ATM
 if (WIN32)
