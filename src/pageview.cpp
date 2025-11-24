@@ -572,7 +572,7 @@ void PageView::mouseReleaseEvent(QMouseEvent *event)
     setCursor(Qt::ArrowCursor);
 
     // reset pan information
-    if (!m_panStartPoint.isNull() && m_panStartPoint != event->globalPosition()) {
+    if (!m_panStartPoint.isNull() && m_panStartPoint != event->globalPosition().toPoint()) {
         m_panStartPoint = QPoint(0, 0);
         return;
     }
