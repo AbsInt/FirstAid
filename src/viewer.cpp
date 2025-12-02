@@ -54,6 +54,7 @@
 #include <QProcess>
 #include <QProgressDialog>
 #include <QStackedWidget>
+#include <QTcpSocket>
 #include <QThreadPool>
 #include <QVBoxLayout>
 #include <QWindow>
@@ -67,9 +68,11 @@
 #include <Windows.h>
 #endif
 
+#include <sys/ioctl.h>
+
 PdfViewer *PdfViewer::s_instance = nullptr;
 
-PdfViewer::PdfViewer(const QString &file)
+PdfViewer::PdfViewer(const QString &file, quint16 tcpPort)
     : QMainWindow()
 {
     // register singleton
@@ -152,6 +155,16 @@ PdfViewer::PdfViewer(const QString &file)
 
     // update action state & co
     updateOnDocumentChange();
+
+    /**
+     * open tcp socket if requested
+     */
+    if (tcpPort > 0) {
+        QTcpSocket *tcpSocket = new QTcpSocket(this);
+        connect(tcpSocket, &QTcpSocket::readyRead, this, &PdfViewer::receiveCommand);
+        tcpSocket->connectToHost(QHostAddress::LocalHost, tcpPort);
+        tcpSocket->waitForConnected();
+    }
 
     /**
      * load document if one is passed
@@ -284,50 +297,12 @@ void PdfViewer::closeDocument()
 
 void PdfViewer::receiveCommand()
 {
-    std::string line;
-
-#ifdef Q_OS_WIN
-
-    // try to avoid stall on windows
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    if (hStdin == INVALID_HANDLE_VALUE)
+    QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
+    if (!socket)
         return;
 
-    INPUT_RECORD eventBuffer[1];
-    DWORD eventsRead = 0;
-    if (PeekConsoleInput(hStdin, eventBuffer, 1, &eventsRead)) {
-        if (1 != eventsRead) {
-            return;
-        }
-
-        if (KEY_EVENT != eventBuffer[0].EventType) {
-            // get rid of non keyboard event
-            ReadConsoleInput(hStdin, eventBuffer, 1, &eventsRead);
-            return;
-        }
-
-        // read one line, without buffering
-        std::getline(std::cin, line);
-    } else {
-        DWORD bytesLeft = 0;
-        PeekNamedPipe(hStdin, NULL, 0, NULL, &bytesLeft, NULL);
-        if (!bytesLeft)
-            return;
-
-        std::vector<char> fileBuffer(bytesLeft);
-        DWORD bytesRead = 0;
-        if (!ReadFile(hStdin, fileBuffer.data(), bytesLeft, &bytesRead, NULL))
-            return;
-
-        line = std::string(fileBuffer.data(), bytesRead);
-    }
-#else
-    // read one line, without buffering
-    std::getline(std::cin, line);
-#endif
-
     // just to be sure: if we packed x lines into one string, split it
-    const auto lines = QString::fromStdString(line).split(QLatin1Char('\n'));
+    const auto lines = QString::fromUtf8(socket->readAll()).split(QLatin1Char('\n'));
     for (const auto &line : lines) {
         // queue the command if not empty
         if (const auto trimmedLine = line.trimmed(); !trimmedLine.isEmpty())

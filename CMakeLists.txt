@@ -42,8 +42,9 @@ set (CMAKE_AUTORCC ON)
 # needed Qt parts
 find_package(Qt6Concurrent)
 find_package(Qt6Core)
-find_package(Qt6Widgets)
+find_package(Qt6Network)
 find_package(Qt6PrintSupport)
+find_package(Qt6Widgets)
 find_package(Qt6Xml)
 
 set(firstaid_SRCS
@@ -78,11 +79,11 @@ endif ()
 
 # link, we assume static libs on Windows ATM
 if (WIN32)
-    target_link_libraries(firstaid poppler-qt6.lib poppler.lib freetype.lib zlib.lib Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
+    target_link_libraries(firstaid poppler-qt6.lib poppler.lib freetype.lib zlib.lib Qt6::Core Qt6::Widgets Qt6::Gui Qt6::Network Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 elseif (APPLE)
-    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lexpat -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
+    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lexpat -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::Network Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 else()
-    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lexpat -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
+    target_link_libraries(firstaid -lpoppler-qt6 -lpoppler -lfontconfig -lfreetype -lexpat -lz Qt6::Core Qt6::Widgets Qt6::Gui Qt6::Network Qt6::PrintSupport Qt6::Concurrent Qt6::Xml)
 endif()
 
 set(link_checker_SRCS

@@ -32,6 +32,7 @@ class QAction;
 class QActionGroup;
 class QLabel;
 class QStackedWidget;
+
 namespace Poppler
 {
 class Document;
@@ -47,8 +48,9 @@ public:
     /**
      * Construct viewer image, is a singleton.
      * @param file file to open, if not empty
+     * @param startTcpServer start a tcp server to receive commands
      */
-    PdfViewer(const QString &file);
+    PdfViewer(const QString &file, quint16 tcpPort);
 
     /**
      * Destruct the viewer window.
