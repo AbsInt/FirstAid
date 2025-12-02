@@ -61,14 +61,9 @@
 
 #include <QtConcurrent>
 
-#include <iostream>
-#include <vector>
-
 #ifdef Q_OS_WIN
 #include <Windows.h>
 #endif
-
-#include <sys/ioctl.h>
 
 PdfViewer *PdfViewer::s_instance = nullptr;
 
