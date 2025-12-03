@@ -158,7 +158,10 @@ PdfViewer::PdfViewer(const QString &file, quint16 tcpPort)
         QTcpSocket *tcpSocket = new QTcpSocket(this);
         connect(tcpSocket, &QTcpSocket::readyRead, this, &PdfViewer::receiveCommand);
         tcpSocket->connectToHost(QHostAddress::LocalHost, tcpPort);
-        tcpSocket->waitForConnected();
+        if (!tcpSocket->waitForConnected())
+            QTimer::singleShot(0, this, [this, tcpPort]() {
+                QMessageBox::warning(this, QStringLiteral("Connection error"), QStringLiteral("<p>Could not connect to server on port %1.</p>").arg(tcpPort));
+            });
     }
 
     /**
